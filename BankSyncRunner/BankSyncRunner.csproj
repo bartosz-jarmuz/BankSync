@@ -14,6 +14,8 @@
   <ItemGroup>
     <ProjectReference Include="..\BankSync.Exporters.Ipko\BankSync.Exporters.Ipko.csproj" />
     <ProjectReference Include="..\BankSync.Utilities\BankSync.Utilities.csproj" />
+    <ProjectReference Include="..\BankSync.Writers.Csv\BankSync.Writers.Csv.csproj" />
+    <ProjectReference Include="..\BankSync.Writers.Excel\BankSync.Writers.Excel.csproj" />
   </ItemGroup>
 
 </Project>

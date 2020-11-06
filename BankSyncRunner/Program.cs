@@ -13,6 +13,8 @@ using System.Xml.Linq;
 using BankSync.Exporters.Ipko;
 using BankSync.Model;
 using BankSync.Utilities;
+using BankSync.Writers.Csv;
+using BankSync.Writers.Excel;
 using Newtonsoft.Json;
 
 namespace BankSyncRunner
@@ -25,8 +27,23 @@ namespace BankSyncRunner
             var ipkoData = await downloader.GetData(GetStoredValue("AccountNumber").ToInsecureString(), new DateTime(2020,10,01), new DateTime(2020, 10, 31));
             Console.WriteLine("Data downloaded");
 
+            string outputPath = GetOutputPath();
+            var writer = new ExcelBankDataWriter(outputPath);
+            writer.Write(ipkoData);
+
+            Console.WriteLine($"All written to: {outputPath}");
+
+
+            Console.ReadKey();
         }
 
+        static string GetOutputPath()
+        {
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Output",
+                DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss") + ".xlsx");
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            return filePath;
+        }
 
         private static BankCredentials GetCredentials()
         {

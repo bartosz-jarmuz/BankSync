@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using BankSync.Model;
 
 namespace BankSync.Exporters.Ipko
 {

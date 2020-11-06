@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Writers.Csv", "Ban
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Model", "BankSync.Model\BankSync.Model.csproj", "{6633BC18-2061-4869-82A0-F10C56259010}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Writers.Excel", "BankSync.Writers.Excel\BankSync.Writers.Excel.csproj", "{62462F20-AF33-461A-9963-FAF7D16A5478}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{6633BC18-2061-4869-82A0-F10C56259010}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6633BC18-2061-4869-82A0-F10C56259010}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6633BC18-2061-4869-82A0-F10C56259010}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62462F20-AF33-461A-9963-FAF7D16A5478}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62462F20-AF33-461A-9963-FAF7D16A5478}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62462F20-AF33-461A-9963-FAF7D16A5478}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62462F20-AF33-461A-9963-FAF7D16A5478}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

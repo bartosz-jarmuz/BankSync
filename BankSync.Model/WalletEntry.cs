@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BankSync.Exporters.Ipko
+namespace BankSync.Model
 {
     public class WalletEntry
     {
