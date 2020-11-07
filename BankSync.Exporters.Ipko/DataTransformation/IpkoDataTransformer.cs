@@ -1,12 +1,22 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
+using Microsoft.Win32.SafeHandles;
 
-namespace BankSync.Exporters.Ipko
+namespace BankSync.Exporters.Ipko.DataTransformation
 {
-    class DataTransformer
+    public class IpkoDataTransformer
     {
+        private readonly IDataMapper mapper;
+        private readonly DescriptionDataExtractor descriptionDataExtractor;
+
+        public IpkoDataTransformer(IDataMapper mapper)
+        {
+            this.mapper = mapper;
+            this.descriptionDataExtractor = new DescriptionDataExtractor();
+        }
+
         public WalletDataSheet Transform(XDocument xDocument)
         {
             var sheet = new WalletDataSheet();
@@ -17,8 +27,10 @@ namespace BankSync.Exporters.Ipko
                     Date = this.GetDate(operation),
                     Amount = this.GetAmount(operation),
                     Currency = this.GetCurrency(operation),
-                    Category = this.GetCategory(operation),
-                    Payer = this.GetPayer(operation),
+                    Category =this.mapper.Map(this.GetCategory(operation)),
+                    Payer = this.mapper.Map(this.GetPayer(operation)),
+                    Recipient = this.mapper.Map(this.GetRecipient(operation)),
+                    Note = this.GetNote(operation)
                 };
                 sheet.Entries.Add(entry);
 
@@ -27,12 +39,34 @@ namespace BankSync.Exporters.Ipko
             return sheet;
         }
 
+        private string GetNote(XElement operation)
+        {
+            var element = operation.Element("description");
+            if (element != null)
+            {
+                return element.Value;
+            }
+
+            return "";
+        }
+
+        private string GetRecipient(XElement operation)
+        {
+            var element = operation.Element("description");
+            if (element != null)
+            {
+
+            }
+
+            return "";
+        }
+
         private string GetPayer(XElement operation)
         {
             var element = operation.Element("description");
             if (element != null)
             {
-                
+                return this.descriptionDataExtractor.GetPayer(element.Value);
             }
 
             return "";
@@ -76,34 +110,6 @@ namespace BankSync.Exporters.Ipko
             {
                 return element.Attribute("curr")?.Value??"";
             }
-            return "";
-        }
-    }
-
-    public static class DescriptionDataExtractor
-    {
-        public static string GetPayer(string description)
-        {
-            if (description.StartsWith("Numer telefonu: "))
-            {
-                var part = description.Substring("Numer telefonu: ".Length);
-                return part.Remove(part.IndexOf("Lokalizacja")).Trim();
-            }
-
-            if (description.Contains("Numer karty: "))
-            {
-                var part = description.Substring(description.IndexOf("Numer karty: ") + "Numer karty: ".Length);
-                return part.Trim();
-            }
-
-            if (description.Contains("Nazwa nadawcy: "))
-            {
-                Regex regex = new Regex("(Nazwa nadawcy: )(.*)");
-                var match = regex.Match(description);
-                return match.Groups[2].Value.Trim();
-            }
-
-
             return "";
         }
     }

@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using BankSync.Exporters.Ipko.DataTransformation;
 using BankSync.Exporters.Ipko.DTO;
 using BankSync.Model;
 using BankSync.Utilities;
@@ -17,10 +18,12 @@ namespace BankSync.Exporters.Ipko
     public class IpkoDataDownloader
     {
         private readonly BankCredentials credentials;
+        private readonly IpkoDataTransformer transformer;
 
-        public IpkoDataDownloader(BankCredentials credentials)
+        public IpkoDataDownloader(BankCredentials credentials, IpkoDataTransformer transformer)
         {
             this.credentials = credentials;
+            this.transformer = transformer;
             HttpClientHandler handler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
@@ -35,7 +38,7 @@ namespace BankSync.Exporters.Ipko
             string ticket = await this.GetDownloadTicket(sessionId, account, startDate, endDate);
             XDocument document = await this.GetDocument(sessionId, ticket);
 
-            return new DataTransformer().Transform(document);
+            return this.transformer.Transform(document);
         }
 
         private async Task<XDocument> GetDocument(string sessionId, string ticket)

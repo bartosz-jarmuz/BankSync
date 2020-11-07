@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using BankSync.Exporters.Ipko;
+using BankSync.Exporters.Ipko.DataTransformation;
+using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
 using BankSync.Utilities;
 using BankSync.Writers.Csv;
@@ -23,12 +25,15 @@ namespace BankSyncRunner
     {
         static async Task Main(string[] args)
         {
-            var downloader = new IpkoDataDownloader(GetCredentials());
-            var ipkoData = await downloader.GetData(GetStoredValue("AccountNumber").ToInsecureString(), new DateTime(2020,10,01), new DateTime(2020, 10, 31));
+            IpkoDataTransformer transformer =
+                new IpkoDataTransformer(new ConfigurableDataMapper(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Mappings.xml")));
+            IpkoDataDownloader downloader = new IpkoDataDownloader(GetCredentials(), transformer);
+            WalletDataSheet ipkoData = 
+                await downloader.GetData(GetStoredValue("AccountNumber").ToInsecureString(), new DateTime(2020, 10, 01), new DateTime(2020, 10, 31));
             Console.WriteLine("Data downloaded");
 
             string outputPath = GetOutputPath();
-            var writer = new ExcelBankDataWriter(outputPath);
+            ExcelBankDataWriter writer = new ExcelBankDataWriter(outputPath);
             writer.Write(ipkoData);
 
             Console.WriteLine($"All written to: {outputPath}");
@@ -47,8 +52,8 @@ namespace BankSyncRunner
 
         private static BankCredentials GetCredentials()
         {
-            var login = GetStoredValue("Login");
-            var password = GetStoredValue("Password");
+            SecureString login = GetStoredValue("Login");
+            SecureString password = GetStoredValue("Password");
 
             return new BankCredentials()
             {
@@ -59,13 +64,13 @@ namespace BankSyncRunner
 
         private static SecureString GetStoredValue(string key)
         {
-            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            var setting = config.AppSettings.Settings[key]?.Value;
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            string setting = config.AppSettings.Settings[key]?.Value;
             if (setting == null)
             {
                 Console.Write($"Provide {key} (will be stored encrypted).");
                 setting = Console.ReadLine();
-                var secure = setting.ToSecureString();
+                SecureString secure = setting.ToSecureString();
                 config.AppSettings.Settings.Add(key, secure.EncryptString());
                 config.Save(ConfigurationSaveMode.Modified);
                 return secure;
@@ -75,12 +80,12 @@ namespace BankSyncRunner
                 return setting.DecryptString();
             }
         }
-     
+
     }
 
 
-    
-    
+
+
 
 
 }
