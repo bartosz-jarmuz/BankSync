@@ -28,10 +28,13 @@ namespace BankSync.Exporters.Ipko.DataTransformation
                     Amount = this.GetAmount(operation),
                     Currency = this.GetCurrency(operation),
                     Category =this.mapper.Map(this.GetCategory(operation)),
-                    Payer = this.mapper.Map(this.GetPayer(operation)),
-                    Recipient = this.mapper.Map(this.GetRecipient(operation)),
-                    Note = this.GetNote(operation)
                 };
+
+                entry.Payer = this.mapper.Map(this.GetPayer(entry, operation));
+                entry.Recipient = this.mapper.Map(this.GetRecipient(entry, operation));
+                entry.Note = this.mapper.Map(this.GetNote(operation));
+
+
                 sheet.Entries.Add(entry);
 
             }
@@ -44,31 +47,52 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             var element = operation.Element("description");
             if (element != null)
             {
-                return element.Value;
+                return this.descriptionDataExtractor.GetNote(element.Value);
             }
 
             return "";
         }
 
-        private string GetRecipient(XElement operation)
+        private string GetRecipient(WalletEntry entry, XElement operation)
         {
+            if (entry.Category == "Przelew na rachunek" || entry.Category == "Zwrot w terminalu")
+            {
+                return "Wspólne konto";
+            }
+            if (entry.Category == "Wypłata z bankomatu")
+            {
+                return entry.Payer;
+            }
+            if (entry.Category == "Prowizja"
+                || entry.Category == "Opłata")
+            {
+                return "Bank";
+            }
+
             var element = operation.Element("description");
             if (element != null)
             {
-
+                return this.descriptionDataExtractor.GetRecipient(element.Value);
             }
 
             return "";
         }
 
-        private string GetPayer(XElement operation)
+        private string GetPayer(WalletEntry entry, XElement operation)
         {
+            if (entry.Category == "Przelew z rachunku" 
+                || entry.Category == "Zlecenie stałe"
+                || entry.Category == "Polecenie Zapłaty" 
+                || entry.Category == "Prowizja" 
+                || entry.Category == "Opłata")
+            {
+                return "Wspólne konto";
+            }
             var element = operation.Element("description");
             if (element != null)
             {
                 return this.descriptionDataExtractor.GetPayer(element.Value);
             }
-
             return "";
         }
 
