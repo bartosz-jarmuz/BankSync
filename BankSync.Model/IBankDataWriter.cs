@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
-//  <copyright file="IDataWriter.cs" company="SDL plc">
-//   Copyright (c) SDL plc. All rights reserved.
+//  <copyright file="IDataWriter.cs" >
+//   Copyright (c) Bartosz Jarmuz. All rights reserved.
 //  </copyright>
 // -----------------------------------------------------------------------
 

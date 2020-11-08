@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
-//  <copyright file="IDataMapper.cs" company="SDL plc">
-//   Copyright (c) SDL plc. All rights reserved.
+//  <copyright file="IDataMapper.cs" >
+//   Copyright (c) Bartosz Jarmuz. All rights reserved.
 //  </copyright>
 // -----------------------------------------------------------------------
 

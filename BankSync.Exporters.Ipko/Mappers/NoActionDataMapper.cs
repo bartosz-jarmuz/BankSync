@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
-//  <copyright file="NoActionDataMapper.cs" company="SDL plc">
-//   Copyright (c) SDL plc. All rights reserved.
+//  <copyright file="NoActionDataMapper.cs" >
+//   Copyright (c) Bartosz Jarmuz. All rights reserved.
 //  </copyright>
 // -----------------------------------------------------------------------
 
