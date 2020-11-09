@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BankSync.Enrichers.Allegro\BankSync.Enrichers.Allegro.csproj" />
     <ProjectReference Include="..\BankSync.Exporters.Ipko\BankSync.Exporters.Ipko.csproj" />
     <ProjectReference Include="..\BankSync.Utilities\BankSync.Utilities.csproj" />
     <ProjectReference Include="..\BankSync.Writers.Csv\BankSync.Writers.Csv.csproj" />

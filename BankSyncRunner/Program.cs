@@ -10,6 +10,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using BankSync.Exporters.Allegro;
 using BankSync.Exporters.Ipko;
 using BankSync.Exporters.Ipko.DataTransformation;
 using BankSync.Exporters.Ipko.Mappers;
@@ -30,7 +31,12 @@ namespace BankSyncRunner
             IpkoDataDownloader downloader = new IpkoDataDownloader(GetCredentials(), transformer);
             WalletDataSheet ipkoData = 
                 await downloader.GetData(GetStoredValue("AccountNumber").ToInsecureString(), new DateTime(2020, 10, 01), new DateTime(2020, 10, 31));
+
             Console.WriteLine("Data downloaded");
+
+            var enricher = new DataEnricherExecutor();
+            enricher.LoadEnrichers();
+            await enricher.EnrichData(ipkoData);
 
             string outputPath = GetOutputPath();
             ExcelBankDataWriter writer = new ExcelBankDataWriter(outputPath);
@@ -41,6 +47,8 @@ namespace BankSyncRunner
 
             Console.ReadKey();
         }
+
+        
 
         static string GetOutputPath()
         {
@@ -81,6 +89,35 @@ namespace BankSyncRunner
             }
         }
 
+    }
+
+
+    public class DataEnricherExecutor
+    {
+        private List<IBankDataEnricher> enrichers = new List<IBankDataEnricher>();
+
+        public void LoadEnrichers()
+        {
+            var enrichersFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Enrichers.xml");
+
+            XDocument xDoc = XDocument.Load(enrichersFile.FullName);
+
+            foreach (XElement allegroEnricher in xDoc.Descendants("Allegro"))
+            {
+                var enricher = new AllegroBankDataEnricher(allegroEnricher.Parent.Attribute("To").Value);
+                this.enrichers.Add(enricher);
+            }
+
+            
+        }
+
+        public async Task EnrichData(WalletDataSheet data)
+        {
+            foreach (IBankDataEnricher bankDataEnricher in this.enrichers)
+            {
+                await bankDataEnricher.Enrich(data);
+            }
+        }
     }
 
 

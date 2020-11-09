@@ -22,17 +22,20 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             var sheet = new WalletDataSheet();
             foreach (XElement operation in xDocument.Descendants("operation"))
             {
+
                 var entry = new WalletEntry()
                 {
+                    WalletEntryId = operation.Value.GetHashCode(),
                     Date = this.GetDate(operation),
                     Amount = this.GetAmount(operation),
+                    Balance = this.GetBalance(operation),
                     Currency = this.GetCurrency(operation),
-                    Category =this.mapper.Map(this.GetCategory(operation)),
+                    PaymentType =this.mapper.Map(this.GetPaymentType(operation)),
                 };
 
                 entry.Payer = this.mapper.Map(this.GetPayer(entry, operation));
                 entry.Recipient = this.mapper.Map(this.GetRecipient(entry, operation));
-                entry.Note = this.mapper.Map(this.GetNote(operation));
+                entry.Note = this.mapper.Map(this.GetNote(entry,operation));
 
 
                 sheet.Entries.Add(entry);
@@ -42,12 +45,21 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             return sheet;
         }
 
-        private string GetNote(XElement operation)
+        private string GetNote(WalletEntry entry, XElement operation)
         {
             var element = operation.Element("description");
             if (element != null)
             {
-                return this.descriptionDataExtractor.GetNote(element.Value);
+                string note = this.descriptionDataExtractor.GetNote(element.Value);
+                if (entry.PaymentType == "Prowizja" 
+                || entry.PaymentType == "Opłata"
+                || entry.PaymentType == "Wypłata z bankomatu"
+                )
+                {
+                    note = $"{entry.PaymentType} - {note}";
+                }
+
+                return note;
             }
 
             return "";
@@ -55,16 +67,16 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private string GetRecipient(WalletEntry entry, XElement operation)
         {
-            if (entry.Category == "Przelew na rachunek" || entry.Category == "Zwrot w terminalu")
+            if (entry.PaymentType == "Przelew na rachunek" || entry.PaymentType == "Zwrot w terminalu")
             {
                 return "Wspólne konto";
             }
-            if (entry.Category == "Wypłata z bankomatu")
+            if (entry.PaymentType == "Wypłata z bankomatu")
             {
                 return entry.Payer;
             }
-            if (entry.Category == "Prowizja"
-                || entry.Category == "Opłata")
+            if (entry.PaymentType == "Prowizja"
+                || entry.PaymentType == "Opłata")
             {
                 return "Bank";
             }
@@ -80,11 +92,11 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private string GetPayer(WalletEntry entry, XElement operation)
         {
-            if (entry.Category == "Przelew z rachunku" 
-                || entry.Category == "Zlecenie stałe"
-                || entry.Category == "Polecenie Zapłaty" 
-                || entry.Category == "Prowizja" 
-                || entry.Category == "Opłata")
+            if (entry.PaymentType == "Przelew z rachunku" 
+                || entry.PaymentType == "Zlecenie stałe"
+                || entry.PaymentType == "Polecenie Zapłaty" 
+                || entry.PaymentType == "Prowizja" 
+                || entry.PaymentType == "Opłata")
             {
                 return "Wspólne konto";
             }
@@ -96,7 +108,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             return "";
         }
 
-        private string GetCategory(XElement operation)
+        private string GetPaymentType(XElement operation)
         {
             var element = operation.Element("type");
             if (element != null)
@@ -120,6 +132,16 @@ namespace BankSync.Exporters.Ipko.DataTransformation
         private decimal GetAmount(XElement operation)
         {
             var element = operation.Element("amount");
+            if (element != null)
+            {
+                return Convert.ToDecimal(element.Value);
+            }
+            return 0;
+        }
+
+        private decimal GetBalance(XElement operation)
+        {
+            var element = operation.Element("ending-balance");
             if (element != null)
             {
                 return Convert.ToDecimal(element.Value);
