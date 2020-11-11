@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
@@ -19,35 +20,46 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         public WalletDataSheet Transform(XDocument xDocument)
         {
-            var sheet = new WalletDataSheet();
+            WalletDataSheet sheet = new WalletDataSheet();
+
+            string account = xDocument.Descendants("account").FirstOrDefault()?.Value;
+            account = this.mapper.Map(account);
             foreach (XElement operation in xDocument.Descendants("operation"))
             {
-
-                var entry = new WalletEntry()
+                WalletEntry entry = new WalletEntry()
                 {
+                    Account = account,
                     WalletEntryId = operation.Value.GetHashCode(),
                     Date = this.GetDate(operation),
                     Amount = this.GetAmount(operation),
                     Balance = this.GetBalance(operation),
                     Currency = this.GetCurrency(operation),
+                    FullDetails = this.GetDescription(operation),
                     PaymentType =this.mapper.Map(this.GetPaymentType(operation)),
                 };
 
                 entry.Payer = this.mapper.Map(this.GetPayer(entry, operation));
                 entry.Recipient = this.mapper.Map(this.GetRecipient(entry, operation));
                 entry.Note = this.mapper.Map(this.GetNote(entry,operation));
-
-
                 sheet.Entries.Add(entry);
-
             }
 
             return sheet;
         }
 
+        private string GetDescription(XElement operation)
+        {
+            XElement element = operation.Element("description");
+            if (element != null)
+            {
+                return element.Value;
+            }
+            return "";
+        }
+
         private string GetNote(WalletEntry entry, XElement operation)
         {
-            var element = operation.Element("description");
+            XElement element = operation.Element("description");
             if (element != null)
             {
                 string note = this.descriptionDataExtractor.GetNote(element.Value);
@@ -81,7 +93,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
                 return "Bank";
             }
 
-            var element = operation.Element("description");
+            XElement element = operation.Element("description");
             if (element != null)
             {
                 return this.descriptionDataExtractor.GetRecipient(element.Value);
@@ -100,7 +112,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 return "Wspólne konto";
             }
-            var element = operation.Element("description");
+            XElement element = operation.Element("description");
             if (element != null)
             {
                 return this.descriptionDataExtractor.GetPayer(element.Value);
@@ -110,7 +122,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private string GetPaymentType(XElement operation)
         {
-            var element = operation.Element("type");
+            XElement element = operation.Element("type");
             if (element != null)
             {
                 return element.Value;
@@ -121,7 +133,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private DateTime GetDate(XElement operation)
         {
-            var element = operation.Element("order-date");
+            XElement element = operation.Element("order-date");
             if (element != null)
             {
                 return DateTime.Parse(element.Value);
@@ -131,7 +143,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
         }  
         private decimal GetAmount(XElement operation)
         {
-            var element = operation.Element("amount");
+            XElement element = operation.Element("amount");
             if (element != null)
             {
                 return Convert.ToDecimal(element.Value);
@@ -141,7 +153,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private decimal GetBalance(XElement operation)
         {
-            var element = operation.Element("ending-balance");
+            XElement element = operation.Element("ending-balance");
             if (element != null)
             {
                 return Convert.ToDecimal(element.Value);
@@ -151,7 +163,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private string GetCurrency(XElement operation)
         {
-            var element = operation.Element("amount");
+            XElement element = operation.Element("amount");
             if (element != null)
             {
                 return element.Attribute("curr")?.Value??"";

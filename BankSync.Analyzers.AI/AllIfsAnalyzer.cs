@@ -50,17 +50,16 @@ namespace BankSync.Analyzers.AI
             {
                 foreach (KeyValuePair<string, List<string>> tag in this.lowLevelTags)
                 {
-                    foreach (var keyword in tag.Value)
+                    foreach (string keyword in tag.Value)
                     {
                         if (walletEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
                             || walletEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                         {
                            walletEntry.AssignTag(tag.Key);
                         }
-
-
                     }
                 }
+
             }
         }
     }

@@ -15,6 +15,7 @@ namespace BankSync.Model
         {
             return new WalletEntry()
             {
+                Account = toBeCloned.Account,
                 Payer = toBeCloned.Payer,
                 Recipient = toBeCloned.Recipient,
                 PaymentType = toBeCloned.PaymentType,
@@ -24,6 +25,8 @@ namespace BankSync.Model
                 WalletEntryId = toBeCloned.WalletEntryId,
                 Amount = toBeCloned.Amount,
                 Note = toBeCloned.Note,
+                FullDetails = toBeCloned.FullDetails,
+                Tags = toBeCloned.Tags
             };
         }
 
@@ -37,6 +40,9 @@ namespace BankSync.Model
         public string Note { get; set; }
         public string PaymentType { get; set; }
         public List<string> Tags{ get; set; } = new List<string>();
+
+        public string FullDetails{ get; set; }
+        public string Account{ get; set; }
 
         public void AssignTag(string tag)
         {
