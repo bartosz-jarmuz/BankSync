@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Model", "BankSync.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Writers.Excel", "BankSync.Writers.Excel\BankSync.Writers.Excel.csproj", "{62462F20-AF33-461A-9963-FAF7D16A5478}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Enrichers.Allegro", "BankSync.Enrichers.Allegro\BankSync.Enrichers.Allegro.csproj", "{BA4C0CB9-903B-4419-95BA-015415010F08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Enrichers.Allegro", "BankSync.Enrichers.Allegro\BankSync.Enrichers.Allegro.csproj", "{BA4C0CB9-903B-4419-95BA-015415010F08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Analyzers.AI", "BankSync.Analyzers.AI\BankSync.Analyzers.AI.csproj", "{D178BBF7-815B-44CF-BC1C-D1AFA0C0E1C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{BA4C0CB9-903B-4419-95BA-015415010F08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA4C0CB9-903B-4419-95BA-015415010F08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA4C0CB9-903B-4419-95BA-015415010F08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D178BBF7-815B-44CF-BC1C-D1AFA0C0E1C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D178BBF7-815B-44CF-BC1C-D1AFA0C0E1C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D178BBF7-815B-44CF-BC1C-D1AFA0C0E1C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D178BBF7-815B-44CF-BC1C-D1AFA0C0E1C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,6 +10,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using BankSync.Analyzers.AI;
 using BankSync.Exporters.Allegro;
 using BankSync.Exporters.Ipko;
 using BankSync.Exporters.Ipko.DataTransformation;
@@ -37,6 +38,10 @@ namespace BankSyncRunner
             var enricher = new DataEnricherExecutor();
             enricher.LoadEnrichers();
             await enricher.EnrichData(ipkoData);
+
+            var analyzer = new AllIfsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Tags.xml"));
+
+            analyzer.AddTags(ipkoData);
 
             string outputPath = GetOutputPath();
             ExcelBankDataWriter writer = new ExcelBankDataWriter(outputPath);

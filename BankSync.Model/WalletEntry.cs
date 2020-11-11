@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Win32.SafeHandles;
 
 namespace BankSync.Model
 {
@@ -33,5 +36,14 @@ namespace BankSync.Model
         public string Currency { get; set; }
         public string Note { get; set; }
         public string PaymentType { get; set; }
+        public List<string> Tags{ get; set; } = new List<string>();
+
+        public void AssignTag(string tag)
+        {
+            if (!this.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+            {
+                this.Tags.Add(tag);
+            }
+        }
     }
 }

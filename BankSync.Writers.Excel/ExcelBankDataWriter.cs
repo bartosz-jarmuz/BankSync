@@ -37,7 +37,10 @@ namespace BankSync.Writers.Excel
             sheet.ColumnWidths[7] = 20;
 
             sheet.Cells[0, 8] = "Note";
-            sheet.ColumnWidths[8] = 70;
+            sheet.ColumnWidths[8] = 50;
+
+            sheet.Cells[0, 9] = "Tags";
+            sheet.ColumnWidths[9] = 70;
 
             for (int index = 0; index < data.Entries.Count; index++)
             {
@@ -51,6 +54,7 @@ namespace BankSync.Writers.Excel
                 sheet.Cells[index+1, 6] = walletEntry.Recipient;
                 sheet.Cells[index+1, 7] = walletEntry.Payer;
                 sheet.Cells[index+1, 8] = walletEntry.Note;
+                sheet.Cells[index+1, 9] = string.Join(";", walletEntry.Tags);
             }
 
             Workbook workbook = new Workbook();

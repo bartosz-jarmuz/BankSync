@@ -55,6 +55,7 @@ namespace BankSync.Exporters.Allegro
                             WalletEntry newEntry = WalletEntry.Clone(entry);
                             newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount) * -1;
                             newEntry.Note = offer.title;
+                            newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
                             updatedEntries.Add(newEntry);
                         }
                     }
