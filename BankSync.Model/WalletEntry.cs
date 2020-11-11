@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Win32.SafeHandles;
 
 namespace BankSync.Model
 {
@@ -22,7 +21,6 @@ namespace BankSync.Model
                 Balance = toBeCloned.Balance,
                 Date = toBeCloned.Date,
                 Currency = toBeCloned.Currency,
-                WalletEntryId = toBeCloned.WalletEntryId,
                 Amount = toBeCloned.Amount,
                 Note = toBeCloned.Note,
                 FullDetails = toBeCloned.FullDetails,
@@ -30,7 +28,8 @@ namespace BankSync.Model
             };
         }
 
-        public int WalletEntryId { get; set; }
+        
+
         public string Payer { get; set; }
         public string Recipient { get; set; }
         public DateTime Date { get; set; }
@@ -50,6 +49,12 @@ namespace BankSync.Model
             {
                 this.Tags.Add(tag);
             }
+        }
+
+        public int GetWalletEntryId()
+        {
+            return $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.FullDetails}"
+                .GetHashCode();
         }
     }
 }

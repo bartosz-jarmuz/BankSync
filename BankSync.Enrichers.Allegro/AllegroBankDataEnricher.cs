@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using BankSync.Enrichers.Allegro.Model;
 using BankSync.Model;
 
-namespace BankSync.Exporters.Allegro
+namespace BankSync.Enrichers.Allegro
 {
     public class AllegroBankDataEnricher : IBankDataEnricher
     {

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Security;
+﻿using System.Security;
 
 namespace BankSync.Model
 {
-    public class BankCredentials
+    public class Credentials
     {
         public string Id { get; set; }
 

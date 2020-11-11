@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using BankSync.Exporters.Ipko.DataTransformation;
@@ -17,10 +15,10 @@ namespace BankSync.Exporters.Ipko
 {
     public class IpkoDataDownloader
     {
-        private readonly BankCredentials credentials;
+        private readonly Credentials credentials;
         private readonly IpkoDataTransformer transformer;
 
-        public IpkoDataDownloader(BankCredentials credentials, IpkoDataTransformer transformer)
+        public IpkoDataDownloader(Credentials credentials, IpkoDataTransformer transformer)
         {
             this.credentials = credentials;
             this.transformer = transformer;
@@ -35,8 +33,10 @@ namespace BankSync.Exporters.Ipko
         public async Task<WalletDataSheet> GetData(string account, DateTime startDate, DateTime endDate)
         {
             string sessionId = await this.LoginAndGetSessionId();
-            string ticket = await this.GetDownloadTicket(sessionId, account, startDate, endDate);
-            XDocument document = await this.GetDocument(sessionId, ticket);
+            string accountTicket = await this.GetAccountOperationsDownloadTicket(sessionId, account, startDate, endDate);
+            //string cardTicket = await this.GetCardOperationsDownloadTicket(sessionId, "", startDate, endDate);
+            XDocument document = await this.GetDocument(sessionId, accountTicket);
+            //XDocument document2 = await this.GetDocument(sessionId, cardTicket);
 
             return this.transformer.Transform(document);
         }
@@ -64,11 +64,11 @@ namespace BankSync.Exporters.Ipko
             }
         }
 
-        private async Task<string> GetDownloadTicket(string sessionId, string account, DateTime startDate,
+        private async Task<string> GetAccountOperationsDownloadTicket(string sessionId, string account, DateTime startDate,
             DateTime endDate)
         {
 
-            GetCompletedOperationsRequest exportRequest = new GetCompletedOperationsRequest(sessionId, account,startDate, endDate);
+            GetAccountCompletedOperationsRequest exportRequest = new GetAccountCompletedOperationsRequest(sessionId, account,startDate, endDate);
             using (HttpRequestMessage requestMessage =
                 new HttpRequestMessage(HttpMethod.Post, "https://www.ipko.pl/secure/ikd3/api/accounts/operations/completed/download"))
             {
@@ -85,6 +85,53 @@ namespace BankSync.Exporters.Ipko
                 return response.response.ticket_id;
             }
         }
+
+        private async Task<string> GetCardOperationsDownloadTicket(string sessionId, string card, DateTime startDate,
+            DateTime endDate)
+        {
+
+            GetCardCompletedOperationsRequest exportRequest = new GetCardCompletedOperationsRequest(sessionId, card, startDate, endDate);
+            using (HttpRequestMessage requestMessage =
+                new HttpRequestMessage(HttpMethod.Post, "https://www.ipko.pl/secure/ikd3/api/paycards/credit/completed/download"))
+            {
+                requestMessage.Content = new StringContent(JsonConvert.SerializeObject(exportRequest));
+                requestMessage.Headers.Add("x-session-id", sessionId);
+                requestMessage.Headers.Add("x-ias-ias_sid", sessionId);
+                requestMessage.Headers.Add("x-http-method", "POST");
+                requestMessage.Headers.Add("x-http-method-override", "POST");
+                requestMessage.Headers.Add("x-method-override", "POST");
+                requestMessage.Headers.Add("x-requested-with", "XMLHttpRequest");
+                HttpResponseMessage httpResponseMessage = await this.client.SendAsync(requestMessage);
+                string stringified = await httpResponseMessage.Content.ReadAsStringAsync();
+                GetCompletedOperationsResponse response = (GetCompletedOperationsResponse)JsonConvert.DeserializeObject(stringified, typeof(GetCompletedOperationsResponse));
+                return response.response.ticket_id;
+            }
+        }
+
+
+        private async Task<string> GetCardId(string sessionId, string card, DateTime startDate,
+            DateTime endDate)
+        {
+
+            GetCardDetailsRequest request = new GetCardDetailsRequest(sessionId);
+            using (HttpRequestMessage requestMessage =
+                new HttpRequestMessage(HttpMethod.Post, "https://www.ipko.pl/secure/ikd3/api/paycards/init"))
+            {
+                requestMessage.Content = new StringContent(JsonConvert.SerializeObject(request));
+                requestMessage.Headers.Add("x-session-id", sessionId);
+                requestMessage.Headers.Add("x-ias-ias_sid", sessionId);
+                requestMessage.Headers.Add("x-http-method", "POST");
+                requestMessage.Headers.Add("x-http-method-override", "POST");
+                requestMessage.Headers.Add("x-method-override", "POST");
+                requestMessage.Headers.Add("x-requested-with", "XMLHttpRequest");
+                HttpResponseMessage httpResponseMessage = await this.client.SendAsync(requestMessage);
+                string stringified = await httpResponseMessage.Content.ReadAsStringAsync();
+                GetCardDetailsResponse response = (GetCardDetailsResponse)JsonConvert.DeserializeObject(stringified, typeof(GetCardDetailsResponse));
+                return null;
+            }
+        }
+
+
 
         private async Task<string> LoginAndGetSessionId()
         {

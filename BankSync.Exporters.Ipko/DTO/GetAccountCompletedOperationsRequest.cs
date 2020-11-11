@@ -1,11 +1,12 @@
 ﻿using System;
+// ReSharper disable InconsistentNaming
 
 namespace BankSync.Exporters.Ipko.DTO
 {
 
-    public class GetCompletedOperationsRequest
+    public class GetAccountCompletedOperationsRequest
     {
-        public GetCompletedOperationsRequest(string sid, string account, DateTime startDate, DateTime endDate)
+        public GetAccountCompletedOperationsRequest(string sid, string account, DateTime startDate, DateTime endDate)
         {
             this.sid = sid;
             this.request = new Request(account, startDate, endDate);

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reflection;
-using BankSync.Model;
+﻿using BankSync.Model;
 using Simplexcel;
 
 namespace BankSync.Writers.Excel
@@ -45,7 +43,7 @@ namespace BankSync.Writers.Excel
             for (int index = 0; index < data.Entries.Count; index++)
             {
                 WalletEntry walletEntry = data.Entries[index];
-                sheet.Cells[index+1, 0] = walletEntry.WalletEntryId; 
+                sheet.Cells[index+1, 0] = walletEntry.GetWalletEntryId(); 
                 sheet.Cells[index+1, 1] = walletEntry.Account;
                 sheet.Cells[index+1, 2] = new Cell(CellType.Date, walletEntry.Date, "dd/MM/yyyy"); 
                 sheet.Cells[index+1, 3] = walletEntry.Currency;

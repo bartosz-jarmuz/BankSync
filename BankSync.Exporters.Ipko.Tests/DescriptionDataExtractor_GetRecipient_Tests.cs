@@ -1,5 +1,4 @@
 ﻿using BankSync.Exporters.Ipko.DataTransformation;
-using BankSync.Exporters.Ipko.Mappers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NFluent;
 

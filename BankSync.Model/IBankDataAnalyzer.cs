@@ -4,8 +4,6 @@
 //  </copyright>
 // -----------------------------------------------------------------------
 
-using System.Threading.Tasks;
-
 namespace BankSync.Model
 {
     public interface IBankDataAnalyzer

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Xml.Linq;
 using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
-using Microsoft.Win32.SafeHandles;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
 {
@@ -29,7 +28,6 @@ namespace BankSync.Exporters.Ipko.DataTransformation
                 WalletEntry entry = new WalletEntry()
                 {
                     Account = account,
-                    WalletEntryId = operation.Value.GetHashCode(),
                     Date = this.GetDate(operation),
                     Amount = this.GetAmount(operation),
                     Balance = this.GetBalance(operation),
