@@ -6,7 +6,6 @@
 
 using System;
 using System.Text.RegularExpressions;
-using BankSync.Exporters.Ipko.Mappers;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
 {
@@ -19,7 +18,15 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 Regex regex = new Regex("(Tytuł: )(.*)");
                 Match match = regex.Match(description);
-                return match.Groups[2].Value.Trim();
+
+                string value = match.Groups[2].Value.Trim();
+
+                if (Regex.IsMatch(value, @"^[\d ]+$"))
+                {
+                    return "";
+                }
+
+                return value;
 
             }
             else
