@@ -6,14 +6,15 @@ namespace BankSync.Exporters.Ipko.DTO
 
     public class GetAccountCompletedOperationsRequest
     {
-        public GetAccountCompletedOperationsRequest(string sid, string account, DateTime startDate, DateTime endDate)
+        public GetAccountCompletedOperationsRequest(string sid, string account, DateTime startDate, DateTime endDate, Sequence sequence)
         {
             this.sid = sid;
+            this.seq = sequence.GetValue();
             this.request = new Request(account, startDate, endDate);
         }
 
         public int version { get; set; } = 2;
-        public int seq { get; set; } = 64;
+        public int seq { get; set; }
         public string location { get; set; } = "";
         public Request request { get; set; }
         public string sid { get; set; }

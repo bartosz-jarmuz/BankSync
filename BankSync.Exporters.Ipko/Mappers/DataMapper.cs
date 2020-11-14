@@ -32,6 +32,10 @@ namespace BankSync.Exporters.Ipko.Mappers
 
         public string Map(string input)
         {
+            if (input == null)
+            {
+                return null;
+            }
             var mapped = this.Nodes.FirstOrDefault(x =>  x.Value.Trim().Equals(input.Trim(), StringComparison.OrdinalIgnoreCase));
             if (mapped != null)
             {

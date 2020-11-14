@@ -10,6 +10,7 @@ using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
 using BankSync.Utilities;
 using BankSync.Writers.Excel;
+using BankSync.Writers.Json;
 
 namespace BankSyncRunner
 {
@@ -36,11 +37,11 @@ namespace BankSyncRunner
 
                     foreach (Config.Account account in configServiceUser.Accounts)
                     {
-                        datasets.Add(await downloader.GetData(account.Number, startTime  , endTime));
+                        datasets.Add(await downloader.GetAccountData(account.Number, startTime  , endTime));
                     }
                     foreach (Config.Card card in configServiceUser.Cards)
                     {
-                        datasets.Add(await downloader.GetData(card.Number, startTime ,endTime));
+                        datasets.Add(await downloader.GetCardData(card.Number, startTime ,endTime));
                     }
                 }
             }
@@ -54,9 +55,17 @@ namespace BankSyncRunner
 
             analyzer.AddTags(ipkoData);
 
-            ExcelBankDataWriter writer = new ExcelBankDataWriter(GetOutputPath());
-            writer.Write(ipkoData);
+            Write(ipkoData);
             Console.ReadKey();
+        }
+
+        private static void Write(WalletDataSheet ipkoData)
+        {
+            var path = GetOutputPath();
+            IBankDataWriter writer = new ExcelBankDataWriter(path + ".xlsx");
+            writer.Write(ipkoData);
+            writer = new JsonBankDataWriter(path + ".json");
+            writer.Write(ipkoData);
         }
 
         private static string GetInput(string question)
@@ -71,7 +80,7 @@ namespace BankSyncRunner
         static string GetOutputPath()
         {
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Output",
-                DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss") + ".xlsx");
+                DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss"));
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             return filePath;
         }

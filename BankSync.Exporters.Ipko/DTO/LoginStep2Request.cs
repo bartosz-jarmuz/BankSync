@@ -1,9 +1,10 @@
-﻿namespace BankSync.Exporters.Ipko.DTO
+﻿// ReSharper disable InconsistentNaming
+namespace BankSync.Exporters.Ipko.DTO
 {
 
     public class LoginStep2Request
     {
-        public LoginStep2Request(string flowId, string token, string password)
+        public LoginStep2Request(string flowId, string token, string password, Sequence sequence)
         {
             this.flow_id = flowId;
             this.token = token;
@@ -11,10 +12,11 @@
             {
                 password = password
             };
+            this.seq = sequence.GetValue();
         }
 
         public int version { get; set; } = 3;
-        public int seq { get; set; } = 1;
+        public int seq { get; set; }
         public string location { get; set; } = "";
         public string state_id { get; set; } = "password";
         public string flow_id { get; set; }

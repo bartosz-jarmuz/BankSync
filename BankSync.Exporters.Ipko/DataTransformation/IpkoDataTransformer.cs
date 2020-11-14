@@ -21,8 +21,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
         {
             WalletDataSheet sheet = new WalletDataSheet();
 
-            string account = xDocument.Descendants("account").FirstOrDefault()?.Value;
-            account = this.mapper.Map(account);
+            string account = this.GetAccount(xDocument);
             foreach (XElement operation in xDocument.Descendants("operation"))
             {
                 WalletEntry entry = new WalletEntry()
@@ -43,6 +42,16 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             }
 
             return sheet;
+        }
+
+        private string GetAccount(XDocument xDocument)
+        {
+            var account = xDocument.Descendants("account").FirstOrDefault();
+            if (account == null)
+            {
+                account = xDocument.Descendants("card").FirstOrDefault();
+            }
+            return this.mapper.Map(account?.Value)??"Not recognized";
         }
 
         private string GetDescription(XElement operation)

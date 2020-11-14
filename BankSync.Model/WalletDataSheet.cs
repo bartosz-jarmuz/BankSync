@@ -12,8 +12,8 @@ namespace BankSync.Model
             {
                 foreach (WalletEntry walletEntry in walletDataSheet.Entries)
                 {
-                    var id = walletEntry.GetWalletEntryId();
-                    if (uniqueEntries.All(x => x.GetWalletEntryId() != id))
+                    var id = walletEntry.WalletEntryId;
+                    if (uniqueEntries.All(x => x.WalletEntryId != id))
                     {
                         uniqueEntries.Add(walletEntry);
                     }

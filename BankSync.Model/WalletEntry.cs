@@ -47,14 +47,17 @@ namespace BankSync.Model
         {
             if (!this.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
             {
-                this.Tags.Add(tag);
+                this.Tags.Insert(0, tag);
             }
         }
 
-        public int GetWalletEntryId()
+        public int WalletEntryId
         {
-            return $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.FullDetails}"
-                .GetHashCode();
+            get
+            {
+                return $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.FullDetails}"
+                    .GetHashCode();
+            }
         }
     }
 }

@@ -18,6 +18,7 @@
     <ProjectReference Include="..\BankSync.Utilities\BankSync.Utilities.csproj" />
     <ProjectReference Include="..\BankSync.Writers.Csv\BankSync.Writers.Csv.csproj" />
     <ProjectReference Include="..\BankSync.Writers.Excel\BankSync.Writers.Excel.csproj" />
+    <ProjectReference Include="..\BankSync.Writers.Json\BankSync.Writers.Json.csproj" />
   </ItemGroup>
 
 </Project>

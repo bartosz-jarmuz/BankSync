@@ -10,7 +10,7 @@ namespace BankSync.Analyzers.AI
     public class AllIfsAnalyzer : IBankDataAnalyzer
     {
         private readonly IDictionary<string, List<string>> lowLevelTags = new Dictionary<string, List<string>>();
-        private IDictionary<string, List<string>> highLevelTags;
+        private IDictionary<string, List<string>> highLevelTags = new Dictionary<string, List<string>>();
 
         public AllIfsAnalyzer(FileInfo dictionaryFile)
         {
@@ -41,6 +41,26 @@ namespace BankSync.Analyzers.AI
                 }
             }
 
+            foreach (XElement fromTag in xDoc.Root.Element("HighLevel").Descendants("From"))
+            {
+                string[] tokenized = fromTag.Value.Split(";", StringSplitOptions.RemoveEmptyEntries);
+                string tag = fromTag.Parent.Attribute("To").Value;
+                if (this.highLevelTags.ContainsKey(tag))
+                {
+                    foreach (string keyword in tokenized)
+                    {
+                        if (!this.highLevelTags[tag].Contains(keyword))
+                        {
+                            this.highLevelTags[tag].Add(keyword);
+                        }
+                    }
+                }
+                else
+                {
+                    this.highLevelTags.Add(tag, tokenized.ToList());
+                }
+            }
+
         }
 
         public void AddTags(WalletDataSheet data)
@@ -59,6 +79,16 @@ namespace BankSync.Analyzers.AI
                     }
                 }
 
+                foreach (KeyValuePair<string, List<string>> highLevelTag in this.highLevelTags)
+                {
+                    foreach (string keyword in highLevelTag.Value)
+                    {
+                        if (walletEntry.Tags.Contains(keyword, StringComparer.OrdinalIgnoreCase))
+                        {
+                            walletEntry.AssignTag(highLevelTag.Key);
+                        }
+                    }
+                }
             }
         }
     }
