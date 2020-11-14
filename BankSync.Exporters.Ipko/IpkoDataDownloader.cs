@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using BankSync.Exporters.Ipko.DataTransformation;
@@ -20,13 +18,12 @@ namespace BankSync.Exporters.Ipko
         {
             this.credentials = credentials;
             this.transformer = transformer;
-            this.cookies = new CookieContainer();
             this.sequence = new Sequence();
             HttpClientHandler handler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                 UseCookies = true,
-                CookieContainer = this.cookies
+                CookieContainer = new CookieContainer()
             };
             this.client = new HttpClient(handler);
         }
@@ -35,8 +32,7 @@ namespace BankSync.Exporters.Ipko
         private readonly IpkoDataTransformer transformer;
         private readonly HttpClient client;
         private string sessionId;
-        private readonly CookieContainer cookies;
-        private Sequence sequence;
+        private readonly Sequence sequence;
 
         public async Task<WalletDataSheet> GetAccountData(string account, DateTime startDate, DateTime endDate)
         {
@@ -51,7 +47,7 @@ namespace BankSync.Exporters.Ipko
         public async Task<WalletDataSheet> GetCardData(string cardNumber, DateTime startDate, DateTime endDate)
         {
             this.sessionId = await this.LoginAndGetSessionId();
-            var cardOperations = new CardOperations(this.client, this.cookies, this.sessionId, this.sequence);
+            var cardOperations = new CardOperations(this.client, this.sessionId, this.sequence);
             XDocument document = await cardOperations.GetCardData(cardNumber, startDate, endDate);
 
             return this.transformer.Transform(document);

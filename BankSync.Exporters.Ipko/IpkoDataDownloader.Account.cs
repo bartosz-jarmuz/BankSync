@@ -29,7 +29,7 @@ namespace BankSync.Exporters.Ipko
             public async Task<XDocument> GetAccountData(string account, DateTime startDate, DateTime endDate)
             {
                 
-                string accountTicket = await this.GetAccountOperationsDownloadTicket(account, startDate, endDate);
+                string accountTicket = await this.GetDownloadTicket(account, startDate, endDate);
                 XDocument document = await this.GetDocument(accountTicket);
                 return document;
             }
@@ -57,15 +57,15 @@ namespace BankSync.Exporters.Ipko
                 }
             }
 
-            private async Task<string> GetAccountOperationsDownloadTicket(string account, DateTime startDate,
+            private async Task<string> GetDownloadTicket(string account, DateTime startDate,
                 DateTime endDate)
             {
 
-                GetAccountCompletedOperationsRequest exportRequest = new GetAccountCompletedOperationsRequest(this.sessionId, account, startDate, endDate, this.sequence);
+                GetAccountOperationsDownloadTicketRequest exportDownloadTicketRequest = new GetAccountOperationsDownloadTicketRequest(this.sessionId, account, startDate, endDate, this.sequence);
                 using (HttpRequestMessage requestMessage =
                     new HttpRequestMessage(HttpMethod.Post, "https://www.ipko.pl/secure/ikd3/api/accounts/operations/completed/download"))
                 {
-                    requestMessage.Content = new StringContent(JsonConvert.SerializeObject(exportRequest));
+                    requestMessage.Content = new StringContent(JsonConvert.SerializeObject(exportDownloadTicketRequest));
                     requestMessage.Headers.Add("x-session-id", this.sessionId);
                     requestMessage.Headers.Add("x-ias-ias_sid", this.sessionId);
                     requestMessage.Headers.Add("x-http-method", "POST");
@@ -74,7 +74,7 @@ namespace BankSync.Exporters.Ipko
                     requestMessage.Headers.Add("x-requested-with", "XMLHttpRequest");
                     HttpResponseMessage httpResponseMessage = await this.client.SendAsync(requestMessage);
                     string stringified = await httpResponseMessage.Content.ReadAsStringAsync();
-                    GetCompletedOperationsResponse response = (GetCompletedOperationsResponse)JsonConvert.DeserializeObject(stringified, typeof(GetCompletedOperationsResponse));
+                    GetDownloadTicketResponse response = (GetDownloadTicketResponse)JsonConvert.DeserializeObject(stringified, typeof(GetDownloadTicketResponse));
                     return response.response.ticket_id;
                 }
             }

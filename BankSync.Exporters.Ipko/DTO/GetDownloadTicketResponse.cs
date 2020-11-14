@@ -1,7 +1,7 @@
 ﻿namespace BankSync.Exporters.Ipko.DTO
 {
 
-    public class GetCompletedOperationsResponse
+    public class GetDownloadTicketResponse
     {
         public Session session { get; set; }
         public int httpStatus { get; set; }

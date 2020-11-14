@@ -4,9 +4,9 @@
 namespace BankSync.Exporters.Ipko.DTO
 {
 
-    public class GetAccountCompletedOperationsRequest
+    public class GetAccountOperationsDownloadTicketRequest
     {
-        public GetAccountCompletedOperationsRequest(string sid, string account, DateTime startDate, DateTime endDate, Sequence sequence)
+        public GetAccountOperationsDownloadTicketRequest(string sid, string account, DateTime startDate, DateTime endDate, Sequence sequence)
         {
             this.sid = sid;
             this.seq = sequence.GetValue();

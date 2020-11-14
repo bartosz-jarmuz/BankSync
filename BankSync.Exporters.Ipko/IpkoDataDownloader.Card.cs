@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using BankSync.Exporters.Ipko.DataTransformation;
 using BankSync.Exporters.Ipko.DTO;
-using BankSync.Model;
 using BankSync.Utilities;
 using Newtonsoft.Json;
 
@@ -24,7 +19,7 @@ namespace BankSync.Exporters.Ipko
             private string sessionId;
             private Sequence sequence;
 
-            public CardOperations(HttpClient client, CookieContainer cookies, string sessionId, Sequence sequence)
+            public CardOperations(HttpClient client, string sessionId, Sequence sequence)
             {
                 this.client = client;
                 this.sessionId = sessionId;
@@ -34,17 +29,23 @@ namespace BankSync.Exporters.Ipko
 
             public async Task<XDocument> GetCardData(string cardNumber, DateTime startDate, DateTime endDate)
             {
-                Paycard paycard = await this.GetCard(cardNumber);
-                await this.GetCardOperationsDaterange(paycard.id, startDate, endDate);
-                string downloadTicket = await this.GetCardOperationsDownloadTicket(paycard.id, startDate, endDate);
+                GetCardsInitResponse.Paycard paycard = await this.GetCard(cardNumber);
+                await this.ExtendCardOperationsDaterange(paycard.id, startDate, endDate);
+                string downloadTicket = await this.GetDownloadTicket(paycard.id, startDate, endDate);
                 XDocument document = await this.GetDocument(downloadTicket);
                 return document;
             }
 
-
-            private async Task GetCardOperationsDaterange(string cardId, DateTime startDate, DateTime endDate)
+            /// <summary>
+            /// This call is needed, because without it, the download ticket does not respect the start and end dates 
+            /// </summary>
+            /// <param name="cardId"></param>
+            /// <param name="startDate"></param>
+            /// <param name="endDate"></param>
+            /// <returns></returns>
+            private async Task ExtendCardOperationsDaterange(string cardId, DateTime startDate, DateTime endDate)
             {
-
+                
                 GetCardCompletedDateRangeRequest exportRequest = new GetCardCompletedDateRangeRequest(this.sessionId, cardId, startDate, endDate, this.sequence);
                 using (HttpRequestMessage requestMessage =
                     new HttpRequestMessage(HttpMethod.Post, "https://www.ipko.pl/secure/ikd3/api/paycards/credit/completed"))
@@ -78,14 +79,14 @@ namespace BankSync.Exporters.Ipko
                 }
             }
 
-            private async Task<string> GetCardOperationsDownloadTicket(string cardId, DateTime startDate, DateTime endDate)
+            private async Task<string> GetDownloadTicket(string cardId, DateTime startDate, DateTime endDate)
             {
 
-                GetCardCompletedOperationsRequest exportRequest = new GetCardCompletedOperationsRequest(this.sessionId, cardId, startDate, endDate, this.sequence);
+                GetCardOperationsDownloadTicketRequest exportDownloadTicketRequest = new GetCardOperationsDownloadTicketRequest(this.sessionId, cardId, startDate, endDate, this.sequence);
                 using (HttpRequestMessage requestMessage =
                     new HttpRequestMessage(HttpMethod.Post, "https://www.ipko.pl/secure/ikd3/api/paycards/credit/completed/download"))
                 {
-                    var json = JsonConvert.SerializeObject(exportRequest);
+                    var json = JsonConvert.SerializeObject(exportDownloadTicketRequest);
                     requestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
                     requestMessage.Headers.Add("Accept-Encoding", "gzip, deflate, br");
@@ -112,43 +113,8 @@ namespace BankSync.Exporters.Ipko
 
                     HttpResponseMessage httpResponseMessage = await this.client.SendAsync(requestMessage);
                     string stringified = await httpResponseMessage.Content.ReadAsStringAsync();
-                    GetCompletedOperationsResponse response = (GetCompletedOperationsResponse)JsonConvert.DeserializeObject(stringified, typeof(GetCompletedOperationsResponse));
+                    GetDownloadTicketResponse response = (GetDownloadTicketResponse)JsonConvert.DeserializeObject(stringified, typeof(GetDownloadTicketResponse));
                     return response.response.ticket_id;
-                }
-            }
-
-
-            private async Task GetCardDetails(Paycard card)
-            {
-                GetCardDetailsRequest request = new GetCardDetailsRequest(this.sessionId, card.id, this.sequence);
-
-                using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post,
-                    "https://www.ipko.pl/secure/ikd3/api/paycards/credit/details"))
-                {
-                    var json = JsonConvert.SerializeObject(request);
-                    requestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                    requestMessage.Headers.Add("Accept-Encoding", "gzip, deflate, br");
-                    requestMessage.Headers.Add("Accept-Language", "en-US,en;q=0.5");
-                    requestMessage.Headers.Add("Connection", "keep-alive");
-
-                    requestMessage.Headers.Add("Host", "www.ipko.pl");
-                    requestMessage.Headers.Add("Origin", "https://www.ipko.pl");
-                    requestMessage.Headers.Add("Referer", "https://www.ipko.pl/");
-
-                    requestMessage.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0");
-
-
-                    requestMessage.Headers.Add("x-ias-ias_sid", this.sessionId);
-                    requestMessage.Headers.Add("X-HTTP-Method", "GET");
-                    requestMessage.Headers.Add("X-HTTP-Method-Override", "GET");
-                    requestMessage.Headers.Add("X-METHOD-OVERRIDE", "GET");
-                    requestMessage.Headers.Add("X-Requested-With", "XMLHttpRequest");
-                    HttpResponseMessage httpResponseMessage = await this.client.SendAsync(requestMessage);
-                    string stringified = await httpResponseMessage.Content.ReadAsStringAsync();
-                    GetCardDetailsResponse response = (GetCardDetailsResponse)JsonConvert.DeserializeObject(stringified, typeof(GetCardDetailsResponse));
-                    
-                    
                 }
             }
 
@@ -175,12 +141,7 @@ namespace BankSync.Exporters.Ipko
                 }
             }
 
-
-
-         
-
-
-            private async Task<Paycard> GetCard(string cardNumber)
+            private async Task<GetCardsInitResponse.Paycard> GetCard(string cardNumber)
             {
                 GetCardsInitRequest request = new GetCardsInitRequest(this.sequence, this.sessionId);
                 using (HttpRequestMessage requestMessage =
@@ -198,7 +159,7 @@ namespace BankSync.Exporters.Ipko
                     GetCardsInitResponse response = (GetCardsInitResponse)JsonConvert.DeserializeObject(stringified, typeof(GetCardsInitResponse));
 
                     
-                    foreach (Paycard paycard in response.response.paycard_list)
+                    foreach (GetCardsInitResponse.Paycard paycard in response.response.paycard_list)
                     {
                         if (MaskedInputRecognizer.IsMatch(cardNumber, paycard.number))
                         {

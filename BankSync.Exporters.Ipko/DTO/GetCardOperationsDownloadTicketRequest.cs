@@ -5,9 +5,9 @@
 namespace BankSync.Exporters.Ipko.DTO
 {
 
-    public class GetCardCompletedOperationsRequest
+    public class GetCardOperationsDownloadTicketRequest
     {
-        public GetCardCompletedOperationsRequest(string sid, string cardId, DateTime startDate, DateTime endDate,
+        public GetCardOperationsDownloadTicketRequest(string sid, string cardId, DateTime startDate, DateTime endDate,
             Sequence sequence)
         {
             this.sid = sid;
