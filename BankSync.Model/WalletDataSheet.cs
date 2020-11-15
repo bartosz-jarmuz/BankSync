@@ -28,5 +28,12 @@ namespace BankSync.Model
             return consolidated;
         }
         public List<WalletEntry> Entries { get; set; } = new List<WalletEntry>();
+
+        public TagMap TagMap { get; set; }
+    }
+
+    public class TagMap
+    {
+        public Dictionary<int, List<string>> Values { get; set; } = new Dictionary<int, List<string>>();
     }
 }

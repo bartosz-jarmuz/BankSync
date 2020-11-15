@@ -17,6 +17,16 @@ namespace BankSync.Writers.Json
 
         public void Write(WalletDataSheet data)
         {
+            var map = new TagMap();
+
+            foreach (WalletEntry walletEntry in data.Entries)
+            {
+                map.Values.Add(walletEntry.WalletEntryId, walletEntry.Tags);
+            }
+
+
+            data.TagMap = map;
+
             string serialized = JsonConvert.SerializeObject(data);
 
             File.WriteAllText(this.targetFilePath, serialized);

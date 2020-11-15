@@ -7,10 +7,25 @@ using BankSync.Model;
 
 namespace BankSync.Analyzers.AI
 {
+
+    public class Subcategory
+    {
+        public string Name { get; set; }
+        public List<string> MapFrom { get; set; } = new List<string>();
+    }
+
+    public class Category
+    {
+        public string Name { get; set; }
+        public List<Subcategory> Subcategories { get; set; } = new List<Subcategory>();
+        public List<string> MapFrom { get; set; } = new List<string>();
+    }
+
+    
+
     public class AllIfsAnalyzer : IBankDataAnalyzer
     {
-        private readonly IDictionary<string, List<string>> lowLevelTags = new Dictionary<string, List<string>>();
-        private IDictionary<string, List<string>> highLevelTags = new Dictionary<string, List<string>>();
+        private readonly List<Category> categories = new List<Category>();
 
         public AllIfsAnalyzer(FileInfo dictionaryFile)
         {
@@ -21,73 +36,77 @@ namespace BankSync.Analyzers.AI
         {
             XDocument xDoc = XDocument.Load(dictionaryFile.FullName);
 
-            foreach (XElement fromTag in xDoc.Root.Element("LowLevel").Descendants("From"))
+            foreach (XElement categoryElement in xDoc.Root.Descendants("Category"))
             {
-                string[] tokenized = fromTag.Value.Split(";", StringSplitOptions.RemoveEmptyEntries);
-                string tag = fromTag.Parent.Attribute("To").Value;
-                if (this.lowLevelTags.ContainsKey(tag))
+                var category = new Category()
                 {
-                    foreach (string keyword in tokenized)
-                    {
-                        if (!this.lowLevelTags[tag].Contains(keyword))
-                        {
-                            this.lowLevelTags[tag].Add(keyword);
-                        }
-                    }
-                }
-                else
-                {
-                    this.lowLevelTags.Add(tag, tokenized.ToList());
-                }
-            }
+                    Name = categoryElement.Attribute("Name").Value
+                };
 
-            foreach (XElement fromTag in xDoc.Root.Element("HighLevel").Descendants("From"))
-            {
-                string[] tokenized = fromTag.Value.Split(";", StringSplitOptions.RemoveEmptyEntries);
-                string tag = fromTag.Parent.Attribute("To").Value;
-                if (this.highLevelTags.ContainsKey(tag))
+
+                List<string> allDirectTokens = LoadTokensFromElement(categoryElement);
+                category.MapFrom = new List<string>(allDirectTokens);
+
+                foreach (XElement subcategoryElement in categoryElement.Elements("Subcategory"))
                 {
-                    foreach (string keyword in tokenized)
-                    {
-                        if (!this.highLevelTags[tag].Contains(keyword))
-                        {
-                            this.highLevelTags[tag].Add(keyword);
-                        }
-                    }
+                    var subcategory = new Subcategory();
+                    subcategory.Name = subcategoryElement.Attribute("Name").Value;
+                    subcategory.MapFrom = LoadTokensFromElement(subcategoryElement);
+                    category.Subcategories.Add(subcategory);
                 }
-                else
-                {
-                    this.highLevelTags.Add(tag, tokenized.ToList());
-                }
+
+                this.categories.Add(category);
             }
 
         }
 
-        public void AddTags(WalletDataSheet data)
+        private static List<string> LoadTokensFromElement(XElement categoryElement)
+        {
+            var allDirectTokens = new List<string>();
+            foreach (XElement mappingElement in categoryElement.Elements("MapFrom"))
+            {
+                string[] tokenized = mappingElement.Value.Split(";", StringSplitOptions.RemoveEmptyEntries);
+                allDirectTokens.AddRange(tokenized);
+            }
+
+            return allDirectTokens.Distinct().ToList();
+        }
+
+        public void AssignCategories(WalletDataSheet data)
         {
             foreach (WalletEntry walletEntry in data.Entries)
             {
-                foreach (KeyValuePair<string, List<string>> tag in this.lowLevelTags)
+                bool isAssigned = false;
+                foreach (Category category in this.categories)
                 {
-                    foreach (string keyword in tag.Value)
+                    foreach (Subcategory subcategory in category.Subcategories)
                     {
-                        if (walletEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
-                            || walletEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                        foreach (string keyword in subcategory.MapFrom)
                         {
-                           walletEntry.AssignTag(tag.Key);
+                            if (walletEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+                                || walletEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                            {
+                                walletEntry.Subcategory = subcategory.Name;
+                                walletEntry.Category = category.Name;
+                                isAssigned = true;
+                                break;
+                            }
                         }
                     }
-                }
 
-                foreach (KeyValuePair<string, List<string>> highLevelTag in this.highLevelTags)
-                {
-                    foreach (string keyword in highLevelTag.Value)
+                    if (!isAssigned)
                     {
-                        if (walletEntry.Tags.Contains(keyword, StringComparer.OrdinalIgnoreCase))
+                        foreach (string keyword in category.MapFrom)
                         {
-                            walletEntry.AssignTag(highLevelTag.Key);
+                            if (walletEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+                                || walletEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                            {
+                                walletEntry.Category = category.Name;
+                                break;
+                            }
                         }
                     }
+
                 }
             }
         }

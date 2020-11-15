@@ -23,6 +23,8 @@ namespace BankSync.Model
                 Currency = toBeCloned.Currency,
                 Amount = toBeCloned.Amount,
                 Note = toBeCloned.Note,
+                Category = toBeCloned.Category,
+                Subcategory = toBeCloned.Subcategory,
                 FullDetails = toBeCloned.FullDetails,
                 Tags = toBeCloned.Tags
             };
@@ -38,6 +40,8 @@ namespace BankSync.Model
         public string Currency { get; set; }
         public string Note { get; set; }
         public string PaymentType { get; set; }
+        public string Category { get; set; }
+        public string Subcategory { get; set; }
         public List<string> Tags{ get; set; } = new List<string>();
 
         public string FullDetails{ get; set; }
@@ -55,7 +59,7 @@ namespace BankSync.Model
         {
             get
             {
-                return $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.FullDetails}"
+                return $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.Note}{this.FullDetails}"
                     .GetHashCode();
             }
         }

@@ -20,8 +20,8 @@ namespace BankSyncRunner
         static DataEnricherExecutor enricher = new DataEnricherExecutor();
         static IBankDataAnalyzer analyzer = new AllIfsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Tags.xml"));
         static FileInfo configFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Accounts.xml");
-        private static DateTime startTime = new DateTime(2020, 10, 01);
-        private static DateTime endTime = new DateTime(2020, 10, 31);
+        private static DateTime startTime = new DateTime(2020, 09, 01);
+        private static DateTime endTime = new DateTime(2020, 11, 14);
 
         static async Task Main(string[] args)
         {
@@ -53,7 +53,7 @@ namespace BankSyncRunner
             enricher.LoadEnrichers();
             await enricher.EnrichData(ipkoData);
 
-            analyzer.AddTags(ipkoData);
+            analyzer.AssignCategories(ipkoData);
 
             Write(ipkoData);
             Console.ReadKey();
