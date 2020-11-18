@@ -2,7 +2,7 @@
 namespace BankSync.Exporters.Ipko.DTO
 {
 
-    public class LoginStep2Request
+    internal class LoginStep2Request
     {
         public LoginStep2Request(string flowId, string token, string password, Sequence sequence)
         {

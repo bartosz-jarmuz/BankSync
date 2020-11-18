@@ -4,7 +4,7 @@
 namespace BankSync.Exporters.Ipko.DTO
 {
 
-    public class GetAccountOperationsDownloadTicketRequest
+    internal class GetAccountOperationsDownloadTicketRequest
     {
         public GetAccountOperationsDownloadTicketRequest(string sid, string account, DateTime startDate, DateTime endDate, Sequence sequence)
         {

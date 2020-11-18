@@ -19,13 +19,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Writers.Excel", "B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Enrichers.Allegro", "BankSync.Enrichers.Allegro\BankSync.Enrichers.Allegro.csproj", "{BA4C0CB9-903B-4419-95BA-015415010F08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Analyzers.AI", "BankSync.Analyzers.AI\BankSync.Analyzers.AI.csproj", "{D178BBF7-815B-44CF-BC1C-D1AFA0C0E1C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Analyzers.AI", "BankSync.Analyzers.AI\BankSync.Analyzers.AI.csproj", "{D178BBF7-815B-44CF-BC1C-D1AFA0C0E1C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Utilities.Tests", "BankSync.Utilities.Tests\BankSync.Utilities.Tests.csproj", "{22A9610B-B3BE-4FA6-B156-173BB6EB7E99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Utilities.Tests", "BankSync.Utilities.Tests\BankSync.Utilities.Tests.csproj", "{22A9610B-B3BE-4FA6-B156-173BB6EB7E99}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8888123D-E035-44DE-8CBA-DFD98B737499}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Writers.Json", "BankSync.Writers.Json\BankSync.Writers.Json.csproj", "{9437C088-3507-4FB3-A025-BAC2B4654ECD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Writers.Json", "BankSync.Writers.Json\BankSync.Writers.Json.csproj", "{9437C088-3507-4FB3-A025-BAC2B4654ECD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Writers", "Writers", "{936DCA8C-5B7A-4466-A845-440B2F45012C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Config", "BankSync.Config\BankSync.Config.csproj", "{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,13 +81,19 @@ Global
 		{9437C088-3507-4FB3-A025-BAC2B4654ECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9437C088-3507-4FB3-A025-BAC2B4654ECD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9437C088-3507-4FB3-A025-BAC2B4654ECD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B61CB87D-E324-4F7C-8611-0A1F3E43C6C9} = {8888123D-E035-44DE-8CBA-DFD98B737499}
+		{62462F20-AF33-461A-9963-FAF7D16A5478} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
 		{22A9610B-B3BE-4FA6-B156-173BB6EB7E99} = {8888123D-E035-44DE-8CBA-DFD98B737499}
+		{9437C088-3507-4FB3-A025-BAC2B4654ECD} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F2AB631F-F509-4047-9CCF-A8A2E970EB3F}

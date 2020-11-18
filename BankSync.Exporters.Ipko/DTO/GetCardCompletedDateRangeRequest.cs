@@ -9,7 +9,7 @@ using System;
 namespace BankSync.Exporters.Ipko.DTO
 {
 
-    public class GetCardCompletedDateRangeRequest
+    internal class GetCardCompletedDateRangeRequest
     {
         public GetCardCompletedDateRangeRequest(string sid, string cardId, DateTime startDate, DateTime endDate, Sequence sequence)
         {

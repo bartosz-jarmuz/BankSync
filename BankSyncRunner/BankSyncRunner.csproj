@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BankSync.Analyzers.AI\BankSync.Analyzers.AI.csproj" />
+    <ProjectReference Include="..\BankSync.Config\BankSync.Config.csproj" />
     <ProjectReference Include="..\BankSync.Enrichers.Allegro\BankSync.Enrichers.Allegro.csproj" />
     <ProjectReference Include="..\BankSync.Exporters.Ipko\BankSync.Exporters.Ipko.csproj" />
     <ProjectReference Include="..\BankSync.Utilities\BankSync.Utilities.csproj" />

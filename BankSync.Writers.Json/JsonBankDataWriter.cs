@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json.Serialization;
 using BankSync.Model;
@@ -21,7 +22,7 @@ namespace BankSync.Writers.Json
 
             foreach (WalletEntry walletEntry in data.Entries)
             {
-                map.Values.Add(walletEntry.WalletEntryId, walletEntry.Tags);
+                map.Values.Add(new KeyValuePair<int, List<string>>(walletEntry.OriginalBankEntryId, walletEntry.Tags));
             }
 
 

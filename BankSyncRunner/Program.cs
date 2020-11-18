@@ -4,6 +4,7 @@ using System.IO;
 using System.Security;
 using System.Threading.Tasks;
 using BankSync.Analyzers.AI;
+using BankSync.Config;
 using BankSync.Exporters.Ipko;
 using BankSync.Exporters.Ipko.DataTransformation;
 using BankSync.Exporters.Ipko.Mappers;
@@ -20,30 +21,18 @@ namespace BankSyncRunner
         static DataEnricherExecutor enricher = new DataEnricherExecutor();
         static IBankDataAnalyzer analyzer = new AllIfsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Tags.xml"));
         static FileInfo configFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Accounts.xml");
-        private static DateTime startTime = new DateTime(2020, 09, 01);
+        private static DateTime startTime = new DateTime(2019, 12, 01);
         private static DateTime endTime = new DateTime(2020, 11, 14);
 
         static async Task Main(string[] args)
         {
 
-            var config = new Config(configFile, GetInput);
+            var config = new BankSyncConfig(configFile, GetInput);
 
             var datasets = new List<WalletDataSheet>();
-            foreach (Config.Service configService in config.Services)
+            foreach (Service configService in config.Services)
             {
-                foreach (Config.User configServiceUser in configService.Users)
-                {
-                    IpkoDataDownloader downloader = new IpkoDataDownloader(configServiceUser.Credentials, transformer);
-
-                    foreach (Config.Account account in configServiceUser.Accounts)
-                    {
-                        datasets.Add(await downloader.GetAccountData(account.Number, startTime  , endTime));
-                    }
-                    foreach (Config.Card card in configServiceUser.Cards)
-                    {
-                        datasets.Add(await downloader.GetCardData(card.Number, startTime ,endTime));
-                    }
-                }
+                await ProcessServices(configService, datasets);
             }
 
             WalletDataSheet ipkoData = WalletDataSheet.Consolidate(datasets);
@@ -58,6 +47,25 @@ namespace BankSyncRunner
             Write(ipkoData);
             Console.ReadKey();
         }
+
+        private static async Task ProcessServices(Service configService, List<WalletDataSheet> datasets)
+        {
+            if (string.Equals(configService.Name, "IPKO", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (ServiceUser configServiceUser in configService.Users)
+                {
+                    IBankDataExporter downloader = new IpkoDataDownloader(configServiceUser, transformer);
+
+                    datasets.Add( await downloader.GetData(startTime, endTime));
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unsupported service type: [{configService?.Name}]");
+            }
+
+        }
+
 
         private static void Write(WalletDataSheet ipkoData)
         {

@@ -55,11 +55,15 @@ namespace BankSync.Model
             }
         }
 
-        public int WalletEntryId
+        /// <summary>
+        /// A hash code uniquely identifying an entry as it stands in the bank
+        /// It might be different from a 'Wallet' entry, if our entry is split into several by an enricher
+        /// </summary>
+        public int OriginalBankEntryId
         {
             get
             {
-                return $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.Note}{this.FullDetails}"
+                return $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.FullDetails}"
                     .GetHashCode();
             }
         }

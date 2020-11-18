@@ -4,7 +4,7 @@
 namespace BankSync.Exporters.Ipko.DTO
 {
 
-    public class GetCardsInitRequest
+    internal class GetCardsInitRequest
     {
 
         public GetCardsInitRequest(Sequence sequence, string sessionId)

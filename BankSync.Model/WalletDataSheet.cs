@@ -7,23 +7,19 @@ namespace BankSync.Model
     {
         public static WalletDataSheet Consolidate(IEnumerable<WalletDataSheet> sheets)
         {
-            var uniqueEntries = new List<WalletEntry>();
+            List<WalletEntry> uniqueEntries = new List<WalletEntry>();
             foreach (WalletDataSheet walletDataSheet in sheets)
             {
                 foreach (WalletEntry walletEntry in walletDataSheet.Entries)
                 {
-                    var id = walletEntry.WalletEntryId;
-                    if (uniqueEntries.All(x => x.WalletEntryId != id))
+                    int id = walletEntry.OriginalBankEntryId;
+                    if (uniqueEntries.All(x => x.OriginalBankEntryId != id))
                     {
                         uniqueEntries.Add(walletEntry);
                     }
-                    else
-                    {
-
-                    }
                 }
             }
-            var consolidated = new WalletDataSheet();
+            WalletDataSheet consolidated = new WalletDataSheet();
             consolidated.Entries = uniqueEntries.OrderByDescending(x => x.Date).ToList();
             return consolidated;
         }
@@ -34,6 +30,6 @@ namespace BankSync.Model
 
     public class TagMap
     {
-        public Dictionary<int, List<string>> Values { get; set; } = new Dictionary<int, List<string>>();
+        public List<KeyValuePair<int, List<string>>> Values { get; set; } = new List<KeyValuePair<int, List<string>>>();
     }
 }
