@@ -17,14 +17,14 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             this.descriptionDataExtractor = new DescriptionDataExtractor();
         }
 
-        public WalletDataSheet TransformXml(XDocument xDocument)
+        public BankDataSheet TransformXml(XDocument xDocument)
         {
-            WalletDataSheet sheet = new WalletDataSheet();
+            BankDataSheet sheet = new BankDataSheet();
 
             string account = this.GetAccount(xDocument);
             foreach (XElement operation in xDocument.Descendants("operation"))
             {
-                WalletEntry entry = new WalletEntry()
+                BankEntry entry = new BankEntry()
                 {
                     Account = account,
                     Date = this.GetDate(operation),
@@ -45,7 +45,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             return sheet;
         }
 
-        private static void MakeSureRecipientNotEmpty(WalletEntry entry)
+        private static void MakeSureRecipientNotEmpty(BankEntry entry)
         {
             if (string.IsNullOrEmpty(entry.Recipient) && entry.PaymentType == "Płatność kartą")
             {
@@ -78,7 +78,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             return "";
         }
 
-        private string GetNote(WalletEntry entry, XElement operation)
+        private string GetNote(BankEntry entry, XElement operation)
         {
             XElement element = operation.Element("description");
             if (element != null)
@@ -98,7 +98,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             return "";
         }
 
-        private string GetRecipient(WalletEntry entry, XElement operation)
+        private string GetRecipient(BankEntry entry, XElement operation)
         {
             if (entry.PaymentType == "Przelew na rachunek" || entry.PaymentType == "Zwrot w terminalu" || entry.PaymentType == "Spłata należności - Dziękujemy")
             {
@@ -124,7 +124,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             return "";
         }
 
-        private string GetPayer(WalletEntry entry, XElement operation)
+        private string GetPayer(BankEntry entry, XElement operation)
         {
             if (entry.PaymentType == "Płatność kartą")
             {

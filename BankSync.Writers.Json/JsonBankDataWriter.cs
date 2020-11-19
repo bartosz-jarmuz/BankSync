@@ -16,13 +16,13 @@ namespace BankSync.Writers.Json
             this.targetFilePath = targetFilePath;
         }
 
-        public void Write(WalletDataSheet data)
+        public void Write(BankDataSheet data)
         {
             var map = new TagMap();
 
-            foreach (WalletEntry walletEntry in data.Entries)
+            foreach (BankEntry bankEntry in data.Entries)
             {
-                map.Values.Add(new KeyValuePair<int, List<string>>(walletEntry.OriginalBankEntryId, walletEntry.Tags));
+                map.Values.Add(new KeyValuePair<int, List<string>>(bankEntry.OriginalBankEntryId, bankEntry.Tags));
             }
 
 

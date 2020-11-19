@@ -43,9 +43,9 @@ namespace BankSync.Exporters.Ipko
         private readonly OldDataManager oldDataManager;
 
 
-        public async Task<WalletDataSheet> GetData(DateTime startTime, DateTime endTime)
+        public async Task<BankDataSheet> GetData(DateTime startTime, DateTime endTime)
         {
-            var datasets = new List<WalletDataSheet>();
+            var datasets = new List<BankDataSheet>();
             var oldData = this.oldDataManager.GetOldData();
             datasets.Add(oldData);
             foreach (Account account in this.serviceUserConfig.Accounts)
@@ -58,10 +58,10 @@ namespace BankSync.Exporters.Ipko
                 datasets.Add(await this.GetCardData(card.Number, startTime, endTime));
             }
 
-            return WalletDataSheet.Consolidate(datasets);
+            return BankDataSheet.Consolidate(datasets);
         }
 
-        private async Task<WalletDataSheet> GetAccountData(string account, DateTime startDate, DateTime endDate)
+        private async Task<BankDataSheet> GetAccountData(string account, DateTime startDate, DateTime endDate)
         {
             this.sessionId = await this.LoginAndGetSessionId();
 
@@ -74,7 +74,7 @@ namespace BankSync.Exporters.Ipko
         }
 
       
-        private async Task<WalletDataSheet> GetCardData(string cardNumber, DateTime startDate, DateTime endDate)
+        private async Task<BankDataSheet> GetCardData(string cardNumber, DateTime startDate, DateTime endDate)
         {
             this.sessionId = await this.LoginAndGetSessionId();
             var cardOperations = new CardOperations(this.client, this.sessionId, this.sequence);

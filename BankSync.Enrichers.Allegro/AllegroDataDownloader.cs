@@ -92,7 +92,7 @@ namespace BankSync.Enrichers.Allegro
 
         private async Task<AllegroDataContainer> LoadData(DateTime oldestEntry)
         {
-            var dataList = new List<AllegroData>();
+            List<AllegroData> dataList = new List<AllegroData>();
             HttpResponseMessage response = await this.client.GetAsync("https://allegro.pl/moje-allegro/zakupy/kupione");
             AllegroData data = await GetDataFromResponse(response);
             dataList.Add(data);
@@ -115,7 +115,7 @@ namespace BankSync.Enrichers.Allegro
         {
             AllegroData first = dataList.First();
             IEnumerable<Myorder> allOrders = dataList.SelectMany(x => x.parameters.myorders.myorders);
-            var distinct = allOrders.GroupBy(x => x.id).Select(g => g.First()).OrderByDescending(x=>x.orderDate).ToArray();
+            Myorder[] distinct = allOrders.GroupBy(x => x.id).Select(g => g.First()).OrderByDescending(x=>x.orderDate).ToArray();
 
             first.parameters.myorders.myorders = distinct;
             return new AllegroDataContainer(first, this.userConfig.UserName);

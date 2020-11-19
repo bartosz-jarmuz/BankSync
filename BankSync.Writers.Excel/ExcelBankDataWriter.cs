@@ -13,7 +13,7 @@ namespace BankSync.Writers.Excel
         }
 
 
-        public void Write(WalletDataSheet data)
+        public void Write(BankDataSheet data)
         {
             Worksheet sheet = new Worksheet("Data");
             sheet.Cells[0, 0] = "Entry ID";
@@ -47,21 +47,21 @@ namespace BankSync.Writers.Excel
 
             for (int index = 0; index < data.Entries.Count; index++)
             {
-                WalletEntry walletEntry = data.Entries[index];
-                sheet.Cells[index+1, 0] = walletEntry.OriginalBankEntryId; 
-                sheet.Cells[index+1, 1] = walletEntry.Account;
-                sheet.Cells[index+1, 2] = new Cell(CellType.Date, walletEntry.Date, "dd/MM/yyyy"); 
-                sheet.Cells[index+1, 3] = walletEntry.Currency;
-                sheet.Cells[index+1, 4] = walletEntry.Amount;
-                sheet.Cells[index+1, 5] = walletEntry.Balance;
-                sheet.Cells[index+1, 6] = walletEntry.PaymentType;
-                sheet.Cells[index+1, 7] = walletEntry.Recipient;
-                sheet.Cells[index+1, 8] = walletEntry.Payer;
-                sheet.Cells[index+1, 9] = walletEntry.Note;
-                sheet.Cells[index+1, 10] = walletEntry.Category;
-                sheet.Cells[index+1, 11] = walletEntry.Subcategory;
-                sheet.Cells[index+1, 12] = string.Join(";", walletEntry.Tags);
-                sheet.Cells[index + 1, 13] = walletEntry.FullDetails;
+                BankEntry bankEntry = data.Entries[index];
+                sheet.Cells[index+1, 0] = bankEntry.OriginalBankEntryId; 
+                sheet.Cells[index+1, 1] = bankEntry.Account;
+                sheet.Cells[index+1, 2] = new Cell(CellType.Date, bankEntry.Date, "dd/MM/yyyy"); 
+                sheet.Cells[index+1, 3] = bankEntry.Currency;
+                sheet.Cells[index+1, 4] = bankEntry.Amount;
+                sheet.Cells[index+1, 5] = bankEntry.Balance;
+                sheet.Cells[index+1, 6] = bankEntry.PaymentType;
+                sheet.Cells[index+1, 7] = bankEntry.Recipient;
+                sheet.Cells[index+1, 8] = bankEntry.Payer;
+                sheet.Cells[index+1, 9] = bankEntry.Note;
+                sheet.Cells[index+1, 10] = bankEntry.Category;
+                sheet.Cells[index+1, 11] = bankEntry.Subcategory;
+                sheet.Cells[index+1, 12] = string.Join(";", bankEntry.Tags);
+                sheet.Cells[index + 1, 13] = bankEntry.FullDetails;
             }
 
             Workbook workbook = new Workbook();

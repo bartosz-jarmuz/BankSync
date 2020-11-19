@@ -16,9 +16,9 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             this.mapper = mapper;
         }
 
-        public WalletDataSheet TransformTsv(FileInfo file)
+        public BankDataSheet TransformTsv(FileInfo file)
         {
-            WalletDataSheet sheet = new WalletDataSheet();
+            BankDataSheet sheet = new BankDataSheet();
 
             string account = this.GetAccount(file);
 
@@ -28,7 +28,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 string[] data = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
 
-                WalletEntry entry = new WalletEntry()
+                BankEntry entry = new BankEntry()
                 {
                     Account = account,
                     Date = this.GetDate(data),
@@ -63,7 +63,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
         {
              return line[1];
         }
-        private string GetRecipient(string[] line, WalletEntry entry)
+        private string GetRecipient(string[] line, BankEntry entry)
         {
             if (entry.PaymentType == "Spłata należności - Dziękujemy")
             {
@@ -72,7 +72,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             return line[1] + ", " + line[2];
         }
 
-        private string GetPayer(WalletEntry entry)
+        private string GetPayer(BankEntry entry)
         {
             if (entry.PaymentType == "Płatność kartą")
             {

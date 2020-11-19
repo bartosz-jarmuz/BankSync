@@ -32,10 +32,10 @@ namespace BankSync.Enrichers.Allegro
 
             foreach (ServiceUser serviceUser in this.config.Users)
             {
-                var oldDataManager = new OldDataManager(serviceUser);
+                OldDataManager oldDataManager = new OldDataManager(serviceUser);
                 oldDataManager.GetOldData();
 
-                var container = await new AllegroDataDownloader(serviceUser).GetData(oldestEntry);
+                AllegroDataContainer container = await new AllegroDataDownloader(serviceUser).GetData(oldestEntry);
                 allegroData.Add(container);
 
                 oldDataManager.StoreData(container);
@@ -46,14 +46,14 @@ namespace BankSync.Enrichers.Allegro
 
        
 
-        public async Task Enrich(WalletDataSheet data, DateTime startTime, DateTime endTime)
+        public async Task Enrich(BankDataSheet data, DateTime startTime, DateTime endTime)
         {
             List<AllegroDataContainer> allData = await this.LoadAllData(startTime);
-            var updatedEntries = new List<WalletEntry>();
+            List<BankEntry> updatedEntries = new List<BankEntry>();
 
             for (int index = 0; index < data.Entries.Count; index++)
             {
-                var entry = data.Entries[index];
+                BankEntry entry = data.Entries[index];
 
                 if (IsAllegro(entry))
                 {
@@ -64,7 +64,7 @@ namespace BankSync.Enrichers.Allegro
                         {
                             foreach (Offer offer in allegroEntry.offers)
                             {
-                                WalletEntry newEntry = WalletEntry.Clone(entry);
+                                BankEntry newEntry = BankEntry.Clone(entry);
                                 newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount) * -1;
                                 newEntry.Note = offer.title;
                                 newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
@@ -88,12 +88,12 @@ namespace BankSync.Enrichers.Allegro
             data.Entries = updatedEntries;
         }
 
-        private static bool IsAllegro(WalletEntry entry)
+        private static bool IsAllegro(BankEntry entry)
         {
             return (entry.Recipient.Contains("allegro.pl", StringComparison.OrdinalIgnoreCase) || entry.Recipient.Contains("PAYU*ALLEGRO", StringComparison.OrdinalIgnoreCase));
         }
 
-        private List<Myorder> GetRelevantEntry(WalletEntry entry, List<AllegroDataContainer> allegroDataContainers)
+        private List<Myorder> GetRelevantEntry(BankEntry entry, List<AllegroDataContainer> allegroDataContainers)
         {
             AllegroData model = allegroDataContainers.FirstOrDefault(x => x.ServiceUserName == entry.Payer)?.Model;
             if (model != null)
@@ -135,15 +135,15 @@ namespace BankSync.Enrichers.Allegro
         }
 
 
-        public WalletDataSheet GetOldData()
+        public BankDataSheet GetOldData()
         {
-            var sheets = new List<WalletDataSheet>();
+            List<BankDataSheet> sheets = new List<BankDataSheet>();
             if (this.dataRetentionDirectory != null)
             {
                 this.LoadOldDataFromXml(sheets);
             }
 
-            return WalletDataSheet.Consolidate(sheets);
+            return BankDataSheet.Consolidate(sheets);
         }
 
         public void StoreData(AllegroDataContainer allegroDataContainer)
@@ -157,7 +157,7 @@ namespace BankSync.Enrichers.Allegro
             }
         }
 
-        private void LoadOldDataFromXml(List<WalletDataSheet> sheets)
+        private void LoadOldDataFromXml(List<BankDataSheet> sheets)
         {
             foreach (FileInfo fileInfo in this.dataRetentionDirectory.GetFiles("*.json"))
             {
@@ -166,10 +166,10 @@ namespace BankSync.Enrichers.Allegro
 
         private DirectoryInfo GetDataRetentionDirectory()
         {
-            var dataRetentionElement = this.serviceUserConfig.UserElement.Element("DataRetentionFolder");
+            XElement dataRetentionElement = this.serviceUserConfig.UserElement.Element("DataRetentionFolder");
             if (dataRetentionElement != null)
             {
-                var pathInConfig = dataRetentionElement.Attribute("Path").Value;
+                string pathInConfig = dataRetentionElement.Attribute("Path").Value;
                 DirectoryInfo dataDirectory;
                 if (Path.IsPathFullyQualified(pathInConfig))
                 {

@@ -8,6 +8,6 @@ namespace BankSync.Model
 {
     public interface IBankDataWriter
     {
-        public void Write(WalletDataSheet data);
+        public void Write(BankDataSheet data);
     }
 }

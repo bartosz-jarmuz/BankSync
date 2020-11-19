@@ -31,16 +31,16 @@ namespace BankSync.Exporters.Ipko
         }
 
 
-        public WalletDataSheet GetOldData()
+        public BankDataSheet GetOldData()
         {
-            var sheets = new List<WalletDataSheet>();
+            var sheets = new List<BankDataSheet>();
             if (this.dataRetentionDirectory != null)
             {
                 this.LoadOldDataFromXml(sheets);
                 this.LoadOldDataFromTsv(sheets);
             }
 
-            return WalletDataSheet.Consolidate(sheets);
+            return BankDataSheet.Consolidate(sheets);
         }
 
         public void StoreData(XDocument document, string account, in DateTime startDate, in DateTime endDate)
@@ -53,7 +53,7 @@ namespace BankSync.Exporters.Ipko
             }
         }
 
-        private void LoadOldDataFromXml(List<WalletDataSheet> sheets)
+        private void LoadOldDataFromXml(List<BankDataSheet> sheets)
         {
             foreach (FileInfo fileInfo in this.dataRetentionDirectory.GetFiles("*.xml"))
             {
@@ -62,7 +62,7 @@ namespace BankSync.Exporters.Ipko
             }
         }
 
-        private void LoadOldDataFromTsv(List<WalletDataSheet> sheets)
+        private void LoadOldDataFromTsv(List<BankDataSheet> sheets)
         {
             foreach (FileInfo fileInfo in this.dataRetentionDirectory.GetFiles("*.tsv"))
             {

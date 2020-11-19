@@ -8,6 +8,6 @@ namespace BankSync.Model
 {
     public interface IBankDataAnalyzer
     {
-        public void AssignCategories(WalletDataSheet data);
+        public void AssignCategories(BankDataSheet data);
     }
 }

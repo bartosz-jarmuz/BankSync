@@ -28,7 +28,7 @@ namespace BankSync.Enrichers.Allegro
 
         private void AssignTimeRange()
         {
-            var allDates = GetAllDates(this.Model);
+            List<DateTime> allDates = GetAllDates(this.Model);
 
             this.NewestEntry = allDates.First();
             this.OldestEntry = allDates.Last();
@@ -36,7 +36,7 @@ namespace BankSync.Enrichers.Allegro
 
         public static DateTime GetOldestDate(AllegroData model)
         {
-            var allDates = GetAllDates(model);
+            List<DateTime> allDates = GetAllDates(model);
             return allDates.Last();
         }
 

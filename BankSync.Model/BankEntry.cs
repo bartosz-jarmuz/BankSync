@@ -4,15 +4,15 @@ using System.Linq;
 
 namespace BankSync.Model
 {
-    public class WalletEntry
+    public class BankEntry
     {
-        public WalletEntry()
+        public BankEntry()
         {
         }
 
-        public static WalletEntry Clone(WalletEntry toBeCloned)
+        public static BankEntry Clone(BankEntry toBeCloned)
         {
-            return new WalletEntry()
+            return new BankEntry()
             {
                 Account = toBeCloned.Account,
                 Payer = toBeCloned.Payer,

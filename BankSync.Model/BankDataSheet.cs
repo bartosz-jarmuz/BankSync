@@ -3,27 +3,27 @@ using System.Linq;
 
 namespace BankSync.Model
 {
-    public class WalletDataSheet
+    public class BankDataSheet
     {
-        public static WalletDataSheet Consolidate(IEnumerable<WalletDataSheet> sheets)
+        public static BankDataSheet Consolidate(IEnumerable<BankDataSheet> sheets)
         {
-            List<WalletEntry> uniqueEntries = new List<WalletEntry>();
-            foreach (WalletDataSheet walletDataSheet in sheets)
+            List<BankEntry> uniqueEntries = new List<BankEntry>();
+            foreach (BankDataSheet bankDataSheeta in sheets)
             {
-                foreach (WalletEntry walletEntry in walletDataSheet.Entries)
+                foreach (BankEntry bankEntry in bankDataSheeta.Entries)
                 {
-                    int id = walletEntry.OriginalBankEntryId;
+                    int id = bankEntry.OriginalBankEntryId;
                     if (uniqueEntries.All(x => x.OriginalBankEntryId != id))
                     {
-                        uniqueEntries.Add(walletEntry);
+                        uniqueEntries.Add(bankEntry);
                     }
                 }
             }
-            WalletDataSheet consolidated = new WalletDataSheet();
+            BankDataSheet consolidated = new BankDataSheet();
             consolidated.Entries = uniqueEntries.OrderByDescending(x => x.Date).ToList();
             return consolidated;
         }
-        public List<WalletEntry> Entries { get; set; } = new List<WalletEntry>();
+        public List<BankEntry> Entries { get; set; } = new List<BankEntry>();
 
         public TagMap TagMap { get; set; }
     }

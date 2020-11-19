@@ -72,9 +72,9 @@ namespace BankSync.Analyzers.AI
             return allDirectTokens.Distinct().ToList();
         }
 
-        public void AssignCategories(WalletDataSheet data)
+        public void AssignCategories(BankDataSheet data)
         {
-            foreach (WalletEntry walletEntry in data.Entries)
+            foreach (BankEntry bankEntry in data.Entries)
             {
                 bool isAssigned = false;
                 foreach (Category category in this.categories)
@@ -83,11 +83,11 @@ namespace BankSync.Analyzers.AI
                     {
                         foreach (string keyword in subcategory.MapFrom)
                         {
-                            if (walletEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
-                                || walletEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                            if (bankEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+                                || bankEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                             {
-                                walletEntry.Subcategory = subcategory.Name;
-                                walletEntry.Category = category.Name;
+                                bankEntry.Subcategory = subcategory.Name;
+                                bankEntry.Category = category.Name;
                                 isAssigned = true;
                                 break;
                             }
@@ -98,10 +98,10 @@ namespace BankSync.Analyzers.AI
                     {
                         foreach (string keyword in category.MapFrom)
                         {
-                            if (walletEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
-                                || walletEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                            if (bankEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
+                                || bankEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                             {
-                                walletEntry.Category = category.Name;
+                                bankEntry.Category = category.Name;
                                 break;
                             }
                         }

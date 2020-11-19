@@ -31,7 +31,7 @@ namespace BankSyncRunner
             }
         }
 
-        public async Task EnrichData(WalletDataSheet data, DateTime startTime, DateTime endTime)
+        public async Task EnrichData(BankDataSheet data, DateTime startTime, DateTime endTime)
         {
             foreach (IBankDataEnricher bankDataEnricher in this.enrichers)
             {

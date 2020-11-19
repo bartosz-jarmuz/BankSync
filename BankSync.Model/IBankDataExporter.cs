@@ -11,6 +11,6 @@ namespace BankSync.Model
 {
     public interface IBankDataExporter
     {
-        public Task<WalletDataSheet> GetData(DateTime startTime, DateTime endTime);
+        public Task<BankDataSheet> GetData(DateTime startTime, DateTime endTime);
     }
 }

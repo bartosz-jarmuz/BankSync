@@ -29,13 +29,13 @@ namespace BankSyncRunner
 
             var config = new BankSyncConfig(configFile, GetInput);
 
-            var datasets = new List<WalletDataSheet>();
+            var datasets = new List<BankDataSheet>();
             foreach (ServiceConfig configService in config.Services)
             {
                 await ProcessServices(configService, datasets);
             }
 
-            WalletDataSheet ipkoData = WalletDataSheet.Consolidate(datasets);
+            BankDataSheet ipkoData = BankDataSheet.Consolidate(datasets);
 
             Console.WriteLine("Data downloaded");
 
@@ -54,7 +54,7 @@ namespace BankSyncRunner
             Console.ReadKey();
         }
 
-        private static async Task ProcessServices(ServiceConfig configServiceConfig, List<WalletDataSheet> datasets)
+        private static async Task ProcessServices(ServiceConfig configServiceConfig, List<BankDataSheet> datasets)
         {
             if (string.Equals(configServiceConfig.Name, "IPKO", StringComparison.OrdinalIgnoreCase))
             {
@@ -68,7 +68,7 @@ namespace BankSyncRunner
         }
 
 
-        private static void Write(WalletDataSheet ipkoData)
+        private static void Write(BankDataSheet ipkoData)
         {
             var path = GetOutputPath();
             IBankDataWriter writer = new ExcelBankDataWriter(path + ".xlsx");
