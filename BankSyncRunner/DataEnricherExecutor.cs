@@ -6,8 +6,10 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using BankSync.Config;
 using BankSync.Enrichers.Allegro;
 using BankSync.Model;
 
@@ -15,18 +17,16 @@ namespace BankSyncRunner
 {
     public class DataEnricherExecutor
     {
-        private List<IBankDataEnricher> enrichers = new List<IBankDataEnricher>();
+        private readonly List<IBankDataEnricher> enrichers = new List<IBankDataEnricher>();
 
-        public void LoadEnrichers()
+        public void LoadEnrichers(BankSyncConfig config)
         {
-            var enrichersFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Enrichers.xml");
 
-            XDocument xDoc = XDocument.Load(enrichersFile.FullName);
+            var allegroConfig = config.Services.FirstOrDefault(x => x.Name == "Allegro");
 
-            foreach (XElement allegroEnricher in xDoc.Descendants("Allegro"))
+            if (allegroConfig != null)
             {
-                var enricher = new AllegroBankDataEnricher(allegroEnricher.Parent.Attribute("To").Value);
-                this.enrichers.Add(enricher);
+                this.enrichers.Add(new AllegroBankDataEnricher(allegroConfig));
             }
 
             

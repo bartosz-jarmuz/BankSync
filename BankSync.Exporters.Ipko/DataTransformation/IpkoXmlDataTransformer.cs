@@ -6,18 +6,18 @@ using BankSync.Model;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
 {
-    public class IpkoDataTransformer
+    public class IpkoXmlDataTransformer
     {
         private readonly IDataMapper mapper;
         private readonly DescriptionDataExtractor descriptionDataExtractor;
 
-        public IpkoDataTransformer(IDataMapper mapper)
+        public IpkoXmlDataTransformer(IDataMapper mapper)
         {
             this.mapper = mapper;
             this.descriptionDataExtractor = new DescriptionDataExtractor();
         }
 
-        public WalletDataSheet Transform(XDocument xDocument)
+        public WalletDataSheet TransformXml(XDocument xDocument)
         {
             WalletDataSheet sheet = new WalletDataSheet();
 
@@ -38,10 +38,24 @@ namespace BankSync.Exporters.Ipko.DataTransformation
                 entry.Payer = this.mapper.Map(this.GetPayer(entry, operation));
                 entry.Recipient = this.mapper.Map(this.GetRecipient(entry, operation));
                 entry.Note = this.mapper.Map(this.GetNote(entry,operation));
+                MakeSureRecipientNotEmpty(entry);
                 sheet.Entries.Add(entry);
             }
 
             return sheet;
+        }
+
+        private static void MakeSureRecipientNotEmpty(WalletEntry entry)
+        {
+            if (string.IsNullOrEmpty(entry.Recipient) && entry.PaymentType == "Płatność kartą")
+            {
+                entry.Recipient = entry.Note;
+            }
+            if (string.IsNullOrEmpty(entry.Recipient) && entry.Amount > 0)
+            {
+                entry.Recipient = entry.Account;
+            }
+
         }
 
         private string GetAccount(XDocument xDocument)
@@ -86,7 +100,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private string GetRecipient(WalletEntry entry, XElement operation)
         {
-            if (entry.PaymentType == "Przelew na rachunek" || entry.PaymentType == "Zwrot w terminalu")
+            if (entry.PaymentType == "Przelew na rachunek" || entry.PaymentType == "Zwrot w terminalu" || entry.PaymentType == "Spłata należności - Dziękujemy")
             {
                 return "Wspólne konto";
             }
@@ -99,6 +113,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 return "Bank";
             }
+            
 
             XElement element = operation.Element("description");
             if (element != null)
@@ -111,6 +126,11 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private string GetPayer(WalletEntry entry, XElement operation)
         {
+            if (entry.PaymentType == "Płatność kartą")
+            {
+                return this.mapper.Map(entry.Account);
+            }
+
             if (entry.PaymentType == "Przelew z rachunku" 
                 || entry.PaymentType == "Zlecenie stałe"
                 || entry.PaymentType == "Polecenie Zapłaty" 

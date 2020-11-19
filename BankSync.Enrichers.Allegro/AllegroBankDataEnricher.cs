@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BankSync.Config;
 using BankSync.Enrichers.Allegro.Model;
 using BankSync.Model;
 
@@ -15,49 +16,57 @@ namespace BankSync.Enrichers.Allegro
 {
     public class AllegroBankDataEnricher : IBankDataEnricher
     {
-        private readonly string owner;
-        private readonly string manualDataFile;
+        private readonly ServiceConfig config;
 
-        public AllegroBankDataEnricher(string owner)
+        public AllegroBankDataEnricher(ServiceConfig config)
         {
-            this.owner = owner;
-            if (this.owner == "Bartek")
+            this.config = config;
+        }
+
+        private async Task<List<AllegroDataContainer>> LoadAllData()
+        {
+            List<AllegroDataContainer> allegroData = new List<AllegroDataContainer>();
+
+            foreach (ServiceUser serviceUser in this.config.Users)
             {
-                this.manualDataFile = @"C:\Users\bjarmuz\Documents\BankSync\allegro_bartek.json";
+                AllegroData model = await new AllegroDataDownloader(serviceUser).GetData();
+                AllegroDataContainer container = new AllegroDataContainer(model, serviceUser.UserName);
+                allegroData.Add(container);
             }
-            else if (this.owner == "Justyna")
-            {
-                this.manualDataFile = @"C:\Users\bjarmuz\Documents\BankSync\allegro_justyna.json";
-            }
-            else
-            {
-                throw new NotImplementedException("This is very much WIP");
-            }
+
+            return allegroData;
         }
 
         public async Task Enrich(WalletDataSheet data)
         {
-            AllegroData model = await new AllegroDataDownloader().GetData(this.manualDataFile);
-
+            List<AllegroDataContainer> allData = await this.LoadAllData();
             var updatedEntries = new List<WalletEntry>();
 
             for (int index = 0; index < data.Entries.Count; index++)
             {
                 var entry = data.Entries[index];
-                if (entry.Recipient.Contains("allegro.pl", StringComparison.OrdinalIgnoreCase) && entry.Payer == this.owner)
-                {
-                    List<Myorder> allegroEntries = GetRelevantEntry(model, entry);
 
-                    foreach (Myorder allegroEntry in allegroEntries)
+                if (IsAllegro(entry))
+                {
+                    List<Myorder> allegroEntries = this.GetRelevantEntry(entry, allData);
+                    if (allegroEntries != null && allegroEntries.Any())
                     {
-                        foreach (Offer offer in allegroEntry.offers)
+                        foreach (Myorder allegroEntry in allegroEntries)
                         {
-                            WalletEntry newEntry = WalletEntry.Clone(entry);
-                            newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount) * -1;
-                            newEntry.Note = offer.title;
-                            newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
-                            updatedEntries.Add(newEntry);
+                            foreach (Offer offer in allegroEntry.offers)
+                            {
+                                WalletEntry newEntry = WalletEntry.Clone(entry);
+                                newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount) * -1;
+                                newEntry.Note = offer.title;
+                                newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
+                                updatedEntries.Add(newEntry);
+                            }
                         }
+                    }
+                    else
+                    {
+                        //that's either not Allegro entry or not entry of this person, but needs to be preserved on the list
+                        updatedEntries.Add(entry);
                     }
                 }
                 else
@@ -70,22 +79,41 @@ namespace BankSync.Enrichers.Allegro
             data.Entries = updatedEntries;
         }
 
-        private static List<Myorder> GetRelevantEntry(AllegroData model, WalletEntry entry)
+        private static bool IsAllegro(WalletEntry entry)
         {
-            List<Myorder> allegroEntries = model.parameters.myorders.myorders
-                .Where(x => x.payment.buyerPaidAmount.amount == entry.Amount.ToString().Trim('-')).ToList();
-            if (allegroEntries.Count < 2)
+            if (entry.Recipient.Contains("PAYU*ALLEGRO", StringComparison.OrdinalIgnoreCase))
             {
-                return allegroEntries;
+
+            }
+            return (entry.Recipient.Contains("allegro.pl", StringComparison.OrdinalIgnoreCase) || entry.Recipient.Contains("PAYU*ALLEGRO", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private List<Myorder> GetRelevantEntry(WalletEntry entry, List<AllegroDataContainer> allegroDataContainers)
+        {
+            AllegroData model = allegroDataContainers.FirstOrDefault(x => x.ServiceUserName == entry.Payer)?.Model;
+            if (model != null)
+            {
+
+                List<Myorder> allegroEntries = model.parameters.myorders.myorders
+                    .Where(x => x.payment.buyerPaidAmount.amount == entry.Amount.ToString().Trim('-')).ToList();
+                if (allegroEntries.Count < 2)
+                {
+                    return allegroEntries;
+                }
+                else
+                {
+                    allegroEntries = allegroEntries.Where(x => x.payment.endDate.Date == entry.Date).ToList();
+                    if (allegroEntries.Count < 1)
+                    {
+                        Console.WriteLine($"ERROR - TOO FEW ENTRIES WHEN RECOGNIZING ALLEGRO ENTRY FOR {entry.Note}");
+                    }
+
+                    return allegroEntries;
+                }
             }
             else
             {
-                allegroEntries = allegroEntries.Where(x => x.payment.endDate.Date == entry.Date).ToList();
-                if (allegroEntries.Count < 1)
-                {
-                    Console.WriteLine($"ERROR - TOO FEW ENTRIES WHEN RECOGNIZING ALLEGRO ENTRY FOR {entry.Note}");
-                }
-                return allegroEntries;
+                return null;
             }
         }
     }

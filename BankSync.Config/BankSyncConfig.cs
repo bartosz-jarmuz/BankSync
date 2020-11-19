@@ -28,24 +28,24 @@ namespace BankSync.Config
 
         public string ConfigFilePath { get;  }
 
-        public List<Service> Services { get; } = new List<Service>();
+        public List<ServiceConfig> Services { get; } = new List<ServiceConfig>();
 
         public void LoadServices(Func<string, string> provideInput, Action updateConfig)
         {
             foreach (XElement service in this.configXDoc.Root.Elements("Service"))
             {
-                this.Services.Add(new Service(this,service, provideInput, updateConfig));
+                this.Services.Add(new ServiceConfig(this,service, provideInput, updateConfig));
             }
         }
 
     }
 
-    public class Service
+    public class ServiceConfig
     {
         public readonly BankSyncConfig Config;
         public XElement ServiceElement { get; }
 
-        public Service(BankSyncConfig config, XElement serviceElement, Func<string, string> provideInput,
+        public ServiceConfig(BankSyncConfig config, XElement serviceElement, Func<string, string> provideInput,
             Action updateConfig)
         {
             this.Config = config;
@@ -65,14 +65,14 @@ namespace BankSync.Config
     public class ServiceUser
     {
         public XElement UserElement { get; }
-        public  readonly Service Service;
-        private readonly string userName;
+        public  readonly ServiceConfig ServiceConfig;
+        public string UserName { get; }
 
-        public ServiceUser(Service service, XElement userElement, Func<string, string> provideInput, Action updateConfig)
+        public ServiceUser(ServiceConfig serviceConfig, XElement userElement, Func<string, string> provideInput, Action updateConfig)
         {
             this.UserElement = userElement;
-            this.Service = service;
-            this.userName = userElement.Attribute("Name")?.Value ?? "Name not specified";
+            this.ServiceConfig = serviceConfig;
+            this.UserName = userElement.Attribute("Name")?.Value ?? "Name not specified";
             XElement accounts = userElement.Element("Accounts");
             if (accounts != null)
             {
@@ -103,9 +103,8 @@ namespace BankSync.Config
 
         private void LoadCredentials(XElement userElement, Func<string, string> provideInput, Action updateConfig)
         {
-            string sampleProduct = this.Accounts.FirstOrDefault()?.Number ?? this.Cards.FirstOrDefault()?.Number ?? "N/A";
-            SecureString login = this.LoadStoredValue(userElement, "Login", sampleProduct, provideInput, updateConfig);
-            SecureString password = this.LoadStoredValue(userElement, "Password", sampleProduct, provideInput, updateConfig);
+            SecureString login = this.LoadStoredValue(userElement, "Login", provideInput, updateConfig);
+            SecureString password = this.LoadStoredValue(userElement, "Password", provideInput, updateConfig);
 
             this.Credentials = new Credentials()
             {
@@ -114,19 +113,18 @@ namespace BankSync.Config
             };
         }
 
-        private SecureString LoadStoredValue(XElement userElement, string elementToBeLoadedName, string sampleProduct,
+        private SecureString LoadStoredValue(XElement userElement, string elementToBeLoadedName,
             Func<string, string> provideInput, Action updateConfig)
         {
             XElement elementToBeLoaded = userElement.Element(elementToBeLoadedName);
-            if (elementToBeLoaded != null)
+            if (elementToBeLoaded != null && !string.IsNullOrEmpty(elementToBeLoaded.Value))
             {
                 return elementToBeLoaded.Value.DecryptString();
             }
             else
             {
                 string newLogin = provideInput(
-                    $"Provide '{this.Service.Name}' login for user '{this.userName}' to access {this.Accounts.Count + this.Cards.Count} " +
-                    $"product(s) (e.g. {sampleProduct}). (WILL BE STORED ENCRYPTED)");
+                    $"Provide '{this.ServiceConfig.Name}' login for user '{this.UserName}' (WILL BE STORED ENCRYPTED)");
                 userElement.Add(new XElement(elementToBeLoadedName, newLogin.ToSecureString().EncryptString()));
                 updateConfig();
                 return newLogin.ToSecureString();
