@@ -4,6 +4,7 @@
 //  </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,15 +29,13 @@ namespace BankSyncRunner
             {
                 this.enrichers.Add(new AllegroBankDataEnricher(allegroConfig));
             }
-
-            
         }
 
-        public async Task EnrichData(WalletDataSheet data)
+        public async Task EnrichData(WalletDataSheet data, DateTime startTime, DateTime endTime)
         {
             foreach (IBankDataEnricher bankDataEnricher in this.enrichers)
             {
-                await bankDataEnricher.Enrich(data);
+                await bankDataEnricher.Enrich(data, startTime, endTime);
             }
         }
     }

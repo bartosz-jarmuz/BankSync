@@ -6,11 +6,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using BankSync.Config;
 using BankSync.Enrichers.Allegro.Model;
 using BankSync.Model;
+using Newtonsoft.Json;
 
 namespace BankSync.Enrichers.Allegro
 {
@@ -23,23 +26,29 @@ namespace BankSync.Enrichers.Allegro
             this.config = config;
         }
 
-        private async Task<List<AllegroDataContainer>> LoadAllData()
+        private async Task<List<AllegroDataContainer>> LoadAllData(DateTime oldestEntry)
         {
             List<AllegroDataContainer> allegroData = new List<AllegroDataContainer>();
 
             foreach (ServiceUser serviceUser in this.config.Users)
             {
-                AllegroData model = await new AllegroDataDownloader(serviceUser).GetData();
-                AllegroDataContainer container = new AllegroDataContainer(model, serviceUser.UserName);
+                var oldDataManager = new OldDataManager(serviceUser);
+                oldDataManager.GetOldData();
+
+                var container = await new AllegroDataDownloader(serviceUser).GetData(oldestEntry);
                 allegroData.Add(container);
+
+                oldDataManager.StoreData(container);
             }
 
             return allegroData;
         }
 
-        public async Task Enrich(WalletDataSheet data)
+       
+
+        public async Task Enrich(WalletDataSheet data, DateTime startTime, DateTime endTime)
         {
-            List<AllegroDataContainer> allData = await this.LoadAllData();
+            List<AllegroDataContainer> allData = await this.LoadAllData(startTime);
             var updatedEntries = new List<WalletEntry>();
 
             for (int index = 0; index < data.Entries.Count; index++)
@@ -81,10 +90,6 @@ namespace BankSync.Enrichers.Allegro
 
         private static bool IsAllegro(WalletEntry entry)
         {
-            if (entry.Recipient.Contains("PAYU*ALLEGRO", StringComparison.OrdinalIgnoreCase))
-            {
-
-            }
             return (entry.Recipient.Contains("allegro.pl", StringComparison.OrdinalIgnoreCase) || entry.Recipient.Contains("PAYU*ALLEGRO", StringComparison.OrdinalIgnoreCase));
         }
 
@@ -115,6 +120,74 @@ namespace BankSync.Enrichers.Allegro
             {
                 return null;
             }
+        }
+    }
+
+    internal class OldDataManager
+    {
+        private ServiceUser serviceUserConfig;
+        private DirectoryInfo dataRetentionDirectory;
+
+        public OldDataManager(ServiceUser serviceUserConfig)
+        {
+            this.serviceUserConfig = serviceUserConfig;
+            this.dataRetentionDirectory = this.GetDataRetentionDirectory();
+        }
+
+
+        public WalletDataSheet GetOldData()
+        {
+            var sheets = new List<WalletDataSheet>();
+            if (this.dataRetentionDirectory != null)
+            {
+                this.LoadOldDataFromXml(sheets);
+            }
+
+            return WalletDataSheet.Consolidate(sheets);
+        }
+
+        public void StoreData(AllegroDataContainer allegroDataContainer)
+        {
+            if (this.dataRetentionDirectory != null)
+            {
+                string path = Path.Combine(this.dataRetentionDirectory.FullName, $"{allegroDataContainer.ServiceUserName}_{allegroDataContainer.OldestEntry:yyyy-MM-dd}_{allegroDataContainer.NewestEntry:yyyy-MM-dd}.json");
+                string serialized = JsonConvert.SerializeObject(allegroDataContainer);
+                File.WriteAllText(path, serialized);
+                
+            }
+        }
+
+        private void LoadOldDataFromXml(List<WalletDataSheet> sheets)
+        {
+            foreach (FileInfo fileInfo in this.dataRetentionDirectory.GetFiles("*.json"))
+            {
+            }
+        }
+
+        private DirectoryInfo GetDataRetentionDirectory()
+        {
+            var dataRetentionElement = this.serviceUserConfig.UserElement.Element("DataRetentionFolder");
+            if (dataRetentionElement != null)
+            {
+                var pathInConfig = dataRetentionElement.Attribute("Path").Value;
+                DirectoryInfo dataDirectory;
+                if (Path.IsPathFullyQualified(pathInConfig))
+                {
+                    dataDirectory = new DirectoryInfo(pathInConfig);
+                }
+                else
+                {
+                    dataDirectory = new DirectoryInfo(
+                        Path.Combine(
+                            Path.GetDirectoryName(this.serviceUserConfig.ServiceConfig.Config.ConfigFilePath), pathInConfig.TrimStart(new[] { '/' })));
+                }
+
+                Directory.CreateDirectory(dataDirectory.FullName);
+
+                return dataDirectory;
+            }
+
+            return null;
         }
     }
 }

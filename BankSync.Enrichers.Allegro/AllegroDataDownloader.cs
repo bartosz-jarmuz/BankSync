@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 
 namespace BankSync.Enrichers.Allegro
 {
-    public class AllegroDataDownloader
+    internal class AllegroDataDownloader
     {
         private readonly ServiceUser userConfig;
 
@@ -36,12 +36,11 @@ namespace BankSync.Enrichers.Allegro
         private readonly CookieContainer cookies;
         private string csrfToken;
 
-        public async Task<AllegroData> GetData()
+        public async Task<AllegroDataContainer> GetData(DateTime oldestEntry)
         {
-
             await this.LogIn();
 
-            return await this.LoadData();
+            return await this.LoadData(oldestEntry);
         }
 
         private async Task LogIn()
@@ -91,18 +90,49 @@ namespace BankSync.Enrichers.Allegro
 
         }
 
-        private async Task<AllegroData> LoadData()
+        private async Task<AllegroDataContainer> LoadData(DateTime oldestEntry)
         {
+            var dataList = new List<AllegroData>();
             HttpResponseMessage response = await this.client.GetAsync("https://allegro.pl/moje-allegro/zakupy/kupione");
+            AllegroData data = await GetDataFromResponse(response);
+            dataList.Add(data);
+
+            int limit = 25;
+            int offset = 25;
+            while (AllegroDataContainer.GetOldestDate(data) > oldestEntry)
+            {
+                response = await this.client.GetAsync($"https://allegro.pl/moje-allegro/zakupy/kupione?limit={limit}&offset={offset}");
+                data = await GetDataFromResponse(response);
+                dataList.Add(data);
+                offset += 25;
+            }
+
+            
+            return this.SquashData(dataList);
+        }
+
+        private AllegroDataContainer SquashData(List<AllegroData> dataList)
+        {
+            AllegroData first = dataList.First();
+            IEnumerable<Myorder> allOrders = dataList.SelectMany(x => x.parameters.myorders.myorders);
+            var distinct = allOrders.GroupBy(x => x.id).Select(g => g.First()).OrderByDescending(x=>x.orderDate).ToArray();
+
+            first.parameters.myorders.myorders = distinct;
+            return new AllegroDataContainer(first, this.userConfig.UserName);
+        }
+
+
+
+        private static async Task<AllegroData> GetDataFromResponse(HttpResponseMessage response)
+        {
             string stringified = await response.Content.ReadAsStringAsync();
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(stringified);
 
             IEnumerable<HtmlNode> scripts = htmlDoc.DocumentNode.Descendants("script");
-            HtmlNode myOrdersScript = scripts.Where(x => x.InnerHtml.Contains("myorders")).OrderByDescending(x=>x.InnerHtml.Length).FirstOrDefault();
+            HtmlNode myOrdersScript = scripts.Where(x => x.InnerHtml.Contains("myorders"))
+                .OrderByDescending(x => x.InnerHtml.Length).FirstOrDefault();
             return JsonConvert.DeserializeObject<AllegroData>(myOrdersScript.InnerText);
         }
-
-
     }
 }
