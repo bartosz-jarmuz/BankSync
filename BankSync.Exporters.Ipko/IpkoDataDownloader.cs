@@ -22,6 +22,7 @@ namespace BankSync.Exporters.Ipko
         {
             this.credentials = serviceUserConfig.Credentials;
             this.serviceUserConfig = serviceUserConfig;
+            this.mapper = mapper;
             this.xmlTransformer = new IpkoXmlDataTransformer(mapper);
             this.sequence = new Sequence();
             this.oldDataManager = new OldDataManager(serviceUserConfig, this.xmlTransformer, mapper);
@@ -36,6 +37,7 @@ namespace BankSync.Exporters.Ipko
 
         private readonly Credentials credentials;
         private readonly ServiceUser serviceUserConfig;
+        private readonly IDataMapper mapper;
         private readonly IpkoXmlDataTransformer xmlTransformer;
         private readonly HttpClient client;
         private string sessionId;
@@ -45,20 +47,46 @@ namespace BankSync.Exporters.Ipko
 
         public async Task<BankDataSheet> GetData(DateTime startTime, DateTime endTime)
         {
-            var datasets = new List<BankDataSheet>();
-            var oldData = this.oldDataManager.GetOldData();
+            List<BankDataSheet> datasets = new List<BankDataSheet>();
+            BankDataSheet oldData = this.oldDataManager.GetOldData();
             datasets.Add(oldData);
             foreach (Account account in this.serviceUserConfig.Accounts)
             {
-                datasets.Add(await this.GetAccountData(account.Number, startTime, endTime));
+                DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, account.Number);
+                BankDataSheet data = await this.GetAccountData(account.Number, oldestEntryAdjusted, endTime);
+                datasets.Add(data);
             }
-
             foreach (Card card in this.serviceUserConfig.Cards)
             {
-                datasets.Add(await this.GetCardData(card.Number, startTime, endTime));
+                DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, card.Number);
+
+                BankDataSheet data = await this.GetCardData(card.Number, oldestEntryAdjusted, endTime);
+                datasets.Add(data);
             }
 
             return BankDataSheet.Consolidate(datasets);
+         }
+
+        /// <summary>
+        /// Don't donwload old data if older or equal data is already stored
+        /// </summary>
+        /// <param name="oldestEntryToBeFetched"></param>
+        /// <param name="oldData"></param>
+        /// <param name="accountNumber"></param>
+        /// <returns></returns>
+        private DateTime AdjustOldestEntryToDownloadBasedOnOldData(DateTime oldestEntryToBeFetched, BankDataSheet oldData, string accountNumber)
+        {
+            if (oldData != null )
+            {
+                var oldestAvailable = oldData.GetOldestEntryFor(this.mapper.Map(accountNumber));
+
+                if (oldestAvailable != default && oldestAvailable <= oldestEntryToBeFetched)
+                {
+                    oldestEntryToBeFetched = oldData.GetNewestEntryFor(this.mapper.Map(accountNumber));
+                }
+            }
+
+            return oldestEntryToBeFetched;
         }
 
         private async Task<BankDataSheet> GetAccountData(string account, DateTime startDate, DateTime endDate)
@@ -67,8 +95,7 @@ namespace BankSync.Exporters.Ipko
 
             AccountOperations accountOperations = new AccountOperations(this.client, this.sessionId, this.sequence);
             XDocument document = await accountOperations.GetAccountData(account, startDate, endDate);
-
-            this.oldDataManager.StoreData(document, account, startDate, endDate);
+            this.oldDataManager.StoreData(document, account);
 
             return this.xmlTransformer.TransformXml(document);
         }
@@ -77,10 +104,9 @@ namespace BankSync.Exporters.Ipko
         private async Task<BankDataSheet> GetCardData(string cardNumber, DateTime startDate, DateTime endDate)
         {
             this.sessionId = await this.LoginAndGetSessionId();
-            var cardOperations = new CardOperations(this.client, this.sessionId, this.sequence);
+            CardOperations cardOperations = new CardOperations(this.client, this.sessionId, this.sequence);
             XDocument document = await cardOperations.GetCardData(cardNumber, startDate, endDate);
-            
-            this.oldDataManager.StoreData(document, cardNumber, startDate, endDate);
+            this.oldDataManager.StoreData(document, cardNumber);
 
             return this.xmlTransformer.TransformXml(document);
         }

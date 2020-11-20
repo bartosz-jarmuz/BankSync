@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using BankSync.Model;
+using BankSync.Utilities;
 
 namespace BankSync.Analyzers.AI
 {
@@ -83,8 +84,8 @@ namespace BankSync.Analyzers.AI
                     {
                         foreach (string keyword in subcategory.MapFrom)
                         {
-                            if (bankEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
-                                || bankEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                            if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
+                                || bankEntry.Note.ContainsNationalUnaware(keyword))
                             {
                                 bankEntry.Subcategory = subcategory.Name;
                                 bankEntry.Category = category.Name;
@@ -98,8 +99,8 @@ namespace BankSync.Analyzers.AI
                     {
                         foreach (string keyword in category.MapFrom)
                         {
-                            if (bankEntry.Recipient.Contains(keyword, StringComparison.OrdinalIgnoreCase)
-                                || bankEntry.Note.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                            if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
+                                || bankEntry.Note.ContainsNationalUnaware(keyword))
                             {
                                 bankEntry.Category = category.Name;
                                 break;

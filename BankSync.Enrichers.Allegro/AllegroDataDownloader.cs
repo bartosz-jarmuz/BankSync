@@ -92,10 +92,10 @@ namespace BankSync.Enrichers.Allegro
 
         private async Task<AllegroDataContainer> LoadData(DateTime oldestEntry)
         {
-            List<AllegroData> dataList = new List<AllegroData>();
+            List<AllegroDataContainer> dataList = new List<AllegroDataContainer>();
             HttpResponseMessage response = await this.client.GetAsync("https://allegro.pl/moje-allegro/zakupy/kupione");
             AllegroData data = await GetDataFromResponse(response);
-            dataList.Add(data);
+            dataList.Add(new AllegroDataContainer(data, this.userConfig.UserName));
 
             int limit = 25;
             int offset = 25;
@@ -103,23 +103,15 @@ namespace BankSync.Enrichers.Allegro
             {
                 response = await this.client.GetAsync($"https://allegro.pl/moje-allegro/zakupy/kupione?limit={limit}&offset={offset}");
                 data = await GetDataFromResponse(response);
-                dataList.Add(data);
+                dataList.Add(new AllegroDataContainer(data, this.userConfig.UserName));
                 offset += 25;
             }
 
             
-            return this.SquashData(dataList);
+            return AllegroDataContainer.Consolidate(dataList);
         }
 
-        private AllegroDataContainer SquashData(List<AllegroData> dataList)
-        {
-            AllegroData first = dataList.First();
-            IEnumerable<Myorder> allOrders = dataList.SelectMany(x => x.parameters.myorders.myorders);
-            Myorder[] distinct = allOrders.GroupBy(x => x.id).Select(g => g.First()).OrderByDescending(x=>x.orderDate).ToArray();
-
-            first.parameters.myorders.myorders = distinct;
-            return new AllegroDataContainer(first, this.userConfig.UserName);
-        }
+    
 
 
 

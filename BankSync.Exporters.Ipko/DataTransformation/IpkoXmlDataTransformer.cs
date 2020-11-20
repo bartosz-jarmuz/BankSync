@@ -87,6 +87,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
                 if (entry.PaymentType == "Prowizja" 
                 || entry.PaymentType == "Opłata"
                 || entry.PaymentType == "Wypłata z bankomatu"
+                || entry.PaymentType == "Wypłata w bankomacie"
                 )
                 {
                     note = $"{entry.PaymentType} - {note}";
@@ -104,7 +105,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 return "Wspólne konto";
             }
-            if (entry.PaymentType == "Wypłata z bankomatu")
+            if (entry.PaymentType == "Wypłata z bankomatu" || entry.PaymentType == "Wypłata w bankomacie")
             {
                 return entry.Payer;
             }

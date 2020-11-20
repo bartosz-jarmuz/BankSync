@@ -6,14 +6,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using BankSync.Config;
 using BankSync.Enrichers.Allegro.Model;
 using BankSync.Model;
-using Newtonsoft.Json;
 
 namespace BankSync.Enrichers.Allegro
 {
@@ -28,23 +25,46 @@ namespace BankSync.Enrichers.Allegro
 
         private async Task<List<AllegroDataContainer>> LoadAllData(DateTime oldestEntry)
         {
-            List<AllegroDataContainer> allegroData = new List<AllegroDataContainer>();
+            List<AllegroDataContainer> allUsersData = new List<AllegroDataContainer>();
 
             foreach (ServiceUser serviceUser in this.config.Users)
             {
                 OldDataManager oldDataManager = new OldDataManager(serviceUser);
-                oldDataManager.GetOldData();
+                AllegroDataContainer oldData = oldDataManager.GetOldData();
 
-                AllegroDataContainer container = await new AllegroDataDownloader(serviceUser).GetData(oldestEntry);
-                allegroData.Add(container);
+                DateTime oldestEntryAdjusted = AdjustOldestEntryToDownloadBasedOnOldData(oldestEntry, oldData);
 
-                oldDataManager.StoreData(container);
+                AllegroDataContainer newData = await new AllegroDataDownloader(serviceUser).GetData(oldestEntryAdjusted);
+                oldDataManager.StoreData(newData);
+
+                AllegroDataContainer consolidatedData =  AllegroDataContainer.Consolidate(new List<AllegroDataContainer>() { newData, oldData });
+
+                allUsersData.Add(consolidatedData);
             }
 
-            return allegroData;
+            return allUsersData;
         }
 
-       
+        
+        /// <summary>
+        /// Don't donwload old data if older or equal data is already stored
+        /// </summary>
+        /// <param name="oldestEntry"></param>
+        /// <param name="oldData"></param>
+        /// <returns></returns>
+        private static DateTime AdjustOldestEntryToDownloadBasedOnOldData(DateTime oldestEntry, AllegroDataContainer oldData)
+        {
+            if (oldData != null)
+            {
+                if (oldData.OldestEntry <= oldestEntry)
+                {
+                    oldestEntry = oldData.NewestEntry;
+                }
+            }
+
+            return oldestEntry;
+        }
+
 
         public async Task Enrich(BankDataSheet data, DateTime startTime, DateTime endTime)
         {
@@ -120,74 +140,6 @@ namespace BankSync.Enrichers.Allegro
             {
                 return null;
             }
-        }
-    }
-
-    internal class OldDataManager
-    {
-        private ServiceUser serviceUserConfig;
-        private DirectoryInfo dataRetentionDirectory;
-
-        public OldDataManager(ServiceUser serviceUserConfig)
-        {
-            this.serviceUserConfig = serviceUserConfig;
-            this.dataRetentionDirectory = this.GetDataRetentionDirectory();
-        }
-
-
-        public BankDataSheet GetOldData()
-        {
-            List<BankDataSheet> sheets = new List<BankDataSheet>();
-            if (this.dataRetentionDirectory != null)
-            {
-                this.LoadOldDataFromXml(sheets);
-            }
-
-            return BankDataSheet.Consolidate(sheets);
-        }
-
-        public void StoreData(AllegroDataContainer allegroDataContainer)
-        {
-            if (this.dataRetentionDirectory != null)
-            {
-                string path = Path.Combine(this.dataRetentionDirectory.FullName, $"{allegroDataContainer.ServiceUserName}_{allegroDataContainer.OldestEntry:yyyy-MM-dd}_{allegroDataContainer.NewestEntry:yyyy-MM-dd}.json");
-                string serialized = JsonConvert.SerializeObject(allegroDataContainer);
-                File.WriteAllText(path, serialized);
-                
-            }
-        }
-
-        private void LoadOldDataFromXml(List<BankDataSheet> sheets)
-        {
-            foreach (FileInfo fileInfo in this.dataRetentionDirectory.GetFiles("*.json"))
-            {
-            }
-        }
-
-        private DirectoryInfo GetDataRetentionDirectory()
-        {
-            XElement dataRetentionElement = this.serviceUserConfig.UserElement.Element("DataRetentionFolder");
-            if (dataRetentionElement != null)
-            {
-                string pathInConfig = dataRetentionElement.Attribute("Path").Value;
-                DirectoryInfo dataDirectory;
-                if (Path.IsPathFullyQualified(pathInConfig))
-                {
-                    dataDirectory = new DirectoryInfo(pathInConfig);
-                }
-                else
-                {
-                    dataDirectory = new DirectoryInfo(
-                        Path.Combine(
-                            Path.GetDirectoryName(this.serviceUserConfig.ServiceConfig.Config.ConfigFilePath), pathInConfig.TrimStart(new[] { '/' })));
-                }
-
-                Directory.CreateDirectory(dataDirectory.FullName);
-
-                return dataDirectory;
-            }
-
-            return null;
         }
     }
 }

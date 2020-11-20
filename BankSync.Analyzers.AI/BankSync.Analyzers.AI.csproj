@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BankSync.Model\BankSync.Model.csproj" />
+    <ProjectReference Include="..\BankSync.Utilities\BankSync.Utilities.csproj" />
   </ItemGroup>
 
 </Project>
