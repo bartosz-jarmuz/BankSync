@@ -21,7 +21,7 @@ namespace BankSyncRunner
         static DataEnricherExecutor enricher = new DataEnricherExecutor();
         static IBankDataAnalyzer analyzer = new AllIfsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Tags.xml"));
         static FileInfo configFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Accounts.xml");
-        private static DateTime startTime = DateTime.Today.AddMonths(-12);
+        private static DateTime startTime = DateTime.Today.AddMonths(-1);
         private static DateTime endTime = DateTime.Today;
 
         static async Task Main(string[] args)
@@ -51,7 +51,9 @@ namespace BankSyncRunner
 
 
             Console.WriteLine("All done!");
+            #if !DEBUG
             Console.ReadKey();
+#endif
         }
 
         private static async Task ProcessServices(ServiceConfig configServiceConfig, List<BankDataSheet> datasets)

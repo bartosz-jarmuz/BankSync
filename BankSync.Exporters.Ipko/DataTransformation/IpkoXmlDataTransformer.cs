@@ -101,9 +101,21 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private string GetRecipient(BankEntry entry, XElement operation)
         {
+            string recipient = "";
+            XElement element = operation.Element("description");
+            if (element != null)
+            {
+                recipient =  this.descriptionDataExtractor.GetRecipient(element.Value);
+            }
+
+            if (!string.IsNullOrEmpty(recipient))
+            {
+                return recipient;
+            }
+            
             if (entry.PaymentType == "Przelew na rachunek" || entry.PaymentType == "Zwrot w terminalu" || entry.PaymentType == "Spłata należności - Dziękujemy")
             {
-                return "Wspólne konto";
+                return this.mapper.Map(entry.Account);
             }
             if (entry.PaymentType == "Wypłata z bankomatu" || entry.PaymentType == "Wypłata w bankomacie")
             {
@@ -116,35 +128,39 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             }
             
 
-            XElement element = operation.Element("description");
-            if (element != null)
-            {
-                return this.descriptionDataExtractor.GetRecipient(element.Value);
-            }
+            
 
             return "";
         }
 
         private string GetPayer(BankEntry entry, XElement operation)
         {
-            if (entry.PaymentType == "Płatność kartą")
+            
+            var payer = "";
+            XElement element = operation.Element("description");
+            if (element != null)
+            {
+                payer = this.descriptionDataExtractor.GetPayer(element.Value);
+            }
+
+            if (!string.IsNullOrEmpty(payer))
+            {
+                return payer;
+            }
+            if (entry.PaymentType == "Płatność kartą" || entry.PaymentType == "Przelew z rachunku")
             {
                 return this.mapper.Map(entry.Account);
             }
 
-            if (entry.PaymentType == "Przelew z rachunku" 
-                || entry.PaymentType == "Zlecenie stałe"
+            if (   entry.PaymentType == "Zlecenie stałe"
                 || entry.PaymentType == "Polecenie Zapłaty" 
                 || entry.PaymentType == "Prowizja" 
                 || entry.PaymentType == "Opłata")
             {
-                return "Wspólne konto";
+                return this.mapper.Map(entry.Account);
             }
-            XElement element = operation.Element("description");
-            if (element != null)
-            {
-                return this.descriptionDataExtractor.GetPayer(element.Value);
-            }
+
+            
             return "";
         }
 

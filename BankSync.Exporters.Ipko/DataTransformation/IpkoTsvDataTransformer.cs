@@ -67,20 +67,17 @@ namespace BankSync.Exporters.Ipko.DataTransformation
         {
             if (entry.PaymentType == "Spłata należności - Dziękujemy")
             {
-                return "Wspólne konto";
+                return this.mapper.Map(entry.Account);
             }
             return line[1] + ", " + line[2];
         }
 
         private string GetPayer(BankEntry entry)
         {
-            if (entry.PaymentType == "Płatność kartą")
+            if (entry.PaymentType == "Płatność kartą"
+            ||entry.PaymentType == "Spłata należności - Dziękujemy")
             {
                 return this.mapper.Map(entry.Account);
-            }
-            if (entry.PaymentType == "Spłata należności - Dziękujemy")
-            {
-                return "Wspólne konto";
             }
 
             return "";
