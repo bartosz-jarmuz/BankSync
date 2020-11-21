@@ -56,7 +56,7 @@ namespace BankSync.Enrichers.Allegro
                 foreach (AllegroDataContainer allegroDataContainer in allegroDataContainers)
                 {
                     string path = Path.Combine(this.dataRetentionDirectory.FullName,
-                        $"{allegroDataContainer.ServiceUserName}_{allegroDataContainer.OldestEntry:yyyy-MM-dd}_{allegroDataContainer.NewestEntry:yyyy-MM-dd}.json");
+                        $"{allegroDataContainer.ServiceUserName} {allegroDataContainer.OldestEntry:yyyy-MM-dd} {allegroDataContainer.NewestEntry:yyyy-MM-dd}.json");
                     string serialized = JsonConvert.SerializeObject(allegroDataContainer);
                     File.WriteAllText(path, serialized);
                 }

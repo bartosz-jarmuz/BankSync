@@ -56,7 +56,7 @@ namespace BankSync.Exporters.Ipko
                 {
                     IEnumerable<XElement> orderDateElements = partialDoc.XPathSelectElements("//operation/order-date");
                     (DateTime oldest, DateTime newest) dates = this.GetFirstAndLastDates(orderDateElements);
-                    string path = Path.Combine(this.dataRetentionDirectory.FullName, $"{account.Substring(account.Length - 4)}_{dates.oldest:yyyy-MM-dd}_{dates.newest:yyyy-MM-dd}.xml");
+                    string path = Path.Combine(this.dataRetentionDirectory.FullName, $"{account.Substring(account.Length - 4)} {dates.oldest:yyyy-MM-dd} {dates.newest:yyyy-MM-dd}.xml");
                     partialDoc.Save(path);
                 }
               
