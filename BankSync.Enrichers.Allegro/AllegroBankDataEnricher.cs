@@ -47,7 +47,7 @@ namespace BankSync.Enrichers.Allegro
 
         
         /// <summary>
-        /// Don't donwload old data if older or equal data is already stored
+        /// Don't download old data if older or equal data is already stored
         /// </summary>
         /// <param name="oldestEntry"></param>
         /// <param name="oldData"></param>
@@ -110,35 +110,73 @@ namespace BankSync.Enrichers.Allegro
 
         private static bool IsAllegro(BankEntry entry)
         {
-            return (entry.Recipient.Contains("allegro.pl", StringComparison.OrdinalIgnoreCase) || entry.Recipient.Contains("PAYU*ALLEGRO", StringComparison.OrdinalIgnoreCase));
+            if (entry.Note.Contains("00000050668427903"))
+            {
+                
+            }
+            var value = entry.Recipient.Contains("allegro.pl", StringComparison.OrdinalIgnoreCase) || entry.Recipient.Contains("PAYU*ALLEGRO", StringComparison.OrdinalIgnoreCase);
+            if (value)
+            {
+                return true;
+            }
+
+            value = entry.Note?.Contains("allegro", StringComparison.OrdinalIgnoreCase)??false;
+            
+            return value;
         }
 
         private List<Myorder> GetRelevantEntry(BankEntry entry, List<AllegroDataContainer> allegroDataContainers)
         {
             AllegroData model = allegroDataContainers.FirstOrDefault(x => x.ServiceUserName == entry.Payer)?.Model;
+            List<Myorder> result = null;
             if (model != null)
             {
+                result = GetAllegroEntries(entry, model);
+            }
 
-                List<Myorder> allegroEntries = model.parameters.myorders.myorders
-                    .Where(x => x.payment.buyerPaidAmount.amount == entry.Amount.ToString().Trim('-')).ToList();
-                if (allegroEntries.Count < 2)
-                {
-                    return allegroEntries;
-                }
-                else
-                {
-                    allegroEntries = allegroEntries.Where(x => x.payment.endDate.Date == entry.Date).ToList();
-                    if (allegroEntries.Count < 1)
-                    {
-                        Console.WriteLine($"ERROR - TOO FEW ENTRIES WHEN RECOGNIZING ALLEGRO ENTRY FOR {entry.Note}");
-                    }
-
-                    return allegroEntries;
-                }
+            if (result != null)
+            {
+                return result;
             }
             else
             {
+
+                //the payer can be empty or it can be somehow incorrect, but if we have an entry that matches the exact price and date... it's probably IT
+                foreach (var container in allegroDataContainers)
+                {
+                    var entries = GetAllegroEntries(entry, container.Model);
+                    if (entries != null && entries.Any())
+                    {
+                        return entries;
+                    }
+                }
+            }
+
+
+            return null;
+        }
+
+        private static List<Myorder> GetAllegroEntries(BankEntry entry, AllegroData model)
+        {
+            List<Myorder> allegroEntries = model.parameters.myorders.myorders
+                .Where(x => x.payment.buyerPaidAmount.amount == entry.Amount.ToString().Trim('-')).ToList();
+            if (allegroEntries.Count == 0)
+            {
                 return null;
+            }
+            if (allegroEntries.Count == 1)
+            {
+                return allegroEntries;
+            }
+            else
+            {
+                allegroEntries = allegroEntries.Where(x => x.payment.endDate.Date == entry.Date).ToList();
+                if (allegroEntries.Count < 1)
+                {
+                    Console.WriteLine($"ERROR - TOO FEW ENTRIES WHEN RECOGNIZING ALLEGRO ENTRY FOR {entry.Note}");
+                }
+
+                return allegroEntries;
             }
         }
     }

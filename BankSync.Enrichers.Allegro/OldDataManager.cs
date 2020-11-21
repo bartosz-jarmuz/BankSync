@@ -32,7 +32,11 @@ namespace BankSync.Enrichers.Allegro
             {
                 foreach (FileInfo fileInfo in this.dataRetentionDirectory.GetFiles("*.json"))
                 {
-                    sheets.Add(JsonConvert.DeserializeObject<AllegroDataContainer>(File.ReadAllText(fileInfo.FullName)));
+                    AllegroDataContainer deserialized = JsonConvert.DeserializeObject<AllegroDataContainer>(File.ReadAllText(fileInfo.FullName));
+                    if (deserialized.ServiceUserName == this.serviceUserConfig.UserName)
+                    {
+                        sheets.Add(deserialized);
+                    }
                 }
             }
 
