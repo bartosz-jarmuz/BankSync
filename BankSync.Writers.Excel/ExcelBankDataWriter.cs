@@ -59,7 +59,7 @@ namespace BankSync.Writers.Excel
             for (int rowIndex = 0; rowIndex < data.Entries.Count; rowIndex++)
             {
                 BankEntry bankEntry = data.Entries[rowIndex];
-                sheet.Cells[rowIndex+1, 0] = bankEntry.OriginalBankEntryId; 
+                sheet.Cells[rowIndex+1, 0] = bankEntry.BankEntryId; 
                 if (rowIndex+1 % 2 == 0)
                 {
                     for (int columnIndex = 0; columnIndex < sheet.Cells.ColumnCount; columnIndex++)

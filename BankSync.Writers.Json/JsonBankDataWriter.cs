@@ -23,7 +23,7 @@ namespace BankSync.Writers.Json
 
             foreach (BankEntry bankEntry in data.Entries)
             {
-                map.Values.Add(new KeyValuePair<int, List<string>>(bankEntry.OriginalBankEntryId, bankEntry.Tags));
+                map.Values.Add(new KeyValuePair<int, List<string>>(bankEntry.BankEntryId, bankEntry.Tags));
             }
 
 

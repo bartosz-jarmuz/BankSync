@@ -71,13 +71,30 @@ namespace BankSync.Writers.GoogleSheets
                 .Where(x=> !string.IsNullOrEmpty(x[0]?.ToString()))
                 .Select(x=> Convert.ToInt32(x[0]))
                 .ToList(); 
+            
+            List<int> duplicates = ids
+                .GroupBy(i => i)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key).ToList();
+            
+            if(duplicates.Any())
+            {
+                Console.WriteLine($"Warning: found {duplicates.Count} duplicated IDs. {string.Join(", ", duplicates)}");
+
+                var entries = data.Entries.Where(x => duplicates.Contains(x.BankEntryId));
+
+                foreach (BankEntry bankEntry in entries)
+                {
+                    Console.WriteLine($"Duplicated entry: {bankEntry}");
+                }
+            }
 
             IEnumerable<BankEntry> entriesToVerify = data.Entries.Where(x => (DateTime.Today - x.Date).TotalDays < 30);
 
             List<BankEntry> missingEntries = new List<BankEntry>();
             foreach (BankEntry bankEntry in entriesToVerify)
             {
-                if (ids.All(x => x != bankEntry.OriginalBankEntryId))
+                if (ids.All(x => x != bankEntry.BankEntryId))
                 {
                     missingEntries.Add(bankEntry);
                     Console.WriteLine($"Missing entry {bankEntry}");
@@ -91,7 +108,8 @@ namespace BankSync.Writers.GoogleSheets
 
         private async Task<List<BankEntry>> GetEntriesToAppend(SheetsService sheetsService, BankDataSheet data)
         {
-            ValueRange response = await sheetsService.Spreadsheets.Values.Get(this.spreadsheetId, this.readRange).ExecuteAsync();
+            SpreadsheetsResource.ValuesResource.GetRequest request =sheetsService.Spreadsheets.Values.Get(this.spreadsheetId, this.readRange);
+            ValueRange response = await request.ExecuteAsync();
             IList<object> value = response.Values.Skip(1).FirstOrDefault(x=>x[0] != null && !string.IsNullOrEmpty(x[0].ToString())); //skip header
             if (value == null)
             {
@@ -108,7 +126,7 @@ namespace BankSync.Writers.GoogleSheets
                 {
                     BankEntry entry = data.Entries[i];
                     //we check both ID and date, in case we have been fiddling with the data manually 
-                    if (entry.OriginalBankEntryId == latestId && entry.Date.Date == latestDate.Date)
+                    if (entry.BankEntryId == latestId && entry.Date.Date == latestDate.Date)
                     {
                         List<BankEntry> entries = data.Entries.Take(i).ToList();
                         Console.WriteLine($"Appending {entries.Count} entries");
@@ -205,7 +223,7 @@ namespace BankSync.Writers.GoogleSheets
         {
             List<object> obj = new List<object>();
 
-            obj.Add(entry.OriginalBankEntryId);
+            obj.Add(entry.BankEntryId);
              obj.Add(entry.Account);
              obj.Add(entry.Date.Date.ToString("dd/MM/yyyy"));
              obj.Add(entry.Currency);

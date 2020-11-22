@@ -82,11 +82,12 @@ namespace BankSync.Enrichers.Allegro
                     {
                         foreach (Myorder allegroEntry in allegroEntries)
                         {
-                            foreach (Offer offer in allegroEntry.offers)
+                            for (int offerIndex = 0; offerIndex < allegroEntry.offers.Length; offerIndex++)
                             {
+                                Offer offer = allegroEntry.offers[offerIndex];
                                 BankEntry newEntry = BankEntry.Clone(entry);
                                 newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount) * -1;
-                                newEntry.Note = offer.title;
+                                newEntry.Note = $"{offer.title} (Przedmiot {offerIndex + 1}/{allegroEntry.offers.Length})";
                                 newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
                                 updatedEntries.Add(newEntry);
                             }

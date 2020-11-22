@@ -14,8 +14,8 @@ namespace BankSync.Model
             {
                 foreach (BankEntry bankEntry in bankDataSheeta.Entries)
                 {
-                    int id = bankEntry.OriginalBankEntryId;
-                    if (uniqueEntries.All(x => x.OriginalBankEntryId != id))
+                    int id = bankEntry.BankEntryId;
+                    if (uniqueEntries.All(x => x.BankEntryId != id))
                     {
                         uniqueEntries.Add(bankEntry);
                     }

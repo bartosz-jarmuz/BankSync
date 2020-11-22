@@ -55,15 +55,11 @@ namespace BankSync.Model
             }
         }
 
-        /// <summary>
-        /// A hash code uniquely identifying an entry as it stands in the bank
-        /// It might be different from a 'Wallet' entry, if our entry is split into several by an enricher
-        /// </summary>
-        public int OriginalBankEntryId
+        public int BankEntryId
         {
             get
             {
-                var input = $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.FullDetails}";
+                var input = $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.Note}{this.FullDetails}";
                 return GetStableHashCode(input);
             }
         }
@@ -89,11 +85,12 @@ namespace BankSync.Model
 
         public override string ToString()
         {
-            return $"ID: [{this.OriginalBankEntryId}], " +
+            return $"ID: [{this.BankEntryId}], " +
                    $"DATE: [{this.Date:dd-MM-yyyy}], " +
                    $"AMOUNT: [{this.Amount}], " +
                    $"PAYER [{this.Payer}]," +
                    $"RECIPIENT [{this.Recipient}]" +
+                   $"NOTE [{this.Note}]" +
                    $"";
         }
     }
