@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using BankSync.Model;
 using CsvHelper;
 
@@ -14,11 +15,12 @@ namespace BankSync.Writers.Csv
             this.targetFilePath = targetFilePath;
         }
 
-        public void Write(BankDataSheet data)
+        public Task Write(BankDataSheet data)
         {
             using StreamWriter writer = new StreamWriter(this.targetFilePath);
             using CsvWriter csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
             csv.WriteRecords(data.Entries);
+            return Task.CompletedTask;
         }
     }
 }

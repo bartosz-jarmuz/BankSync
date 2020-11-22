@@ -4,10 +4,12 @@
 //  </copyright>
 // -----------------------------------------------------------------------
 
+using System.Threading.Tasks;
+
 namespace BankSync.Model
 {
     public interface IBankDataWriter
     {
-        public void Write(BankDataSheet data);
+        public Task Write(BankDataSheet data);
     }
 }

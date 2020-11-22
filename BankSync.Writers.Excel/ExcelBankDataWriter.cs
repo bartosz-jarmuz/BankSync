@@ -1,4 +1,5 @@
-﻿using BankSync.Model;
+﻿using System.Threading.Tasks;
+using BankSync.Model;
 using Simplexcel;
 
 namespace BankSync.Writers.Excel
@@ -13,7 +14,7 @@ namespace BankSync.Writers.Excel
         }
 
 
-        public void Write(BankDataSheet data)
+        public Task Write(BankDataSheet data)
         {
             Worksheet sheet = new Worksheet("Data");
             sheet.FreezeTopRow();
@@ -55,11 +56,11 @@ namespace BankSync.Writers.Excel
                 sheet.Cells[0, i].Fill.BackgroundColor = Color.Gray;
             }
 
-            for (int rowIndex = 1; rowIndex < data.Entries.Count; rowIndex++)
+            for (int rowIndex = 0; rowIndex < data.Entries.Count; rowIndex++)
             {
                 BankEntry bankEntry = data.Entries[rowIndex];
-                sheet.Cells[rowIndex, 0] = bankEntry.OriginalBankEntryId; 
-                if (rowIndex % 2 == 0)
+                sheet.Cells[rowIndex+1, 0] = bankEntry.OriginalBankEntryId; 
+                if (rowIndex+1 % 2 == 0)
                 {
                     for (int columnIndex = 0; columnIndex < sheet.Cells.ColumnCount; columnIndex++)
                     {
@@ -67,48 +68,47 @@ namespace BankSync.Writers.Excel
                         {
                             continue;
                         }
-                        sheet.Cells[rowIndex, columnIndex].Fill.BackgroundColor = Color.WhiteSmoke;
+                        sheet.Cells[rowIndex+1, columnIndex].Fill.BackgroundColor = Color.WhiteSmoke;
                     }
                 }
                 
-                sheet.Cells[rowIndex, 1] = bankEntry.Account;
-                sheet.Cells[rowIndex, 2] = new Cell(CellType.Date, bankEntry.Date, "dd/MM/yyyy"); 
-                sheet.Cells[rowIndex, 3] = bankEntry.Currency;
-                sheet.Cells[rowIndex, 4] = bankEntry.Amount;
+                sheet.Cells[rowIndex+1, 1] = bankEntry.Account;
+                sheet.Cells[rowIndex+1, 2] = new Cell(CellType.Date, bankEntry.Date, "dd/MM/yyyy"); 
+                sheet.Cells[rowIndex+1, 3] = bankEntry.Currency;
+                sheet.Cells[rowIndex+1, 4] = bankEntry.Amount;
                 if (bankEntry.Amount < 0)
                 {
-                    sheet.Cells[rowIndex, 4].TextColor = Color.Red;
-                    sheet.Cells[rowIndex, 4].Bold = true;
+                    sheet.Cells[rowIndex+1, 4].TextColor = Color.Red;
+                    sheet.Cells[rowIndex+1, 4].Bold = true;
                 }
                 else
                 {
-                    sheet.Cells[rowIndex, 4].TextColor = Color.Green;
-                    sheet.Cells[rowIndex, 4].Bold = true;
+                    sheet.Cells[rowIndex+1, 4].TextColor = Color.Green;
+                    sheet.Cells[rowIndex+1, 4].Bold = true;
 
                 }
-                sheet.Cells[rowIndex, 5] = bankEntry.Balance;
-                sheet.Cells[rowIndex, 6] = bankEntry.PaymentType;
-                sheet.Cells[rowIndex, 7] = bankEntry.Recipient;
-                sheet.Cells[rowIndex, 7].Border = CellBorder.Right | CellBorder.Left;
-                sheet.Cells[rowIndex, 7].Bold = true;
-                
-                sheet.Cells[rowIndex, 8] = bankEntry.Payer;
-                sheet.Cells[rowIndex, 9] = bankEntry.Note;
-                sheet.Cells[rowIndex, 10] = bankEntry.Category;
-                sheet.Cells[rowIndex, 10].Fill.BackgroundColor = Color.MediumSeaGreen;
-                sheet.Cells[rowIndex, 11] = bankEntry.Subcategory;
-                sheet.Cells[rowIndex, 11].Fill.BackgroundColor = Color.DarkSeaGreen;
-
-                sheet.Cells[rowIndex, 12] = string.Join(";", bankEntry.Tags);
-                sheet.Cells[rowIndex, 13] = bankEntry.FullDetails;
-
-                
-
+                sheet.Cells[rowIndex+1, 5] = bankEntry.Balance;
+                sheet.Cells[rowIndex+1, 6] = bankEntry.PaymentType;
+                sheet.Cells[rowIndex+1, 7] = bankEntry.Recipient;
+                sheet.Cells[rowIndex+1, 7].Border = CellBorder.Right | CellBorder.Left;
+                sheet.Cells[rowIndex+1, 7].Bold = true;
+                                    
+                sheet.Cells[rowIndex+1, 8] = bankEntry.Payer;
+                sheet.Cells[rowIndex+1, 9] = bankEntry.Note;
+                sheet.Cells[rowIndex+1, 10] = bankEntry.Category;
+                sheet.Cells[rowIndex+1, 10].Fill.BackgroundColor = Color.MediumSeaGreen;
+                sheet.Cells[rowIndex+1, 11] = bankEntry.Subcategory;
+                sheet.Cells[rowIndex+1, 11].Fill.BackgroundColor = Color.DarkSeaGreen;
+                                    
+                sheet.Cells[rowIndex+1, 12] = string.Join(";", bankEntry.Tags);
+                sheet.Cells[rowIndex+1, 13] = bankEntry.FullDetails;
             }
 
             Workbook workbook = new Workbook();
             workbook.Add(sheet);
             workbook.Save(this.targetFilePath);
+            return Task.CompletedTask;
+            
         }
     }
 }

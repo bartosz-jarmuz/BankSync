@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Enrichers", "Enrichers", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{E3F75FD5-2ABB-4B90-91E0-8D920682501B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Writers.GoogleSheets", "BankSync.Writers.GoogleSheets\BankSync.Writers.GoogleSheets.csproj", "{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -104,6 +110,7 @@ Global
 		{4B9C1138-96BB-42BA-95B7-6247777C3A3B} = {F7D70F82-55C8-47BE-B1CB-893928F858AC}
 		{BA4C0CB9-903B-4419-95BA-015415010F08} = {6B01CE87-4F8A-43C9-B95A-0FAD9F5608C0}
 		{D178BBF7-815B-44CF-BC1C-D1AFA0C0E1C0} = {E3F75FD5-2ABB-4B90-91E0-8D920682501B}
+		{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F2AB631F-F509-4047-9CCF-A8A2E970EB3F}

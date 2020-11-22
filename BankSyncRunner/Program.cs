@@ -11,6 +11,7 @@ using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
 using BankSync.Utilities;
 using BankSync.Writers.Excel;
+using BankSync.Writers.GoogleSheets;
 using BankSync.Writers.Json;
 
 namespace BankSyncRunner
@@ -20,16 +21,17 @@ namespace BankSyncRunner
         private static IDataMapper mapper = new ConfigurableDataMapper(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Mappings.xml"));
         static DataEnricherExecutor enricher = new DataEnricherExecutor();
         static IBankDataAnalyzer analyzer = new AllIfsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Tags.xml"));
-        static FileInfo configFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Accounts.xml");
+        static FileInfo servicesConfigFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Accounts.xml");
+        static FileInfo googleWriterConfigFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Google\GoogleWriterSettings.xml");
         private static DateTime startTime = DateTime.Today.AddMonths(-12);
         private static DateTime endTime = DateTime.Today;
 
         static async Task Main(string[] args)
         {
 
-            var config = new BankSyncConfig(configFile, GetInput);
+            BankSyncConfig config = new BankSyncConfig(servicesConfigFile, GetInput);
 
-            var datasets = new List<BankDataSheet>();
+            List<BankDataSheet> datasets = new List<BankDataSheet>();
             foreach (ServiceConfig configService in config.Services)
             {
                 await ProcessServices(configService, datasets);
@@ -46,9 +48,7 @@ namespace BankSyncRunner
             analyzer.AssignCategories(ipkoData);
             Console.WriteLine("Data categorized");
 
-            Write(ipkoData);
-            Console.WriteLine("Data written");
-
+            await Write(ipkoData);
 
             Console.WriteLine("All done!");
             #if !DEBUG
@@ -70,13 +70,24 @@ namespace BankSyncRunner
         }
 
 
-        private static void Write(BankDataSheet ipkoData)
+        private static async Task Write(BankDataSheet ipkoData)
         {
-            var path = GetOutputPath();
-            IBankDataWriter writer = new ExcelBankDataWriter(path + ".xlsx");
-            writer.Write(ipkoData);
-            writer = new JsonBankDataWriter(path + ".json");
-            writer.Write(ipkoData);
+            var writers = new List<IBankDataWriter>();
+            string path = GetOutputPath();
+            writers.Add(new ExcelBankDataWriter(path + ".xlsx"));
+            writers.Add(new GoogleSheetsBankDataWriter(googleWriterConfigFile));
+            foreach (IBankDataWriter writer in writers)
+            {
+                try
+                {
+                    await writer.Write(ipkoData);
+                    Console.WriteLine($"Data written with with {writer.GetType().Name}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error while writing with {writer.GetType().Name}: {ex}");
+                }
+            }
         }
 
         private static string GetInput(string question)

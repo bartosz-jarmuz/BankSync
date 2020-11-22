@@ -86,5 +86,15 @@ namespace BankSync.Model
                 return hash1 + (hash2*1566083941);
             }
         }
+
+        public override string ToString()
+        {
+            return $"ID: [{this.OriginalBankEntryId}], " +
+                   $"DATE: [{this.Date:dd-MM-yyyy}], " +
+                   $"AMOUNT: [{this.Amount}], " +
+                   $"PAYER [{this.Payer}]," +
+                   $"RECIPIENT [{this.Recipient}]" +
+                   $"";
+        }
     }
 }

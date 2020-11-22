@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using BankSync.Model;
 using Newtonsoft.Json;
 
@@ -16,7 +17,7 @@ namespace BankSync.Writers.Json
             this.targetFilePath = targetFilePath;
         }
 
-        public void Write(BankDataSheet data)
+        public Task Write(BankDataSheet data)
         {
             var map = new TagMap();
 
@@ -31,6 +32,9 @@ namespace BankSync.Writers.Json
             string serialized = JsonConvert.SerializeObject(data);
 
             File.WriteAllText(this.targetFilePath, serialized);
+            
+            return Task.CompletedTask;
+
         }
     }
 }
