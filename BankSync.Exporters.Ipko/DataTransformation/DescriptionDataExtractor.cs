@@ -57,7 +57,25 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 return "";
             }
+        }
+        
+        /// <summary>
+        /// When you own multiple accounts, your better bet at figuring out tha payer is by checking the account number
+        /// because the 'nazwa nadawcy' will be same person for multiple sources
+        /// However, when you receive money from a stranger, you better figure out who its from by the name, not a number
+        /// Therefore, a quick win is to try mapping account number, and if not, then go with the regular flow
+        /// </summary>
+        /// <param name="description"></param>
+        /// <returns></returns>
+        public string GetPayerFromAccount(string description)
+        {
+            if (description.StartsWith("Rachunek nadawcy: "))
+            {
+                string part = description.Substring("Rachunek nadawcy: ".Length);
+                return part.Remove(part.IndexOf("Nazwa ", StringComparison.OrdinalIgnoreCase)).Trim();
+            }
 
+            return null;
         }
 
         public string GetRecipient(string description)

@@ -49,6 +49,20 @@ Referencje własne zleceniodawcy: 172173609222";
 
             Check.That(new DescriptionDataExtractor().GetPayer(input)).IsEqualTo("JIM N BEAM");
 
+        } 
+        
+        [TestMethod]
+        public void FromAccountNumber()
+        {
+            string input = @"Rachunek nadawcy: 22 0000 1506 0000 0001 0700 2222
+Nazwa nadawcy: Pani JOHN DOE UL. ZŁA 666 87-134 CZARNOWO
+Tytuł: Kasa";
+
+            Check.That(new DescriptionDataExtractor().GetPayerFromAccount(input)).IsEqualTo("22 0000 1506 0000 0001 0700 2222");
+
+
+            
+
         }
     }
 }

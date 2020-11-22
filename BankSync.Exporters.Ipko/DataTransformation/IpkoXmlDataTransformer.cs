@@ -57,6 +57,8 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             }
 
         }
+        
+      
 
         private string GetAccount(XDocument xDocument)
         {
@@ -140,6 +142,20 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             XElement element = operation.Element("description");
             if (element != null)
             {
+                // When you own multiple accounts, your better bet at figuring out tha payer is by checking the account number
+                // because the 'nazwa nadawcy' will be same person for multiple sources
+                // However, when you receive money from a stranger, you better figure out who its from by the name, not a number
+                // Therefore, a quick win is to try mapping account number, and if not, then go with the regular flow
+                payer = this.descriptionDataExtractor.GetPayerFromAccount(element.Value);
+                if (payer != null)
+                {
+                    var mapped = this.mapper.Map(payer);
+                    if (!string.IsNullOrEmpty(mapped) && mapped != payer)
+                    {
+                        return mapped;
+                    }
+                }
+                
                 payer = this.descriptionDataExtractor.GetPayer(element.Value);
             }
 
