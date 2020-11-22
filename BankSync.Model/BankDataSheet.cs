@@ -43,7 +43,6 @@ namespace BankSync.Model
 
         public List<BankEntry> Entries { get; set; } = new List<BankEntry>();
 
-        public TagMap TagMap { get; set; }
         public DateTime GetOldestEntryFor(string account)
         {
             return this.Entries?.LastOrDefault(x => x.Account == account)?.Date ?? default;
@@ -60,8 +59,5 @@ namespace BankSync.Model
         }
     }
 
-    public class TagMap
-    {
-        public List<KeyValuePair<int, List<string>>> Values { get; set; } = new List<KeyValuePair<int, List<string>>>();
-    }
+ 
 }
