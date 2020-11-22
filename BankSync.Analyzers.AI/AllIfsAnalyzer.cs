@@ -9,13 +9,13 @@ using BankSync.Utilities;
 namespace BankSync.Analyzers.AI
 {
 
-    public class Subcategory
+    internal class Subcategory
     {
         public string Name { get; set; }
         public List<string> MapFrom { get; set; } = new List<string>();
     }
 
-    public class Category
+    internal class Category
     {
         public string Name { get; set; }
         public List<Subcategory> Subcategories { get; set; } = new List<Subcategory>();

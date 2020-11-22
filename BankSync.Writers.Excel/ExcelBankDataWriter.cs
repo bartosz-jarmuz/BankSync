@@ -85,7 +85,6 @@ namespace BankSync.Writers.Excel
                 {
                     sheet.Cells[rowIndex+1, 4].TextColor = Color.Green;
                     sheet.Cells[rowIndex+1, 4].Bold = true;
-
                 }
                 sheet.Cells[rowIndex+1, 5] = bankEntry.Balance;
                 sheet.Cells[rowIndex+1, 6] = bankEntry.PaymentType;

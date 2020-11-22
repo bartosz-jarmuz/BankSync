@@ -20,7 +20,7 @@ namespace BankSync.Writers.GoogleSheets
         private readonly string readRange = "Data!A1:N200";
         private readonly string spreadsheetId;
         private readonly string credentialsPath;
-        private readonly int sheetId;
+        private readonly int dataSheetId;
 
         private static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
         private static readonly string ApplicationName = "BankSync";
@@ -28,10 +28,10 @@ namespace BankSync.Writers.GoogleSheets
         public GoogleSheetsBankDataWriter(FileInfo googleWriterConfigFile)
         {
             this.googleWriterConfigFile = googleWriterConfigFile;
-            var xDoc = XDocument.Load(this.googleWriterConfigFile.FullName);
+            XDocument xDoc = XDocument.Load(this.googleWriterConfigFile.FullName);
             this.credentialsPath = xDoc.Root.Element("CredentialsPath").Value;
             this.spreadsheetId = xDoc.Root.Element("SpreadsheetId").Value;
-            this.sheetId = Convert.ToInt32(xDoc.Root.Element("SheetId").Value);
+            this.dataSheetId = Convert.ToInt32(xDoc.Root.Element("DataSheetId").Value);
         }
 
        
@@ -61,7 +61,12 @@ namespace BankSync.Writers.GoogleSheets
                     Console.WriteLine($"All entries re-added correctly.");
                 }
             }
+
+            await this.AddCategories(service.Spreadsheets, data.Categories);
+
         }
+        
+        
 
         private async Task<int> VerifyAnyDataSkipped(SheetsService sheetsService, BankDataSheet data)
         {
@@ -81,7 +86,7 @@ namespace BankSync.Writers.GoogleSheets
             {
                 Console.WriteLine($"Warning: found {duplicates.Count} duplicated IDs. {string.Join(", ", duplicates)}");
 
-                var entries = data.Entries.Where(x => duplicates.Contains(x.BankEntryId));
+                IEnumerable<BankEntry> entries = data.Entries.Where(x => duplicates.Contains(x.BankEntryId));
 
                 foreach (BankEntry bankEntry in entries)
                 {
@@ -138,7 +143,36 @@ namespace BankSync.Writers.GoogleSheets
             return new List<BankEntry>();
         }
 
-     
+        private async Task AddCategories(SpreadsheetsResource spreadsheets, List<Category> categories)
+        {
+            SpreadsheetsResource.ValuesResource.ClearRequest request = spreadsheets.Values.Clear(new ClearValuesRequest(), this.spreadsheetId, "Categories!A1:Z");
+            await request.ExecuteAsync();
+
+            
+            List<IList<object>> values = new List<IList<object>>();
+            
+            foreach (Category category in categories)
+            {
+                List<object> row = new List<object>();
+                row.Add(category.Name);
+                foreach (Subcategory subcategory in category.Subcategories)
+                {
+                    row.Add(subcategory.Name);
+                }
+                values.Add(row);
+            }
+
+            ValueRange valueRange = new ValueRange()
+            {
+                MajorDimension = "ROWS",
+                Values = values
+            };
+            
+            SpreadsheetsResource.ValuesResource.UpdateRequest update = spreadsheets.Values.Update(valueRange, this.spreadsheetId, $"Categories!A1:Z");
+            
+            update.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+            UpdateValuesResponse res = await update.ExecuteAsync();
+        }
 
         private SheetsService GetSheetsService()
         {
@@ -202,7 +236,7 @@ namespace BankSync.Writers.GoogleSheets
                     Dimension = "ROWS", 
                     StartIndex = 1,
                     EndIndex = entries.Count + 1,
-                    SheetId = this.sheetId
+                    SheetId = this.dataSheetId
                 }
             };
 

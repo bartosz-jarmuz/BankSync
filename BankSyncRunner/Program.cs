@@ -75,6 +75,7 @@ namespace BankSyncRunner
             var writers = new List<IBankDataWriter>();
             string path = GetOutputPath();
             writers.Add(new ExcelBankDataWriter(path + ".xlsx"));
+            writers.Add(new JsonBankDataWriter(path + ".json"));
             writers.Add(new GoogleSheetsBankDataWriter(googleWriterConfigFile));
             foreach (IBankDataWriter writer in writers)
             {

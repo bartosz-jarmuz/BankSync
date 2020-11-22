@@ -19,6 +19,7 @@ namespace BankSync.Writers.Json
 
         public Task Write(BankDataSheet data)
         {
+            data.LoadCategories();
             string serialized = JsonConvert.SerializeObject(data);
 
             File.WriteAllText(this.targetFilePath, serialized);

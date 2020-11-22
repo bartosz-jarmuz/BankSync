@@ -26,21 +26,6 @@ namespace BankSync.Model
             return consolidated;
         }
 
-        public static List<BankDataSheet> SplitPerMonth(BankDataSheet sheet)
-        {
-            var list = new List<BankDataSheet>();
-            IEnumerable<IGrouping<string, BankEntry>> groupings = sheet.Entries.GroupBy(x => x.Date.ToString("yyyy-MM"));
-
-            foreach (IGrouping<string, BankEntry> grouping in groupings)
-            {
-                BankDataSheet clone = sheet.Clone();
-                clone.Entries= grouping.ToList();
-                list.Add(clone);
-            }
-
-            return list;
-        }
-
         public List<BankEntry> Entries { get; set; } = new List<BankEntry>();
 
         public DateTime GetOldestEntryFor(string account)
@@ -51,12 +36,40 @@ namespace BankSync.Model
         {
             return this.Entries?.FirstOrDefault(x => x.Account == account)?.Date ?? default;
         }
-        public BankDataSheet Clone()
-        {
-            var serialized = JsonConvert.SerializeObject(this);
 
-            return JsonConvert.DeserializeObject<BankDataSheet>(serialized);
+        public void LoadCategories()
+        {
+            this.Categories = new List<Category>();
+            foreach (BankEntry bankEntry in this.Entries)
+            {
+                if (bankEntry.Category != null)
+                {
+                    Category existingCategory = this.Categories.FirstOrDefault(x => x.Name == bankEntry.Category);
+                    if (existingCategory != null)
+                    {
+                        if (bankEntry.Subcategory != null)
+                        {
+                            Subcategory existingSubcategory = existingCategory.Subcategories.FirstOrDefault(x => x.Name == bankEntry.Subcategory);
+                            if (existingSubcategory == null)
+                            {
+                                existingCategory.Subcategories.Add(new Subcategory(bankEntry.Subcategory));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Category category = new Category(bankEntry.Category);
+                        if (bankEntry.Subcategory != null)
+                        {
+                            category.Subcategories.Add(new Subcategory(bankEntry.Subcategory));
+                        }
+                        this.Categories.Add(category);
+                    }
+                }
+            }
         }
+        
+        public List<Category> Categories { get; set; } = new List<Category>();
     }
 
  
