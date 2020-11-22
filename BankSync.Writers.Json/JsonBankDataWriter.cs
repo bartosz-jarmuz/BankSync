@@ -19,16 +19,6 @@ namespace BankSync.Writers.Json
 
         public Task Write(BankDataSheet data)
         {
-            var map = new TagMap();
-
-            foreach (BankEntry bankEntry in data.Entries)
-            {
-                map.Values.Add(new KeyValuePair<int, List<string>>(bankEntry.BankEntryId, bankEntry.Tags));
-            }
-
-
-            data.TagMap = map;
-
             string serialized = JsonConvert.SerializeObject(data);
 
             File.WriteAllText(this.targetFilePath, serialized);
