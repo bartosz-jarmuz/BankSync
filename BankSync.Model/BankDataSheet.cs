@@ -39,7 +39,6 @@ namespace BankSync.Model
 
         public void LoadCategories()
         {
-            this.Categories = new List<Category>();
             foreach (BankEntry bankEntry in this.Entries)
             {
                 if (bankEntry.Category != null)

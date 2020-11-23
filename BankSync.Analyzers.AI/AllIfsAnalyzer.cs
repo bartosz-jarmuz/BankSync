@@ -9,16 +9,16 @@ using BankSync.Utilities;
 namespace BankSync.Analyzers.AI
 {
 
-    internal class Subcategory
+    internal class SubcategoryMap
     {
         public string Name { get; set; }
         public List<string> MapFrom { get; set; } = new List<string>();
     }
 
-    internal class Category
+    internal class CategoryMap
     {
         public string Name { get; set; }
-        public List<Subcategory> Subcategories { get; set; } = new List<Subcategory>();
+        public List<SubcategoryMap> Subcategories { get; set; } = new List<SubcategoryMap>();
         public List<string> MapFrom { get; set; } = new List<string>();
     }
 
@@ -26,7 +26,7 @@ namespace BankSync.Analyzers.AI
 
     public class AllIfsAnalyzer : IBankDataAnalyzer
     {
-        private readonly List<Category> categories = new List<Category>();
+        private readonly List<CategoryMap> categories = new List<CategoryMap>();
 
         public AllIfsAnalyzer(FileInfo dictionaryFile)
         {
@@ -39,7 +39,7 @@ namespace BankSync.Analyzers.AI
 
             foreach (XElement categoryElement in xDoc.Root.Descendants("Category"))
             {
-                var category = new Category()
+                CategoryMap category = new CategoryMap()
                 {
                     Name = categoryElement.Attribute("Name").Value
                 };
@@ -50,7 +50,7 @@ namespace BankSync.Analyzers.AI
 
                 foreach (XElement subcategoryElement in categoryElement.Elements("Subcategory"))
                 {
-                    var subcategory = new Subcategory();
+                    SubcategoryMap subcategory = new SubcategoryMap();
                     subcategory.Name = subcategoryElement.Attribute("Name").Value;
                     subcategory.MapFrom = LoadTokensFromElement(subcategoryElement);
                     category.Subcategories.Add(subcategory);
@@ -63,7 +63,7 @@ namespace BankSync.Analyzers.AI
 
         private static List<string> LoadTokensFromElement(XElement categoryElement)
         {
-            var allDirectTokens = new List<string>();
+            List<string> allDirectTokens = new List<string>();
             foreach (XElement mappingElement in categoryElement.Elements("MapFrom"))
             {
                 string[] tokenized = mappingElement.Value.Split(";", StringSplitOptions.RemoveEmptyEntries);
@@ -78,9 +78,9 @@ namespace BankSync.Analyzers.AI
             foreach (BankEntry bankEntry in data.Entries)
             {
                 bool isAssigned = false;
-                foreach (Category category in this.categories)
+                foreach (CategoryMap category in this.categories)
                 {
-                    foreach (Subcategory subcategory in category.Subcategories)
+                    foreach (SubcategoryMap subcategory in category.Subcategories)
                     {
                         foreach (string keyword in subcategory.MapFrom)
                         {
@@ -107,7 +107,38 @@ namespace BankSync.Analyzers.AI
                             }
                         }
                     }
+                }
+            }
+            this.AddCategoryList(data);
+            
+        }
 
+
+        private void AddCategoryList(BankDataSheet data)
+        {
+            foreach (CategoryMap category in this.categories)
+            {
+                Category existingCategory = data.Categories.FirstOrDefault(x => x.Name == category.Name);
+                if (existingCategory != null)
+                {
+                    foreach (SubcategoryMap subcategory in category.Subcategories)
+                    {
+                        Subcategory existingSubcategory = existingCategory.Subcategories.FirstOrDefault(x => x.Name == subcategory.Name);
+                        if (existingSubcategory == null)
+                        {
+                            existingCategory.Subcategories.Add(new Subcategory(subcategory.Name));
+                        }
+                    }
+                }
+                else
+                {
+                    Category newCategory = new Category(category.Name);
+                    
+                    foreach (SubcategoryMap subcategory in category.Subcategories)
+                    {
+                        newCategory.Subcategories.Add(new Subcategory(subcategory.Name));
+                    }
+                    data.Categories.Add(newCategory);
                 }
             }
         }
