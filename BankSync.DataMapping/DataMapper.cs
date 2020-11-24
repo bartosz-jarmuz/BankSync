@@ -9,8 +9,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using BankSync.Model;
 
-namespace BankSync.Exporters.Ipko.Mappers
+namespace BankSync.DataMapping
 {
     public class ConfigurableDataMapper : IDataMapper
     {

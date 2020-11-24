@@ -4,7 +4,7 @@
 //  </copyright>
 // -----------------------------------------------------------------------
 
-namespace BankSync.Exporters.Ipko.Mappers
+namespace BankSync.Model
 {
     public interface IDataMapper
     {

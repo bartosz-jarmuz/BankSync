@@ -13,7 +13,6 @@ using System.Xml.Serialization;
 using System.Xml.XPath;
 using BankSync.Config;
 using BankSync.Exporters.Ipko.DataTransformation;
-using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
 using Newtonsoft.Json;
 

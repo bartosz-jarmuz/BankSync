@@ -71,60 +71,11 @@ namespace BankSync.Enrichers.Allegro
             List<AllegroDataContainer> allData = await this.LoadAllData(startTime);
             List<BankEntry> updatedEntries = new List<BankEntry>();
 
-            for (int index = 0; index < data.Entries.Count; index++)
+            foreach (BankEntry entry in data.Entries)
             {
-                BankEntry entry = data.Entries[index];
-
-                if (IsAllegro(entry)) 
+                if (IsAllegro(entry))
                 {
-                    List<Myorder> allegroEntries = this.GetRelevantEntry(entry, allData, out AllegroDataContainer container);
-                    if (allegroEntries != null && allegroEntries.Any())
-                    {
-                        foreach (Myorder allegroEntry in allegroEntries)
-                        {
-                            for (int offerIndex = 0; offerIndex < allegroEntry.offers.Length; offerIndex++)
-                            {
-                                Offer offer = allegroEntry.offers[offerIndex];
-                                BankEntry newEntry = BankEntry.Clone(entry);
-                                if (entry.Amount < 0)
-                                {
-                                    newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount) * -1;
-                                }
-                                else
-                                {
-                                    newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount) ;
-                                }
-                                newEntry.Note = $"{offer.title} (Przedmiot {offerIndex + 1}/{allegroEntry.offers.Length})";
-                                if (entry.Amount < 0)
-                                {
-                                    newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
-                                    if (string.IsNullOrEmpty(newEntry.Payer))
-                                    {
-                                        newEntry.Payer = container.ServiceUserName;
-                                    }
-                                }
-                                else
-                                {
-                                    newEntry.Payer = "allegro.pl - " + allegroEntry.seller.login;
-                                    newEntry.Recipient = container.ServiceUserName;
-                                }
-
-                               
-                                
-                                updatedEntries.Add(newEntry);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (entry.Amount > 0)
-                        {
-                            entry.Payer = "allegro.pl (unrecognized seller)";
-                            entry.Recipient = container.ServiceUserName;
-                        }
-                        //that's either not Allegro entry or not entry of this person, but needs to be preserved on the list
-                        updatedEntries.Add(entry);
-                    }
+                    this.EnrichAllegroEntry(entry, allData, updatedEntries);
                 }
                 else
                 {
@@ -134,6 +85,90 @@ namespace BankSync.Enrichers.Allegro
             }
 
             data.Entries = updatedEntries;
+        }
+
+        private void EnrichAllegroEntry(BankEntry entry, List<AllegroDataContainer> allData, List<BankEntry> updatedEntries)
+        {
+            List<Myorder> allegroEntries = this.GetRelevantEntry(entry, allData, out AllegroDataContainer container,
+                out List<string> potentiallyRelatedOfferIds);
+            if (allegroEntries != null && allegroEntries.Any())
+            {
+                foreach (Myorder allegroEntry in allegroEntries)
+                {
+                    for (int offerIndex = 0; offerIndex < allegroEntry.offers.Length; offerIndex++)
+                    {
+                        BankEntry newEntry = PrepareNewBankEntryForOffer(allegroEntry, offerIndex, entry, container);
+
+                        updatedEntries.Add(newEntry);
+                    }
+                }
+            }
+            else
+            {
+                //that's either not Allegro entry or not entry of this person, but needs to be preserved on the list
+                EnrichUnrecognizedAllegroOffer(entry, container, potentiallyRelatedOfferIds);
+                updatedEntries.Add(entry);
+            }
+        }
+
+        private static void EnrichUnrecognizedAllegroOffer(BankEntry entry, AllegroDataContainer container, List<string> potentiallyRelatedOfferIds)
+        {
+            if (entry.Amount > 0)
+            {
+                entry.Payer = "allegro.pl (Nierozpoznany sprzedawca)";
+                entry.Recipient = container.ServiceUserName;
+                if (potentiallyRelatedOfferIds != null && potentiallyRelatedOfferIds.Any())
+                {
+                    entry.Note = "Zwrot pasujący do ofert: " + string.Join(",", potentiallyRelatedOfferIds);
+                }
+                else
+                {
+                    entry.Note = "Nierozpoznany zwrot";
+                }
+            }
+            else
+            {
+                if (entry.Note == entry.FullDetails)
+                {
+                    entry.Note = "Nierozpoznany zakup";
+                }
+                else
+                {
+                    entry.Note = "Nierozpoznany zakup - " + entry.Note;
+                }
+            }
+        }
+
+        private static BankEntry PrepareNewBankEntryForOffer(Myorder allegroEntry, int offerIndex, BankEntry entry,
+            AllegroDataContainer container)
+        {
+            Offer offer = allegroEntry.offers[offerIndex];
+            BankEntry newEntry = BankEntry.Clone(entry);
+            if (entry.Amount < 0)
+            {
+                newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount) * -1;
+            }
+            else
+            {
+                newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount);
+            }
+
+            newEntry.Note = $"{offer.title} (Oferta {offer.id}, Przedmiot {offerIndex + 1}/{allegroEntry.offers.Length})";
+            if (entry.Amount < 0)
+            {
+                newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
+                if (string.IsNullOrEmpty(newEntry.Payer))
+                {
+                    newEntry.Payer = container.ServiceUserName;
+                }
+            }
+            else
+            {
+                newEntry.Payer = "allegro.pl - " + allegroEntry.seller.login;
+                newEntry.Recipient = container.ServiceUserName;
+            }
+
+            return newEntry;
         }
 
         private static bool IsAllegro(BankEntry entry)
@@ -149,18 +184,21 @@ namespace BankSync.Enrichers.Allegro
             return value;
         }
 
-        private List<Myorder> GetRelevantEntry(BankEntry entry, List<AllegroDataContainer> allegroDataContainers, out AllegroDataContainer associatedContainer)
+        private List<Myorder> GetRelevantEntry(BankEntry entry, List<AllegroDataContainer> allegroDataContainers, out AllegroDataContainer associatedContainer, out List<string> potentiallyRelatedOfferIds)
         {
             associatedContainer = allegroDataContainers.FirstOrDefault(x => x.ServiceUserName == entry.Payer);
             AllegroData model = associatedContainer?.Model;
+            List<Offer> offersWhichMatchThePriceButNotTheDateBecauseTheyAreRefunds = null;
+
             List<Myorder> result = null;
             if (model != null)
             {
-                result = GetAllegroEntries(entry, model);
+                result = GetAllegroEntries(entry, model, out _ );
             }
 
             if (result != null)
             {
+                potentiallyRelatedOfferIds = null;
                 return result;
             }
             else
@@ -169,21 +207,28 @@ namespace BankSync.Enrichers.Allegro
                 //the payer can be empty or it can be somehow incorrect, but if we have an entry that matches the exact price and date... it's probably IT
                 foreach (var container in allegroDataContainers)
                 {
-                    var entries = GetAllegroEntries(entry, container.Model);
+                    var entries = GetAllegroEntries(entry, container.Model, out List<Offer> offersMatchingPrice );
+                    if (offersMatchingPrice != null && offersMatchingPrice.Any())
+                    {
+                        offersWhichMatchThePriceButNotTheDateBecauseTheyAreRefunds = new List<Offer>(offersMatchingPrice);
+                    }
                     if (entries != null && entries.Any())
                     {
                         associatedContainer = container;
+                        potentiallyRelatedOfferIds = null;
                         return entries;
                     }
                 }
             }
 
-
+            potentiallyRelatedOfferIds =
+                offersWhichMatchThePriceButNotTheDateBecauseTheyAreRefunds?.Select(x => x.id).ToList(); 
             return null;
         }
 
-        private static List<Myorder> GetAllegroEntries(BankEntry entry, AllegroData model)
+        private static List<Myorder> GetAllegroEntries(BankEntry entry, AllegroData model, out List<Offer> offersMatchingPrice )
         {
+            offersMatchingPrice = null;
             List<Myorder> allegroEntries = model.parameters.myorders.myorders
                 .Where(x => 
                    Convert.ToDecimal(x.payment.buyerPaidAmount.amount) == Convert.ToDecimal(entry.Amount.ToString().Trim('-'))
@@ -221,7 +266,11 @@ namespace BankSync.Enrichers.Allegro
                         {
                             //so now we have a potentially long list of entries purchased at the same price (e.g. 9.99),
                             //so we cannot figure out which one was actually refunded.
-                            //to bad there is no refund note or reference
+                            //too bad there is no refund note or reference
+                             offersMatchingPrice = dateFilteredEntries
+                                 .SelectMany(x=> x.offers.Where(x=>Convert.ToDecimal(x.offerPrice.amount)  == Convert.ToDecimal(entry.Amount.ToString().Trim('-')))
+                                ).ToList();
+                            
                             return null;
                         }
                         else

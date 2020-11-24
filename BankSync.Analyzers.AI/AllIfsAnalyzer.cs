@@ -84,13 +84,20 @@ namespace BankSync.Analyzers.AI
                     {
                         foreach (string keyword in subcategory.MapFrom)
                         {
-                            if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
-                                || bankEntry.Note.ContainsNationalUnaware(keyword))
+                            try
                             {
-                                bankEntry.Subcategory = subcategory.Name;
-                                bankEntry.Category = category.Name;
-                                isAssigned = true;
-                                break;
+                                if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
+                                    || bankEntry.Note.ContainsNationalUnaware(keyword))
+                                {
+                                    bankEntry.Subcategory = subcategory.Name;
+                                    bankEntry.Category = category.Name;
+                                    isAssigned = true;
+                                    break;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e);
                             }
                         }
                     }
@@ -99,11 +106,18 @@ namespace BankSync.Analyzers.AI
                     {
                         foreach (string keyword in category.MapFrom)
                         {
-                            if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
-                                || bankEntry.Note.ContainsNationalUnaware(keyword))
+                            try
                             {
-                                bankEntry.Category = category.Name;
-                                break;
+                                if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
+                                    || bankEntry.Note.ContainsNationalUnaware(keyword))
+                                {
+                                    bankEntry.Category = category.Name;
+                                    break;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e);
                             }
                         }
                     }

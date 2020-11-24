@@ -8,7 +8,6 @@ using System.Xml.Linq;
 using BankSync.Config;
 using BankSync.Exporters.Ipko.DataTransformation;
 using BankSync.Exporters.Ipko.DTO;
-using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
 using BankSync.Utilities;
 using Newtonsoft.Json;
@@ -50,19 +49,19 @@ namespace BankSync.Exporters.Ipko
             List<BankDataSheet> datasets = new List<BankDataSheet>();
             BankDataSheet oldData = this.oldDataManager.GetOldData();
             datasets.Add(oldData);
-            // foreach (Account account in this.serviceUserConfig.Accounts)
-            // {
-            //     DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, account.Number);
-            //     BankDataSheet data = await this.GetAccountData(account.Number, oldestEntryAdjusted, endTime);
-            //     datasets.Add(data);
-            // }
-            // foreach (Card card in this.serviceUserConfig.Cards)
-            // {
-            //     DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, card.Number);
-            //
-            //     BankDataSheet data = await this.GetCardData(card.Number, oldestEntryAdjusted, endTime);
-            //     datasets.Add(data);
-            // }
+            foreach (Account account in this.serviceUserConfig.Accounts)
+            {
+                DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, account.Number);
+                BankDataSheet data = await this.GetAccountData(account.Number, oldestEntryAdjusted, endTime);
+                datasets.Add(data);
+            }
+            foreach (Card card in this.serviceUserConfig.Cards)
+            {
+                DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, card.Number);
+            
+                BankDataSheet data = await this.GetCardData(card.Number, oldestEntryAdjusted, endTime);
+                datasets.Add(data);
+            }
 
             return BankDataSheet.Consolidate(datasets);
          }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
@@ -163,7 +162,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 return payer;
             }
-            if (entry.PaymentType == "Płatność kartą" || entry.PaymentType == "Przelew z rachunku")
+            if (entry.PaymentType == "Transakcja kartą" ||entry.PaymentType == "Płatność kartą" || entry.PaymentType == "Przelew z rachunku")
             {
                 return this.mapper.Map(entry.Account);
             }

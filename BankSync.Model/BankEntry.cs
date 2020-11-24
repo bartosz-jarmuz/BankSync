@@ -87,6 +87,7 @@ namespace BankSync.Model
         {
             return $"ID: [{this.BankEntryId}], " +
                    $"DATE: [{this.Date:dd-MM-yyyy}], " +
+                   $"ACCOUNT: [{this.Account}], " +
                    $"AMOUNT: [{this.Amount}], " +
                    $"PAYER [{this.Payer}]," +
                    $"RECIPIENT [{this.Recipient}]" +

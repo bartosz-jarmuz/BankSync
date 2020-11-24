@@ -5,9 +5,10 @@ using System.Security;
 using System.Threading.Tasks;
 using BankSync.Analyzers.AI;
 using BankSync.Config;
+using BankSync.DataMapping;
+using BankSync.Exporters.Citibank;
 using BankSync.Exporters.Ipko;
 using BankSync.Exporters.Ipko.DataTransformation;
-using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
 using BankSync.Utilities;
 using BankSync.Writers.Excel;
@@ -34,21 +35,28 @@ namespace BankSyncRunner
             List<BankDataSheet> datasets = new List<BankDataSheet>();
             foreach (ServiceConfig configService in config.Services)
             {
-                await ProcessServices(configService, datasets);
+                try
+                {
+                    await ProcessServices(configService, datasets);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error while processing service: {configService.Name}", ex);
+                }
             }
 
-            BankDataSheet ipkoData = BankDataSheet.Consolidate(datasets);
+            BankDataSheet bankDataSheet = BankDataSheet.Consolidate(datasets);
 
             Console.WriteLine("Data downloaded");
 
             enricher.LoadEnrichers(config);
-            await enricher.EnrichData(ipkoData, startTime, endTime);
+            await enricher.EnrichData(bankDataSheet, startTime, endTime);
             Console.WriteLine("Data enriched");
 
-            analyzer.AssignCategories(ipkoData);
+            analyzer.AssignCategories(bankDataSheet);
             Console.WriteLine("Data categorized");
 
-            await Write(ipkoData);
+            await Write(bankDataSheet);
 
             Console.WriteLine("All done!");
             #if !DEBUG
@@ -63,6 +71,15 @@ namespace BankSyncRunner
                 foreach (ServiceUser configServiceUser in configServiceConfig.Users)
                 {
                     IBankDataExporter downloader = new IpkoDataDownloader(configServiceUser, mapper);
+
+                    datasets.Add( await downloader.GetData(startTime, endTime));
+                }
+            }
+            if (string.Equals(configServiceConfig.Name, "Citibank", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (ServiceUser configServiceUser in configServiceConfig.Users)
+                {
+                    IBankDataExporter downloader = new CitibankDataDownloader(configServiceUser, mapper);
 
                     datasets.Add( await downloader.GetData(startTime, endTime));
                 }

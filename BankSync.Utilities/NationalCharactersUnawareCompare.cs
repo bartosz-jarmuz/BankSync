@@ -28,7 +28,12 @@ namespace BankSync.Utilities
 
         public static bool ContainsNationalUnaware(this string left, string right)
         {
-            if (left == right || left.Contains(right, StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(left) && string.IsNullOrEmpty(right))
+            {
+                return true;
+            }
+            
+            if (left == right || (left != null && left.Contains(right, StringComparison.OrdinalIgnoreCase)))
             {
                 return true;
             }

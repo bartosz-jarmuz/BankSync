@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using BankSync.Exporters.Ipko.Mappers;
 using BankSync.Model;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
