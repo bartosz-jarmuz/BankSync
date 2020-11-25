@@ -211,7 +211,7 @@ namespace BankSync.Analyzers.AI
 
         private void AddCategoryList(BankDataSheet data)
         {
-            foreach (CategoryMap category in this.expenseCategories)
+            foreach (CategoryMap category in this.expenseCategories.Concat(this.incomeCategories))
             {
                 Category existingCategory = data.Categories.FirstOrDefault(x => x.Name == category.Name);
                 if (existingCategory != null)
