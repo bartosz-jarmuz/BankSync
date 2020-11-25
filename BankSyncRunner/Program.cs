@@ -41,7 +41,7 @@ namespace BankSyncRunner
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error while processing service: {configService.Name}", ex);
+                    Console.WriteLine($"Error while processing service: {configService.Name}" + ex);
                 }
             }
 

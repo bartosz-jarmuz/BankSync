@@ -6,6 +6,7 @@
 
 using System;
 using System.Text.RegularExpressions;
+using BankSync.Model;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
 {
@@ -77,6 +78,17 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
             return null;
         }
+        
+        public string GetRecipientFromAccount(string description)
+        {
+            if (description.StartsWith("Rachunek odbiorcy: "))
+            {
+                string part = description.Substring("Rachunek odbiorcy: ".Length);
+                return part.Remove(part.IndexOf("Nazwa ", StringComparison.OrdinalIgnoreCase)).Trim();
+            }
+
+            return null;
+        }
 
         public string GetRecipient(string description)
         {
@@ -133,6 +145,26 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
                 city = city.Remove(city.IndexOf("Adres:", StringComparison.Ordinal)).Trim();
                 return city;
+            }
+        }
+
+        public DateTime GetDate(string input)
+        {
+            Regex regex = new Regex("(Data i czas operacji: )(.*)");
+            Match match = regex.Match(input);
+            var stringValue = match.Groups[2].Value.Trim();
+            if (string.IsNullOrEmpty(stringValue))
+            {
+                return default;
+            }
+            try
+            {
+                DateTime parsed = Convert.ToDateTime(stringValue);
+                return parsed;
+            }
+            catch (Exception )
+            {
+                return default;
             }
         }
     }

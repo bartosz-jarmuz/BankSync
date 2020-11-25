@@ -30,5 +30,16 @@ Referencje własne zleceniodawcy: 33333333333333";
 
             Check.That(new DescriptionDataExtractor().GetRecipient(input)).IsEqualTo("John DOE");
         }
+        
+        [TestMethod]
+        public void FromRecipientAccount()
+        {
+            string input = @"Rachunek odbiorcy: 28 0000 0022 9000 2016 2222 2222
+Nazwa odbiorcy: John DOE
+Tytuł: SPŁATA CZĘŚCI ZADŁUŻENIA KARTY KRED YTOWEJ * 0982 OD: 2222222222222
+Referencje własne zleceniodawcy: 33333333333333";
+
+            Check.That(new DescriptionDataExtractor().GetRecipientFromAccount(input)).IsEqualTo("28 0000 0022 9000 2016 2222 2222");
+        }
     }
 }

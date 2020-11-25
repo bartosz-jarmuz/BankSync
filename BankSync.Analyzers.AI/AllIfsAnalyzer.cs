@@ -26,7 +26,8 @@ namespace BankSync.Analyzers.AI
 
     public class AllIfsAnalyzer : IBankDataAnalyzer
     {
-        private readonly List<CategoryMap> categories = new List<CategoryMap>();
+        private readonly List<CategoryMap> expenseCategories = new List<CategoryMap>();
+        private readonly List<CategoryMap> incomeCategories = new List<CategoryMap>();
 
         public AllIfsAnalyzer(FileInfo dictionaryFile)
         {
@@ -37,28 +38,42 @@ namespace BankSync.Analyzers.AI
         {
             XDocument xDoc = XDocument.Load(dictionaryFile.FullName);
 
-            foreach (XElement categoryElement in xDoc.Root.Descendants("Category"))
+            foreach (XElement categoryElement in xDoc.Root.Element("Expense").Descendants("Category"))
             {
-                CategoryMap category = new CategoryMap()
-                {
-                    Name = categoryElement.Attribute("Name").Value
-                };
+                CategoryMap category = LoadCategoryMap(categoryElement);
 
+                this.expenseCategories.Add(category);
+            }
+            
+            foreach (XElement categoryElement in xDoc.Root.Element("Income").Descendants("Category"))
+            {
+                CategoryMap category = LoadCategoryMap(categoryElement);
 
-                List<string> allDirectTokens = LoadTokensFromElement(categoryElement);
-                category.MapFrom = new List<string>(allDirectTokens);
-
-                foreach (XElement subcategoryElement in categoryElement.Elements("Subcategory"))
-                {
-                    SubcategoryMap subcategory = new SubcategoryMap();
-                    subcategory.Name = subcategoryElement.Attribute("Name").Value;
-                    subcategory.MapFrom = LoadTokensFromElement(subcategoryElement);
-                    category.Subcategories.Add(subcategory);
-                }
-
-                this.categories.Add(category);
+                this.incomeCategories.Add(category);
             }
 
+        }
+
+        private static CategoryMap LoadCategoryMap(XElement categoryElement)
+        {
+            CategoryMap category = new CategoryMap()
+            {
+                Name = categoryElement.Attribute("Name").Value
+            };
+
+
+            List<string> allDirectTokens = LoadTokensFromElement(categoryElement);
+            category.MapFrom = new List<string>(allDirectTokens);
+
+            foreach (XElement subcategoryElement in categoryElement.Elements("Subcategory"))
+            {
+                SubcategoryMap subcategory = new SubcategoryMap();
+                subcategory.Name = subcategoryElement.Attribute("Name").Value;
+                subcategory.MapFrom = LoadTokensFromElement(subcategoryElement);
+                category.Subcategories.Add(subcategory);
+            }
+
+            return category;
         }
 
         private static List<string> LoadTokensFromElement(XElement categoryElement)
@@ -77,60 +92,126 @@ namespace BankSync.Analyzers.AI
         {
             foreach (BankEntry bankEntry in data.Entries)
             {
-                bool isAssigned = false;
-                foreach (CategoryMap category in this.categories)
+                if (bankEntry.Amount < 0)
                 {
-                    foreach (SubcategoryMap subcategory in category.Subcategories)
-                    {
-                        foreach (string keyword in subcategory.MapFrom)
-                        {
-                            try
-                            {
-                                if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
-                                    || bankEntry.Note.ContainsNationalUnaware(keyword))
-                                {
-                                    bankEntry.Subcategory = subcategory.Name;
-                                    bankEntry.Category = category.Name;
-                                    isAssigned = true;
-                                    break;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e);
-                            }
-                        }
-                    }
+                    this.AssignExpenseCategories(bankEntry);
+                }
+                else
+                {
+                    this.AssignIncomeCategories(bankEntry);
 
-                    if (!isAssigned)
-                    {
-                        foreach (string keyword in category.MapFrom)
-                        {
-                            try
-                            {
-                                if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
-                                    || bankEntry.Note.ContainsNationalUnaware(keyword))
-                                {
-                                    bankEntry.Category = category.Name;
-                                    break;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e);
-                            }
-                        }
-                    }
                 }
             }
             this.AddCategoryList(data);
             
         }
 
+        private void AssignExpenseCategories(BankEntry bankEntry)
+        {
+            bool isAssigned = false;
+            foreach (CategoryMap category in this.expenseCategories)
+            {
+                foreach (SubcategoryMap subcategory in category.Subcategories)
+                {
+                    foreach (string keyword in subcategory.MapFrom)
+                    {
+                        try
+                        {
+                            if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
+                                || bankEntry.PaymentType.ContainsNationalUnaware(keyword)
+                                || bankEntry.Note.ContainsNationalUnaware(keyword))
+                            {
+                                bankEntry.Subcategory = subcategory.Name;
+                                bankEntry.Category = category.Name;
+                                isAssigned = true;
+                                break;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+                }
+
+                if (!isAssigned)
+                {
+                    foreach (string keyword in category.MapFrom)
+                    {
+                        try
+                        {
+                            if (bankEntry.Recipient.ContainsNationalUnaware(keyword)
+                                || bankEntry.PaymentType.ContainsNationalUnaware(keyword)
+                                || bankEntry.Note.ContainsNationalUnaware(keyword))
+                            {
+                                bankEntry.Category = category.Name;
+                                break;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+                }
+            }
+        }
+        
+        private void AssignIncomeCategories(BankEntry bankEntry)
+        {
+            bool isAssigned = false;
+            foreach (CategoryMap category in this.incomeCategories)
+            {
+                foreach (SubcategoryMap subcategory in category.Subcategories)
+                {
+                    foreach (string keyword in subcategory.MapFrom)
+                    {
+                        try
+                        {
+                            if (bankEntry.Payer.ContainsNationalUnaware(keyword)
+                                || bankEntry.PaymentType.ContainsNationalUnaware(keyword)
+                                || bankEntry.Note.ContainsNationalUnaware(keyword))
+                            {
+                                bankEntry.Subcategory = subcategory.Name;
+                                bankEntry.Category = category.Name;
+                                isAssigned = true;
+                                break;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+                }
+
+                if (!isAssigned)
+                {
+                    foreach (string keyword in category.MapFrom)
+                    {
+                        try
+                        {
+                            if (bankEntry.Payer.ContainsNationalUnaware(keyword)
+                                || bankEntry.PaymentType.ContainsNationalUnaware(keyword)
+                                || bankEntry.Note.ContainsNationalUnaware(keyword))
+                            {
+                                bankEntry.Category = category.Name;
+                                break;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+                }
+            }
+        }
+
 
         private void AddCategoryList(BankDataSheet data)
         {
-            foreach (CategoryMap category in this.categories)
+            foreach (CategoryMap category in this.expenseCategories)
             {
                 Category existingCategory = data.Categories.FirstOrDefault(x => x.Name == category.Name);
                 if (existingCategory != null)

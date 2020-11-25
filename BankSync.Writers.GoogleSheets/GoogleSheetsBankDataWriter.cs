@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using BankSync.Model;
+using BankSync.Utilities;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
@@ -17,14 +19,47 @@ namespace BankSync.Writers.GoogleSheets
     public class GoogleSheetsBankDataWriter : IBankDataWriter
     {
         private readonly FileInfo googleWriterConfigFile;
-        private readonly string readRange = "Data!A1:N200";
+        private readonly string readRange = "Data!A:N";
+        private readonly string headerRange = "Data!A1:N1";
         private readonly string spreadsheetId;
         private readonly string credentialsPath;
         private readonly int dataSheetId;
 
         private static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
         private static readonly string ApplicationName = "BankSync";
+        private int? entryIdRow;
+        private int? accountRow;
+        private int? dateRow;
+        private int? currencyRow;
+        private int? amountRow;
+        private int? balanceRow;
+        private int? paymentTypeRow;
+        private int? recipientRow;
+        private int? payerRow;
+        private int? noteRow;
+        private int? categoryRow;
+        private int? subcategoryRow;
+        private int? tagsRow;
+        private int? fullDetailsRow;
 
+        private int?[] allHeadersIndexes => new int?[]
+        {
+            this.entryIdRow,
+            this.accountRow,
+            this.dateRow,
+            this.currencyRow,
+            this.amountRow,
+            this.balanceRow,
+            this.paymentTypeRow,
+            this.recipientRow,
+            this.payerRow,
+            this.noteRow,
+            this.categoryRow,
+            this.subcategoryRow,
+            this.tagsRow,
+            this.fullDetailsRow,
+        };
+        
         public GoogleSheetsBankDataWriter(FileInfo googleWriterConfigFile)
         {
             this.googleWriterConfigFile = googleWriterConfigFile;
@@ -34,11 +69,11 @@ namespace BankSync.Writers.GoogleSheets
             this.dataSheetId = Convert.ToInt32(xDoc.Root.Element("DataSheetId").Value);
         }
 
-       
-
         public async Task Write(BankDataSheet data)
         {
             SheetsService service = this.GetSheetsService();
+            await this.ResetSorting(service.Spreadsheets);
+            
             List<BankEntry> entries = await this.GetEntriesToAppend(service, data);
 
             if (entries.Any())
@@ -66,7 +101,60 @@ namespace BankSync.Writers.GoogleSheets
 
         }
         
-        
+        private async Task ResetSorting(SpreadsheetsResource spreadsheets)
+        {
+            ValueRange response = await spreadsheets.Values.Get(this.spreadsheetId, this.headerRange).ExecuteAsync();
+            this.LoadHeaderIndexes(response.Values.FirstOrDefault());
+            
+            List<Request> list = new List<Request>();
+
+            ClearBasicFilterRequest clearFilter = new ClearBasicFilterRequest()
+            {
+                SheetId = this.dataSheetId
+            };
+            list.Add(new Request(){ ClearBasicFilter = clearFilter});
+
+            
+            SortRangeRequest sortRequest = new SortRangeRequest()
+            {
+                Range = new GridRange()
+                {
+                    SheetId    = this.dataSheetId,
+                    StartColumnIndex = 0
+                },
+                SortSpecs = new List<SortSpec>()
+                {
+                    new SortSpec()
+                    {
+                        DimensionIndex = this.dateRow,
+                        SortOrder = "DESCENDING"
+                    }
+                }
+            };
+
+            list.Add(new Request(){ SortRange = sortRequest});
+            
+            
+            SetBasicFilterRequest setFilter = new SetBasicFilterRequest()
+            {
+                Filter = new BasicFilter()
+                {
+                    Range = new GridRange()
+                    {
+                        SheetId    = this.dataSheetId,
+                        StartColumnIndex = 0
+                    },
+                }
+            };
+            list.Add(new Request(){ SetBasicFilter = setFilter});
+
+            BatchUpdateSpreadsheetRequest updateSpreadsheetRequest = new BatchUpdateSpreadsheetRequest()
+            {
+                Requests = list
+            };
+
+            BatchUpdateSpreadsheetResponse updateResponse = await spreadsheets.BatchUpdate(updateSpreadsheetRequest, this.spreadsheetId).ExecuteAsync();
+        }
 
         private async Task<int> VerifyAnyDataSkipped(SheetsService sheetsService, BankDataSheet data)
         {
@@ -102,7 +190,7 @@ namespace BankSync.Writers.GoogleSheets
                 if (ids.All(x => x != bankEntry.BankEntryId))
                 {
                     missingEntries.Add(bankEntry);
-                    Console.WriteLine($"Missing entry {bankEntry}");
+                    Console.WriteLine($"Missing entry: {bankEntry}");
                 }
             }
 
@@ -111,36 +199,112 @@ namespace BankSync.Writers.GoogleSheets
             return missingEntries.Count;
         }
 
+        private void LoadHeaderIndexes(IList<object> headerRow)
+        {
+            for (int i = 0; i < headerRow.Count; i++)
+            {
+                string text = headerRow[i]?.ToString()??"";
+                switch (text)
+                {
+                    case "Entry ID":
+                        this.entryIdRow = i;
+                        break;
+                    case "Account":
+                        this.accountRow = i;
+                        break;
+                    case "Date":
+                        this.dateRow = i;
+                        break;
+                    case "Currency":
+                        this.currencyRow = i;
+                        break;
+                    case "Amount":
+                        this.amountRow = i;
+                        break;
+                    case "Balance":
+                        this.balanceRow = i;
+                        break;
+                    case "PaymentType":
+                        this.paymentTypeRow = i;
+                        break;
+                    case "Recipient":
+                        this.recipientRow = i;
+                        break;
+                    case "Payer":
+                        this.payerRow = i;
+                        break;
+                    case "Note":
+                        this.noteRow = i;
+                        break;
+                    case "Category":
+                        this.categoryRow = i;
+                        break;
+                    case "Subcategory":
+                        this.subcategoryRow = i;
+                        break;
+                    case "Tags":
+                        this.tagsRow = i;
+                        break;
+                    case "Full Details":
+                        this.fullDetailsRow = i;
+                        break;
+                }
+            }
+
+            if (this.allHeadersIndexes.Any(x=>x == null))
+            {
+                throw new InvalidOperationException("Error: incorrect header rows in Excel file.");
+            }
+            
+        }
+        
         private async Task<List<BankEntry>> GetEntriesToAppend(SheetsService sheetsService, BankDataSheet data)
         {
             SpreadsheetsResource.ValuesResource.GetRequest request =sheetsService.Spreadsheets.Values.Get(this.spreadsheetId, this.readRange);
             ValueRange response = await request.ExecuteAsync();
-            IList<object> value = response.Values.Skip(1).FirstOrDefault(x=>x[0] != null && !string.IsNullOrEmpty(x[0].ToString())); //skip header
-            if (value == null)
+            IList<object> firstDataRow = response.Values.Skip(1).FirstOrDefault(x=>x[0] != null && !string.IsNullOrEmpty(x[0].ToString())); //skip header
+            if (firstDataRow == null)
             {
                 return data.Entries;
             }
             else
             {
-                int latestId = Convert.ToInt32(value[0]);
-                DateTime latestDate = Convert.ToDateTime(value[2]);
-                //that's the topmost entries details - lets find the last entry in the data we have, and import all newer
-                Console.WriteLine($"Latest entry and date: {latestId} : {latestDate.Date}.");
+                int latestId = Convert.ToInt32(firstDataRow[0]);
+                DateTime latestDate = Convert.ToDateTime(firstDataRow[2]);
+                List<int> entriesInTheSheet = new List<int>();
+                List<IList<object>> dataList = response.Values.Skip(1).ToList();
+                Console.WriteLine($"Total entries loaded: {dataList.Count}. Latest entry and date: {latestId} : {latestDate.Date}.");
 
-                for (int i = 0; i < data.Entries.Count; i++)
+                Console.WriteLine($"Looking for entries to be added to the spreadsheet...");
+                foreach (IList<object> row in dataList)
                 {
-                    BankEntry entry = data.Entries[i];
-                    //we check both ID and date, in case we have been fiddling with the data manually 
-                    if (entry.BankEntryId == latestId && entry.Date.Date == latestDate.Date)
+                    string? entryIdString = row[this.entryIdRow.Value]?.ToString();
+                    if (!string.IsNullOrEmpty(entryIdString))
                     {
-                        List<BankEntry> entries = data.Entries.Take(i).ToList();
-                        Console.WriteLine($"Appending {entries.Count} entries");
-                        return entries;
+                        try
+                        {
+                            int entryId = Convert.ToInt32(entryIdString);
+                            entriesInTheSheet.Add(entryId);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"Cannot convert: [{entryIdString}] to entry ID. {e}");
+                            throw;
+                        }
                     }
                 }
+
+                List<BankEntry> missingEntries = data.Entries.Where(newEntry =>
+                    entriesInTheSheet.All(sheetEntry => sheetEntry != newEntry.BankEntryId)).ToList();
+                foreach (BankEntry bankEntry in missingEntries)
+                {
+                    Console.WriteLine($"Entry to be added: {bankEntry}");
+                }
+                Console.WriteLine($"Total entries to be added: {missingEntries.Count}");
+
+                
+                return missingEntries;
             }
-            Console.WriteLine("No entries to append");
-            return new List<BankEntry>();
         }
 
         private async Task AddCategories(SpreadsheetsResource spreadsheets, List<Category> categories)
@@ -174,34 +338,6 @@ namespace BankSync.Writers.GoogleSheets
             UpdateValuesResponse res = await update.ExecuteAsync();
         }
 
-        private SheetsService GetSheetsService()
-        {
-            UserCredential credential;
-
-            using (FileStream stream =
-                new FileStream(this.credentialsPath, FileMode.Open,
-                    FileAccess.Read))
-            {
-                // The file token.json stores the user's access and refresh tokens, and is created
-                // automatically when the authorization flow completes for the first time.
-                string credPath = "token.json";
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(stream).Secrets,
-                    Scopes,
-                    "user",
-                    CancellationToken.None,
-                    new FileDataStore(credPath, true)).Result;
-            }
-
-            // Create Google Sheets API service.
-            SheetsService service = new SheetsService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = ApplicationName
-            });
-            return service;
-        }
-
         private async Task AddEntries(SpreadsheetsResource spreadsheets, List<BankEntry> entries)
         {
             await this.AddRows(entries, spreadsheets);
@@ -210,7 +346,7 @@ namespace BankSync.Writers.GoogleSheets
             List<IList<object>> values = new List<IList<object>>();
             foreach (BankEntry bankEntry in entries)
             {
-                values.Add(this.GetData(bankEntry));
+                values.Add(this.ConvertToRow(bankEntry));
             }
             
             ValueRange valueRange = new ValueRange()
@@ -250,29 +386,59 @@ namespace BankSync.Writers.GoogleSheets
             BatchUpdateSpreadsheetResponse response = await spreadsheets.BatchUpdate(updateSpreadsheetRequest, this.spreadsheetId).ExecuteAsync();
         }
 
-
-      
-
-        private IList<object> GetData(BankEntry entry)
+        private IList<object> ConvertToRow(BankEntry entry)
         {
             List<object> obj = new List<object>();
 
-            obj.Add(entry.BankEntryId);
-             obj.Add(entry.Account);
-             obj.Add(entry.Date.Date.ToString("dd/MM/yyyy"));
-             obj.Add(entry.Currency);
-             obj.Add(entry.Amount);
-             obj.Add(entry.Balance);
-             obj.Add(entry.PaymentType);
-             obj.Add(entry.Recipient);
-             obj.Add(entry.Payer);
-             obj.Add(entry.Note);
-             obj.Add(entry.Category);
-             obj.Add(entry.Subcategory);
-             obj.Add(string.Join(";",entry.Tags));
-             obj.Add(entry.FullDetails);
+            // ReSharper disable PossibleInvalidOperationException - these values were null checked when sheet was loaded 
+            obj.Insert(this.entryIdRow.Value, entry.BankEntryId);
+            obj.Insert(this.accountRow.Value, entry.Account);
+             obj.Insert(this.dateRow.Value, entry.Date.Date.ToString("dd/MM/yyyy"));
+             obj.Insert(this.currencyRow.Value, entry.Currency);
+             obj.Insert(this.amountRow.Value, entry.Amount);
+             obj.Insert(this.balanceRow.Value, entry.Balance);
+             obj.Insert(this.paymentTypeRow.Value, entry.PaymentType);
+             obj.Insert(this.recipientRow.Value,entry.Recipient);
+             obj.Insert(this.payerRow.Value, entry.Payer);
+             obj.Insert(this.noteRow.Value,entry.Note);
+             obj.Insert(this.categoryRow.Value, entry.Category);
+             obj.Insert(this.subcategoryRow.Value,entry.Subcategory);
+             obj.Insert(this.tagsRow.Value,string.Join(";",entry.Tags));
+             obj.Insert(this.fullDetailsRow.Value, entry.FullDetails);
+             // ReSharper restore PossibleInvalidOperationException
                  
              return obj;
         }
+
+        private SheetsService GetSheetsService()
+        {
+            UserCredential credential;
+
+            using (FileStream stream =
+                new FileStream(this.credentialsPath, FileMode.Open,
+                    FileAccess.Read))
+            {
+                // The file token.json stores the user's access and refresh tokens, and is created
+                // automatically when the authorization flow completes for the first time.
+                string credPath = "token.json";
+                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                    GoogleClientSecrets.Load(stream).Secrets,
+                    Scopes,
+                    "user",
+                    CancellationToken.None,
+                    new FileDataStore(credPath, true)).Result;
+            }
+
+            // Create Google Sheets API service.
+            SheetsService service = new SheetsService(new BaseClientService.Initializer
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName
+            });
+            return service;
+        }
+
     }
+
+    
 }

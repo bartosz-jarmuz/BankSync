@@ -45,7 +45,6 @@ namespace BankSync.Enrichers.Allegro
             return allUsersData;
         }
 
-        
         /// <summary>
         /// Don't download old data if older or equal data is already stored
         /// </summary>
@@ -64,7 +63,6 @@ namespace BankSync.Enrichers.Allegro
 
             return oldestEntry;
         }
-
 
         public async Task Enrich(BankDataSheet data, DateTime startTime, DateTime endTime)
         {
@@ -153,7 +151,7 @@ namespace BankSync.Enrichers.Allegro
                 newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount);
             }
 
-            newEntry.Note = $"{offer.title} (Oferta {offer.id}, Przedmiot {offerIndex + 1}/{allegroEntry.offers.Length})";
+            newEntry.Note = $"{offer.title} (Ilość sztuk: {offer.quantity}, Oferta {offer.id}, Pozycja {offerIndex + 1}/{allegroEntry.offers.Length})";
             if (entry.Amount < 0)
             {
                 newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
@@ -167,13 +165,13 @@ namespace BankSync.Enrichers.Allegro
                 newEntry.Payer = "allegro.pl - " + allegroEntry.seller.login;
                 newEntry.Recipient = container.ServiceUserName;
             }
-
+            newEntry.FullDetails += $"\r\nPłatność Allegro: {allegroEntry.payment.id}.\r\n URL: {offer.friendlyUrl}";
             return newEntry;
         }
 
         private static bool IsAllegro(BankEntry entry)
         {
-            var value = entry.Recipient.Contains("allegro.pl", StringComparison.OrdinalIgnoreCase) || entry.Recipient.Contains("PAYU*ALLEGRO", StringComparison.OrdinalIgnoreCase);
+            bool value = entry.Recipient.Contains("allegro.pl", StringComparison.OrdinalIgnoreCase) || entry.Recipient.Contains("PAYU*ALLEGRO", StringComparison.OrdinalIgnoreCase);
             if (value)
             {
                 return true;
@@ -205,9 +203,9 @@ namespace BankSync.Enrichers.Allegro
             {
 
                 //the payer can be empty or it can be somehow incorrect, but if we have an entry that matches the exact price and date... it's probably IT
-                foreach (var container in allegroDataContainers)
+                foreach (AllegroDataContainer container in allegroDataContainers)
                 {
-                    var entries = GetAllegroEntries(entry, container.Model, out List<Offer> offersMatchingPrice );
+                    List<Myorder> entries = GetAllegroEntries(entry, container.Model, out List<Offer> offersMatchingPrice );
                     if (offersMatchingPrice != null && offersMatchingPrice.Any())
                     {
                         offersWhichMatchThePriceButNotTheDateBecauseTheyAreRefunds = new List<Offer>(offersMatchingPrice);
@@ -253,36 +251,72 @@ namespace BankSync.Enrichers.Allegro
             }
             else
             {
-                var dateFilteredEntries = allegroEntries.Where(x => x.payment.endDate.Date == entry.Date).ToList();
+                List<Myorder> dateFilteredEntries = allegroEntries.Where(x => x.payment.endDate.Date == entry.Date.Date).ToList();
                 if (dateFilteredEntries.Count < 1)
                 {
                     if (entry.Amount > 0)
                     {
-                        //if it's a refund, then we have one more chance of finding the right one
-                        //the refund must have happened AFTER the purchase
-                        dateFilteredEntries = allegroEntries.Where(x => x.payment.endDate.Date < entry.Date).ToList();
-
-                        if (dateFilteredEntries.Count != 1)
-                        {
-                            //so now we have a potentially long list of entries purchased at the same price (e.g. 9.99),
-                            //so we cannot figure out which one was actually refunded.
-                            //too bad there is no refund note or reference
-                             offersMatchingPrice = dateFilteredEntries
-                                 .SelectMany(x=> x.offers.Where(x=>Convert.ToDecimal(x.offerPrice.amount)  == Convert.ToDecimal(entry.Amount.ToString().Trim('-')))
-                                ).ToList();
-                            
-                            return null;
-                        }
-                        else
-                        {
-                            return dateFilteredEntries;
-                        }
+                        return FindRefundEntries(entry, ref offersMatchingPrice, allegroEntries);
                     }
-                    
                     
                     Console.WriteLine($"ERROR - TOO FEW ENTRIES WHEN RECOGNIZING ALLEGRO ENTRY FOR {entry.Note}");
                 }
+                else
+                {
+                    return FindProperEntriesBasedOnDateTime(entry, dateFilteredEntries);
+                }
+                return dateFilteredEntries;
+            }
+        }
 
+        private static List<Myorder> FindProperEntriesBasedOnDateTime(BankEntry entry, List<Myorder> dateFilteredEntries)
+        {
+            string paymentId = dateFilteredEntries.First().payment.id;
+            if (dateFilteredEntries.All(x => paymentId == x.payment.id))
+            {
+                //that's all the orders from the same payment, so it's one big purchase
+                return dateFilteredEntries;
+            }
+            else
+            {
+                //we have multiple purchases for the same amount on the same date - lets try finding matching timestamp (if timestamp is available)
+                DateTime entryTimeUtc = entry.Date.ToUniversalTime();
+                List<Myorder> timeMatchingEntries = dateFilteredEntries
+                    .Where(x => x.payment.endDate > entryTimeUtc && x.payment.startDate < entryTimeUtc).ToList();
+
+                if (timeMatchingEntries.Count == 1)
+                {
+                    return timeMatchingEntries;
+                }
+                else
+                {
+                    var orderedByTime = timeMatchingEntries.OrderBy(x => x.payment.endDate);
+                    return orderedByTime.Take(1).ToList();
+                }
+            }
+        }
+
+        private static List<Myorder> FindRefundEntries(BankEntry entry, ref List<Offer> offersMatchingPrice, List<Myorder> allegroEntries)
+        {
+            List<Myorder> dateFilteredEntries;
+            //if it's a refund, then we have one more chance of finding the right one
+            //the refund must have happened AFTER the purchase
+            dateFilteredEntries = allegroEntries.Where(x => x.payment.endDate.Date < entry.Date).ToList();
+
+            if (dateFilteredEntries.Count != 1)
+            {
+                //so now we have a potentially long list of entries purchased at the same price (e.g. 9.99),
+                //so we cannot figure out which one was actually refunded.
+                //too bad there is no refund note or reference
+                offersMatchingPrice = dateFilteredEntries
+                    .SelectMany(x => x.offers.Where(x =>
+                        Convert.ToDecimal(x.offerPrice.amount) == Convert.ToDecimal(entry.Amount.ToString().Trim('-')))
+                    ).ToList();
+
+                return null;
+            }
+            else
+            {
                 return dateFilteredEntries;
             }
         }

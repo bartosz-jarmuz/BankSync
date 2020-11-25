@@ -106,6 +106,19 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             XElement element = operation.Element("description");
             if (element != null)
             {
+                // When you own multiple accounts, your better bet at figuring out tha payer is by checking the account number
+                // because the 'nazwa odbiorcy' will be same person for multiple sources
+                // However, when you send money to a stranger, you better figure out who its from by the name, not a number
+                // Therefore, a quick win is to try mapping account number, and if not, then go with the regular flow
+                recipient = this.descriptionDataExtractor.GetRecipientFromAccount(element.Value);
+                if (recipient != null)
+                {
+                    var mapped = this.mapper.Map(recipient);
+                    if (!string.IsNullOrEmpty(mapped) && mapped != recipient)
+                    {
+                        return mapped;
+                    }
+                }
                 recipient =  this.descriptionDataExtractor.GetRecipient(element.Value);
             }
 
@@ -192,7 +205,18 @@ namespace BankSync.Exporters.Ipko.DataTransformation
 
         private DateTime GetDate(XElement operation)
         {
-            XElement element = operation.Element("order-date");
+            XElement element = operation.Element("description");
+            if (element != null)
+            {
+                //description might be more accurate as for some entries it contains time stamp as well
+                var dateTime = this.descriptionDataExtractor.GetDate(element.Value);
+                if (dateTime != default)
+                {
+                    return dateTime;
+                }
+            }
+
+            element = operation.Element("order-date");
             if (element != null)
             {
                 return DateTime.Parse(element.Value);

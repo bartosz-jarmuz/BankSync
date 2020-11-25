@@ -47,14 +47,6 @@ namespace BankSync.Model
         public string FullDetails{ get; set; }
         public string Account{ get; set; }
 
-        public void AssignTag(string tag)
-        {
-            if (!this.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
-            {
-                this.Tags.Insert(0, tag);
-            }
-        }
-
         public int BankEntryId
         {
             get
@@ -86,7 +78,7 @@ namespace BankSync.Model
         public override string ToString()
         {
             return $"ID: [{this.BankEntryId}], " +
-                   $"DATE: [{this.Date:dd-MM-yyyy}], " +
+                   $"DATE: [{this.Date:dd-MM-yyyy hh-mm-ss}], " +
                    $"ACCOUNT: [{this.Account}], " +
                    $"AMOUNT: [{this.Amount}], " +
                    $"PAYER [{this.Payer}]," +
