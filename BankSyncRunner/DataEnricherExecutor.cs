@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using BankSync.Config;
 using BankSync.Enrichers.Allegro;
+using BankSync.Logging;
 using BankSync.Model;
 
 namespace BankSyncRunner
@@ -20,14 +21,14 @@ namespace BankSyncRunner
     {
         private readonly List<IBankDataEnricher> enrichers = new List<IBankDataEnricher>();
 
-        public void LoadEnrichers(BankSyncConfig config)
+        public void LoadEnrichers(BankSyncConfig config, IBankSyncLogger logger)
         {
 
             var allegroConfig = config.Services.FirstOrDefault(x => x.Name == "Allegro");
 
             if (allegroConfig != null)
             {
-                this.enrichers.Add(new AllegroBankDataEnricher(allegroConfig));
+                this.enrichers.Add(new AllegroBankDataEnricher(allegroConfig,logger));
             }
         }
 

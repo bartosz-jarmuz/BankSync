@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using BankSync.Logging;
 using BankSync.Model;
 using BankSync.Utilities;
 using Google.Apis.Auth.OAuth2;
@@ -19,6 +20,7 @@ namespace BankSync.Writers.GoogleSheets
     public class GoogleSheetsBankDataWriter : IBankDataWriter
     {
         private readonly FileInfo googleWriterConfigFile;
+        private readonly IBankSyncLogger logger;
         private readonly string readRange = "Data!A:N";
         private readonly string headerRange = "Data!A1:N1";
         private readonly string spreadsheetId;
@@ -60,9 +62,10 @@ namespace BankSync.Writers.GoogleSheets
             this.fullDetailsRow,
         };
         
-        public GoogleSheetsBankDataWriter(FileInfo googleWriterConfigFile)
+        public GoogleSheetsBankDataWriter(FileInfo googleWriterConfigFile, IBankSyncLogger logger)
         {
             this.googleWriterConfigFile = googleWriterConfigFile;
+            this.logger = logger;
             XDocument xDoc = XDocument.Load(this.googleWriterConfigFile.FullName);
             this.credentialsPath = xDoc.Root.Element("CredentialsPath").Value;
             this.spreadsheetId = xDoc.Root.Element("SpreadsheetId").Value;
@@ -84,7 +87,7 @@ namespace BankSync.Writers.GoogleSheets
             int skippedCount = await this.VerifyAnyDataSkipped(service, data);
             if (skippedCount > 0)
             {
-                Console.WriteLine($"{skippedCount} entries were missing. Verifying they were re-added correctly.");
+                this.logger.Warning($"{skippedCount} entries were missing. Verifying they were re-added correctly.");
 
                 skippedCount = await this.VerifyAnyDataSkipped(service, data);
                 if (skippedCount > 0)
@@ -93,7 +96,7 @@ namespace BankSync.Writers.GoogleSheets
                 }
                 else
                 {
-                    Console.WriteLine($"All entries re-added correctly.");
+                    this.logger.Debug($"All entries re-added correctly.");
                 }
             }
 
@@ -154,6 +157,8 @@ namespace BankSync.Writers.GoogleSheets
             };
 
             BatchUpdateSpreadsheetResponse updateResponse = await spreadsheets.BatchUpdate(updateSpreadsheetRequest, this.spreadsheetId).ExecuteAsync();
+            
+            this.logger.Debug($"Updated filters and sorting.");
         }
 
         private async Task<int> VerifyAnyDataSkipped(SheetsService sheetsService, BankDataSheet data)
@@ -172,13 +177,13 @@ namespace BankSync.Writers.GoogleSheets
             
             if(duplicates.Any())
             {
-                Console.WriteLine($"Warning: found {duplicates.Count} duplicated IDs. {string.Join(", ", duplicates)}");
+                this.logger.Warning($"Warning: found {duplicates.Count} duplicated IDs. {string.Join(", ", duplicates)}");
 
                 IEnumerable<BankEntry> entries = data.Entries.Where(x => duplicates.Contains(x.BankEntryId));
 
                 foreach (BankEntry bankEntry in entries)
                 {
-                    Console.WriteLine($"Duplicated entry: {bankEntry}");
+                    this.logger.Warning($"Duplicated entry: {bankEntry}");
                 }
             }
 
@@ -190,7 +195,7 @@ namespace BankSync.Writers.GoogleSheets
                 if (ids.All(x => x != bankEntry.BankEntryId))
                 {
                     missingEntries.Add(bankEntry);
-                    Console.WriteLine($"Missing entry: {bankEntry}");
+                    this.logger.Warning($"Missing entry: {bankEntry}");
                 }
             }
 
@@ -273,9 +278,9 @@ namespace BankSync.Writers.GoogleSheets
                 DateTime latestDate = Convert.ToDateTime(firstDataRow[2]);
                 List<(int entryId, DateTime date, IList<object> row) > entriesInTheSheet = new List<(int entryId, DateTime date, IList<object> row)>();
                 List<IList<object>> dataList = response.Values.Skip(1).ToList();
-                Console.WriteLine($"Total entries loaded: {dataList.Count}. Latest entry and date: {latestId} : {latestDate.Date}.");
+                this.logger.Debug($"Total entries loaded: {dataList.Count}. Latest entry and date: {latestId} : {latestDate.Date}.");
 
-                Console.WriteLine($"Looking for entries to be added to the spreadsheet...");
+                this.logger.Debug($"Looking for entries to be added to the spreadsheet...");
                 foreach (IList<object> row in dataList)
                 {
                     string entryIdString = row[this.entryIdRow.Value]?.ToString();
@@ -290,7 +295,7 @@ namespace BankSync.Writers.GoogleSheets
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine($"Cannot convert: [{entryIdString}] to entry ID. {e}");
+                            this.logger.Warning($"Cannot convert: [{entryIdString}] to entry ID. {e}");
                             throw;
                         }
                     }
@@ -303,9 +308,9 @@ namespace BankSync.Writers.GoogleSheets
                 
                 foreach (BankEntry bankEntry in missingEntries)
                 {
-                    Console.WriteLine($"Entry to be added: {bankEntry}");
+                    this.logger.Debug($"Entry to be added: {bankEntry}");
                 }
-                Console.WriteLine($"Total entries to be added: {missingEntries.Count}");
+                this.logger.Debug($"Total entries to be added: {missingEntries.Count}");
 
                 
                 return missingEntries;
@@ -331,7 +336,7 @@ namespace BankSync.Writers.GoogleSheets
                 {
                     if (this.EntriesAreMatched(missingEntry, potentiallyExistingEntry.Value))
                     {
-                        Console.WriteLine($"Potentially duplicated entry with different IDs: " +
+                        this.logger.Warning($"Potentially duplicated entry with different IDs: " +
                                           $"Missing: {missingEntry.BankEntryId} - " +
                                           $"Details of existing: {potentiallyExistingEntry.Value}");
                         trulyMissing = false;
@@ -378,6 +383,8 @@ namespace BankSync.Writers.GoogleSheets
             
             update.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
             UpdateValuesResponse res = await update.ExecuteAsync();
+
+            this.logger.Debug("Updated categories list");
         }
 
         private async Task AddEntries(SpreadsheetsResource spreadsheets, List<BankEntry> entries)
@@ -401,6 +408,8 @@ namespace BankSync.Writers.GoogleSheets
             
             update.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
             UpdateValuesResponse res = await update.ExecuteAsync();
+            
+            this.logger.Info($"Added {values.Count} rows.");
         }
 
         private async Task AddRows(List<BankEntry> entries, SpreadsheetsResource spreadsheets)

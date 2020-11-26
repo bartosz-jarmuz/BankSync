@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using BankSync.Logging;
 using BankSync.Model;
 using BankSync.Utilities;
 
@@ -26,11 +27,13 @@ namespace BankSync.Analyzers.AI
 
     public class AllIfsAnalyzer : IBankDataAnalyzer
     {
+        private readonly IBankSyncLogger logger;
         private readonly List<CategoryMap> expenseCategories = new List<CategoryMap>();
         private readonly List<CategoryMap> incomeCategories = new List<CategoryMap>();
 
-        public AllIfsAnalyzer(FileInfo dictionaryFile)
+        public AllIfsAnalyzer(FileInfo dictionaryFile, IBankSyncLogger logger)
         {
+            this.logger = logger;
             this.LoadDictionary(dictionaryFile);
         }
 
@@ -129,7 +132,7 @@ namespace BankSync.Analyzers.AI
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine(e);
+                            this.logger.Debug(e.ToString());
                         }
                     }
                 }
@@ -150,7 +153,7 @@ namespace BankSync.Analyzers.AI
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine(e);
+                            this.logger.Debug(e.ToString());
                         }
                     }
                 }
@@ -180,7 +183,8 @@ namespace BankSync.Analyzers.AI
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine(e);
+                            this.logger.Debug(e.ToString());
+
                         }
                     }
                 }
@@ -201,7 +205,7 @@ namespace BankSync.Analyzers.AI
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine(e);
+                            this.logger.Debug(e.ToString());
                         }
                     }
                 }

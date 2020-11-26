@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using BankSync.Config;
 using BankSync.Exporters.Ipko.DataTransformation;
 using BankSync.Exporters.Ipko.DTO;
+using BankSync.Logging;
 using BankSync.Model;
 using BankSync.Utilities;
 using Newtonsoft.Json;
@@ -17,12 +18,13 @@ namespace BankSync.Exporters.Ipko
 {
     public partial class IpkoDataDownloader : IBankDataExporter
     {
-        public IpkoDataDownloader(ServiceUser serviceUserConfig, IDataMapper mapper)
+        public IpkoDataDownloader(ServiceUser serviceUserConfig, IDataMapper mapper, IBankSyncLogger logger)
         {
             this.credentials = serviceUserConfig.Credentials;
             this.serviceUserConfig = serviceUserConfig;
             this.mapper = mapper;
-            this.xmlTransformer = new IpkoXmlDataTransformer(mapper);
+            this.logger = logger;
+            this.xmlTransformer = new IpkoXmlDataTransformer(mapper, logger);
             this.sequence = new Sequence();
             this.oldDataManager = new OldDataManager(serviceUserConfig, this.xmlTransformer, mapper);
             HttpClientHandler handler = new HttpClientHandler()
@@ -37,6 +39,7 @@ namespace BankSync.Exporters.Ipko
         private readonly Credentials credentials;
         private readonly ServiceUser serviceUserConfig;
         private readonly IDataMapper mapper;
+        private readonly IBankSyncLogger logger;
         private readonly IpkoXmlDataTransformer xmlTransformer;
         private readonly HttpClient client;
         private string sessionId;
@@ -49,6 +52,7 @@ namespace BankSync.Exporters.Ipko
             List<BankDataSheet> datasets = new List<BankDataSheet>();
             BankDataSheet oldData = this.oldDataManager.GetOldData();
             datasets.Add(oldData);
+            
             foreach (Account account in this.serviceUserConfig.Accounts)
             {
                 DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, account.Number);
@@ -63,8 +67,10 @@ namespace BankSync.Exporters.Ipko
                 datasets.Add(data);
             }
 
-            return BankDataSheet.Consolidate(datasets);
-         }
+            BankDataSheet dataset = BankDataSheet.Consolidate(datasets);
+            
+            return dataset;
+        }
 
         /// <summary>
         /// Don't donwload old data if older or equal data is already stored

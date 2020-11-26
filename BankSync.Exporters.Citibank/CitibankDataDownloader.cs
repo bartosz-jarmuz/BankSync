@@ -10,6 +10,7 @@ namespace BankSync.Exporters.Citibank
     
     public class CitibankDataDownloader : IBankDataExporter
     {
+
         public CitibankDataDownloader(ServiceUser serviceUserConfig, IDataMapper mapper)
         {
             this.oldDataManager = new OldDataManager(serviceUserConfig,new CitibankXmlDataTransformer(mapper), mapper);
@@ -23,14 +24,14 @@ namespace BankSync.Exporters.Citibank
         /// </summary>
         public async Task<BankDataSheet> GetData(DateTime startTime, DateTime endTime)
         {
-            
             await Task.Delay(0);
             
             List<BankDataSheet> datasets = new List<BankDataSheet>();
             BankDataSheet oldData = this.oldDataManager.GetOldData();
             datasets.Add(oldData);
-
-            return BankDataSheet.Consolidate(datasets);
-         }
+            BankDataSheet dataset = BankDataSheet.Consolidate(datasets);
+            
+            return dataset;
+        }
     }
 }

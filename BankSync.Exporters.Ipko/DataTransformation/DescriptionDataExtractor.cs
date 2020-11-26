@@ -6,12 +6,19 @@
 
 using System;
 using System.Text.RegularExpressions;
+using BankSync.Logging;
 using BankSync.Model;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
 {
     public class DescriptionDataExtractor
     {
+        private readonly IBankSyncLogger logger;
+
+        public DescriptionDataExtractor(IBankSyncLogger logger)
+        {
+            this.logger = logger;
+        }
 
         public string GetNote(string description)
         {
@@ -115,7 +122,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    this.logger.Debug(ex.ToString());
                     return description;
                 }
             }

@@ -7,9 +7,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using BankSync.Config;
 using BankSync.Enrichers.Allegro.Model;
+using BankSync.Logging;
 using BankSync.Model;
 
 namespace BankSync.Enrichers.Allegro
@@ -17,10 +19,12 @@ namespace BankSync.Enrichers.Allegro
     public class AllegroBankDataEnricher : IBankDataEnricher
     {
         private readonly ServiceConfig config;
+        private readonly IBankSyncLogger logger;
 
-        public AllegroBankDataEnricher(ServiceConfig config)
+        public AllegroBankDataEnricher(ServiceConfig config, IBankSyncLogger logger)
         {
             this.config = config;
+            this.logger = logger;
         }
 
         private async Task<List<AllegroDataContainer>> LoadAllData(DateTime oldestEntry)
@@ -224,7 +228,7 @@ namespace BankSync.Enrichers.Allegro
             return null;
         }
 
-        private static List<Myorder> GetAllegroEntries(BankEntry entry, AllegroData model, out List<Offer> offersMatchingPrice )
+        private List<Myorder> GetAllegroEntries(BankEntry entry, AllegroData model, out List<Offer> offersMatchingPrice )
         {
             offersMatchingPrice = null;
             List<Myorder> allegroEntries = model.parameters.myorders.myorders
@@ -259,7 +263,7 @@ namespace BankSync.Enrichers.Allegro
                         return FindRefundEntries(entry, ref offersMatchingPrice, allegroEntries);
                     }
                     
-                    Console.WriteLine($"ERROR - TOO FEW ENTRIES WHEN RECOGNIZING ALLEGRO ENTRY FOR {entry.Note}");
+                     this.logger.Error($"ERROR - TOO FEW ENTRIES WHEN RECOGNIZING ALLEGRO ENTRY FOR {entry.Note}", new InvalidOperationException());
                 }
                 else
                 {

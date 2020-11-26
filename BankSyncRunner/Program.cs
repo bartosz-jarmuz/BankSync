@@ -9,8 +9,8 @@ using BankSync.DataMapping;
 using BankSync.Exporters.Citibank;
 using BankSync.Exporters.Ipko;
 using BankSync.Exporters.Ipko.DataTransformation;
+using BankSync.Logging;
 using BankSync.Model;
-using BankSync.Utilities;
 using BankSync.Writers.Excel;
 using BankSync.Writers.GoogleSheets;
 using BankSync.Writers.Json;
@@ -25,7 +25,8 @@ namespace BankSyncRunner
         static FileInfo googleWriterConfigFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Google\GoogleWriterSettings.xml");
         private static DateTime startTime = DateTime.Today.AddMonths(-12);
         private static DateTime endTime = DateTime.Today;
-
+        private static IBankSyncLogger logger = new ContextAwareLogger(new ConsoleLogger());
+        
         static async Task Main(string[] args)
         {
 
@@ -40,25 +41,25 @@ namespace BankSyncRunner
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error while processing service: {configService.Name}" + ex);
+                    logger.Error($"Error while processing service: {configService.Name}" , ex);
                 }
             }
 
             BankDataSheet bankDataSheet = BankDataSheet.Consolidate(datasets);
 
-            Console.WriteLine("Data downloaded");
+            logger.Info("Data downloaded");
 
-            enricher.LoadEnrichers(config);
+            enricher.LoadEnrichers(config, logger);
             await enricher.EnrichData(bankDataSheet, startTime, endTime);
-            Console.WriteLine("Data enriched");
+            logger.Info("Data enriched");
 
-            var analyzersExecutor = new DataAnalyzersExecutor();
+            var analyzersExecutor = new DataAnalyzersExecutor(logger);
             analyzersExecutor.AnalyzeData(bankDataSheet);
-            Console.WriteLine("Data categorized");
+            logger.Info("Data categorized");
 
             await Write(bankDataSheet);
 
-            Console.WriteLine("All done!");
+            logger.Info("All done!");
             #if !DEBUG
             Console.ReadKey();
 #endif
@@ -70,9 +71,10 @@ namespace BankSyncRunner
             {
                 foreach (ServiceUser configServiceUser in configServiceConfig.Users)
                 {
-                    IBankDataExporter downloader = new IpkoDataDownloader(configServiceUser, mapper);
-
-                    datasets.Add( await downloader.GetData(startTime, endTime));
+                    IBankDataExporter downloader = new IpkoDataDownloader(configServiceUser, mapper, logger);
+                    var dataset = await downloader.GetData(startTime, endTime);
+                    datasets.Add(dataset);
+                    logger.Debug($"Loaded {dataset.Entries.Count} entries from IPKO for {configServiceUser.UserName}");
                 }
             }
             if (string.Equals(configServiceConfig.Name, "Citibank", StringComparison.OrdinalIgnoreCase))
@@ -80,8 +82,9 @@ namespace BankSyncRunner
                 foreach (ServiceUser configServiceUser in configServiceConfig.Users)
                 {
                     IBankDataExporter downloader = new CitibankDataDownloader(configServiceUser, mapper);
-
-                    datasets.Add( await downloader.GetData(startTime, endTime));
+                    var dataset = await downloader.GetData(startTime, endTime);
+                    datasets.Add(dataset);
+                    logger.Debug($"Loaded {dataset.Entries.Count} entries from Citibank for {configServiceUser.UserName}");
                 }
             }
         }
@@ -93,17 +96,17 @@ namespace BankSyncRunner
             string path = GetOutputPath();
             writers.Add(new ExcelBankDataWriter(path + ".xlsx"));
             writers.Add(new JsonBankDataWriter(path + ".json"));
-            writers.Add(new GoogleSheetsBankDataWriter(googleWriterConfigFile));
+            writers.Add(new GoogleSheetsBankDataWriter(googleWriterConfigFile, logger));
             foreach (IBankDataWriter writer in writers)
             {
                 try
                 {
                     await writer.Write(ipkoData);
-                    Console.WriteLine($"Data written with with {writer.GetType().Name}");
+                    logger.Info($"Data written with with {writer.GetType().Name}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error while writing with {writer.GetType().Name}: {ex}");
+                    logger.Error($"Error while writing with {writer.GetType().Name}.", ex);
                 }
             }
         }

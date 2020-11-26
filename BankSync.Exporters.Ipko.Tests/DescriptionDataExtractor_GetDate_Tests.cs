@@ -1,5 +1,6 @@
 ﻿using System;
 using BankSync.Exporters.Ipko.DataTransformation;
+using BankSync.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NFluent;
 
@@ -9,6 +10,8 @@ namespace BankSync.Exporters.Ipko.Tests
     // ReSharper disable once InconsistentNaming
     public class DescriptionDataExtractor_GetDate_Tests
     {
+        private readonly IBankSyncLogger logger = new ConsoleLogger();
+
         [TestMethod]
         public void DateOnly()
         {
@@ -18,7 +21,7 @@ Data i czas operacji: 2020-10-29
 Oryginalna kwota operacji: 61,00 PLN
 Numer karty: 005125******0000";
 
-            Check.That(new DescriptionDataExtractor().GetDate(input)).IsEqualTo(new DateTime(2020,10,29));
+            Check.That(new DescriptionDataExtractor(this.logger).GetDate(input)).IsEqualTo(new DateTime(2020,10,29));
         } 
         
         [TestMethod]
@@ -30,7 +33,7 @@ Data i czas operacji: 2020-10-29 11:29:39
 Oryginalna kwota operacji: 61,00 PLN
 Numer karty: 005125******0000";
 
-            Check.That(new DescriptionDataExtractor().GetDate(input)).IsEqualTo(new DateTime(2020,10,29,11,29,39));
+            Check.That(new DescriptionDataExtractor(this.logger).GetDate(input)).IsEqualTo(new DateTime(2020,10,29,11,29,39));
         } 
         
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
+using BankSync.Logging;
 using BankSync.Model;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
@@ -10,10 +11,10 @@ namespace BankSync.Exporters.Ipko.DataTransformation
         private readonly IDataMapper mapper;
         private readonly DescriptionDataExtractor descriptionDataExtractor;
 
-        public IpkoXmlDataTransformer(IDataMapper mapper)
+        public IpkoXmlDataTransformer(IDataMapper mapper, IBankSyncLogger logger)
         {
             this.mapper = mapper;
-            this.descriptionDataExtractor = new DescriptionDataExtractor();
+            this.descriptionDataExtractor = new DescriptionDataExtractor(logger);
         }
 
         public BankDataSheet TransformXml(XDocument xDocument)

@@ -14,14 +14,21 @@ using BankSync.Analyzers.AI;
 using BankSync.Analyzers.InternalTransactions;
 using BankSync.Config;
 using BankSync.Enrichers.Allegro;
+using BankSync.Logging;
 using BankSync.Model;
 
 namespace BankSyncRunner
 {
     public class DataAnalyzersExecutor
     {
-        IBankDataAnalyzer allIfsAnalyzer = new AllIfsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Tags.xml"));
-        IBankDataAnalyzer internalTransfersAnalyzer = new InternalTransactionsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\InternalTransactions.xml"));
+        public DataAnalyzersExecutor(IBankSyncLogger logger)
+        {
+            allIfsAnalyzer = new AllIfsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Tags.xml"), logger);
+            internalTransfersAnalyzer = new InternalTransactionsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\InternalTransactions.xml"));
+        }
+
+        private IBankDataAnalyzer allIfsAnalyzer;
+        private IBankDataAnalyzer internalTransfersAnalyzer;
 
         private List<IBankDataAnalyzer> Enrichers => new List<IBankDataAnalyzer>()
             {this.allIfsAnalyzer, this.internalTransfersAnalyzer};
