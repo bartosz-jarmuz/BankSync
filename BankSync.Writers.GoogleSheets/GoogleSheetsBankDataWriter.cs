@@ -271,20 +271,22 @@ namespace BankSync.Writers.GoogleSheets
             {
                 int latestId = Convert.ToInt32(firstDataRow[0]);
                 DateTime latestDate = Convert.ToDateTime(firstDataRow[2]);
-                List<int> entriesInTheSheet = new List<int>();
+                List<(int entryId, DateTime date, IList<object> row) > entriesInTheSheet = new List<(int entryId, DateTime date, IList<object> row)>();
                 List<IList<object>> dataList = response.Values.Skip(1).ToList();
                 Console.WriteLine($"Total entries loaded: {dataList.Count}. Latest entry and date: {latestId} : {latestDate.Date}.");
 
                 Console.WriteLine($"Looking for entries to be added to the spreadsheet...");
                 foreach (IList<object> row in dataList)
                 {
-                    string? entryIdString = row[this.entryIdRow.Value]?.ToString();
+                    string entryIdString = row[this.entryIdRow.Value]?.ToString();
                     if (!string.IsNullOrEmpty(entryIdString))
                     {
+                        DateTime dateTime = Convert.ToDateTime(row[this.dateRow.Value]?.ToString());
+
                         try
                         {
                             int entryId = Convert.ToInt32(entryIdString);
-                            entriesInTheSheet.Add(entryId);
+                            entriesInTheSheet.Add((entryId, dateTime, row));
                         }
                         catch (Exception e)
                         {
@@ -295,7 +297,10 @@ namespace BankSync.Writers.GoogleSheets
                 }
 
                 List<BankEntry> missingEntries = data.Entries.Where(newEntry =>
-                    entriesInTheSheet.All(sheetEntry => sheetEntry != newEntry.BankEntryId)).ToList();
+                    entriesInTheSheet.All(sheetEntry => sheetEntry.Item1 != newEntry.BankEntryId)).ToList();
+
+                missingEntries = this.FilterMissingEntries(missingEntries,entriesInTheSheet);
+                
                 foreach (BankEntry bankEntry in missingEntries)
                 {
                     Console.WriteLine($"Entry to be added: {bankEntry}");
@@ -305,6 +310,43 @@ namespace BankSync.Writers.GoogleSheets
                 
                 return missingEntries;
             }
+        }
+        
+
+        private List<BankEntry> FilterMissingEntries(List<BankEntry> missingEntries, List<(int entryId, DateTime date, IList<object> row)> entriesInTheSheet)
+        {
+            var filtered = new List<BankEntry>();
+            //there's a possibility that the data that is to be imported is actually an existing data, only the ID is generated differently
+            //(if something changes around the logic of enriching or mapping etc)
+            //therefore, check that and report which entries are actually duplicates and the IDs should be fixed manually (nice to have - autofix)
+
+            List<(int entryId, DateTime date, IList<object> row)> filteredRows = entriesInTheSheet
+                .Where(x => missingEntries.Any(missing => missing.Date.Date == x.date.Date )).ToList();
+               
+            List<KeyValuePair<int, BankEntry>> converted = filteredRows.Select(e => new KeyValuePair<int, BankEntry>(e.entryId, this.ConvertToBankEntry(e.row))).ToList();
+            foreach (BankEntry missingEntry in missingEntries)
+            {
+                bool trulyMissing = true;
+                foreach (KeyValuePair<int,BankEntry> potentiallyExistingEntry  in converted)
+                {
+                    if (this.EntriesAreMatched(missingEntry, potentiallyExistingEntry.Value))
+                    {
+                        Console.WriteLine($"Potentially duplicated entry with different IDs: " +
+                                          $"Missing: {missingEntry.BankEntryId} - " +
+                                          $"Details of existing: {potentiallyExistingEntry.Value}");
+                        trulyMissing = false;
+                        break;
+                    }
+                }
+
+                if (trulyMissing)
+                {
+                    filtered.Add(missingEntry);
+                }
+            }
+
+            return filtered;
+
         }
 
         private async Task AddCategories(SpreadsheetsResource spreadsheets, List<Category> categories)
@@ -393,7 +435,7 @@ namespace BankSync.Writers.GoogleSheets
             // ReSharper disable PossibleInvalidOperationException - these values were null checked when sheet was loaded 
             obj.Insert(this.entryIdRow.Value, entry.BankEntryId);
             obj.Insert(this.accountRow.Value, entry.Account);
-             obj.Insert(this.dateRow.Value, entry.Date.Date.ToString("dd/MM/yyyy"));
+             obj.Insert(this.dateRow.Value, entry.Date.Date.ToString("dd/MM/yyyy HH:mm:ss"));
              obj.Insert(this.currencyRow.Value, entry.Currency);
              obj.Insert(this.amountRow.Value, entry.Amount);
              obj.Insert(this.balanceRow.Value, entry.Balance);
@@ -408,6 +450,63 @@ namespace BankSync.Writers.GoogleSheets
              // ReSharper restore PossibleInvalidOperationException
                  
              return obj;
+        }
+
+        private bool EntriesAreMatched(BankEntry left, BankEntry right)
+        {
+            if (left == null || right == null)
+            {
+                return false;
+            }
+            try
+            {
+
+                if (left.Account != right.Account
+                    || left.Date != right.Date
+                    || left.Currency != right.Currency
+                    || left.Amount != right.Amount
+                    || left.Balance != right.Balance
+                    || left.PaymentType != right.PaymentType
+                    || left.Recipient != right.Recipient
+                    || left.Payer != right.Payer
+                    || left.FullDetails != right.FullDetails
+                )
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        
+        
+        private BankEntry ConvertToBankEntry(IList<object> row)
+        {
+            try
+            {
+                return new BankEntry()
+                {
+                    // ReSharper disable PossibleInvalidOperationException - these values were null checked when sheet was loaded 
+                    Account  = row[this.accountRow.Value]?.ToString(),
+                    Date = Convert.ToDateTime(row[this.dateRow.Value]?.ToString()), 
+                    Currency = row[this.currencyRow.Value]?.ToString(),
+                    Amount = BankSyncConverter.ConvertWithAssumptions( row[this.amountRow.Value]?.ToString()),
+                    Balance = BankSyncConverter.ConvertWithAssumptions(row[this.balanceRow.Value]?.ToString()),
+                    PaymentType =row[this.paymentTypeRow.Value]?.ToString(),
+                    Recipient = row[this.recipientRow.Value]?.ToString(),
+                    Payer = row[this.payerRow.Value]?.ToString(),
+                    FullDetails =row[this.fullDetailsRow.Value]?.ToString()
+                    // ReSharper restore PossibleInvalidOperationException
+                };
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         private SheetsService GetSheetsService()

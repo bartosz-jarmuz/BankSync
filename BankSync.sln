@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Exporters.Citibank
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.DataMapping", "BankSync.DataMapping\BankSync.DataMapping.csproj", "{8D644B06-2D97-4D55-B284-60A94E5DDBAD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Analyzers.InternalTransactions", "BankSync.Analyzers.InternalTransactions\BankSync.Analyzers.InternalTransactions.csproj", "{370D6F49-D2A1-44A1-96F1-DBFEAA48AD62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,10 @@ Global
 		{8D644B06-2D97-4D55-B284-60A94E5DDBAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D644B06-2D97-4D55-B284-60A94E5DDBAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D644B06-2D97-4D55-B284-60A94E5DDBAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{370D6F49-D2A1-44A1-96F1-DBFEAA48AD62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{370D6F49-D2A1-44A1-96F1-DBFEAA48AD62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{370D6F49-D2A1-44A1-96F1-DBFEAA48AD62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{370D6F49-D2A1-44A1-96F1-DBFEAA48AD62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -131,6 +137,7 @@ Global
 		{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
 		{A903039B-3337-46A1-AC36-198CC3F9C5B0} = {F7D70F82-55C8-47BE-B1CB-893928F858AC}
 		{ADD14A74-24EC-4D8D-BCCC-8CA9440324A6} = {8888123D-E035-44DE-8CBA-DFD98B737499}
+		{370D6F49-D2A1-44A1-96F1-DBFEAA48AD62} = {E3F75FD5-2ABB-4B90-91E0-8D920682501B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F2AB631F-F509-4047-9CCF-A8A2E970EB3F}

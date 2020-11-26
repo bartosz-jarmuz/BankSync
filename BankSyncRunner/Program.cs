@@ -21,7 +21,6 @@ namespace BankSyncRunner
     {
         private static IDataMapper mapper = new ConfigurableDataMapper(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Mappings.xml"));
         static DataEnricherExecutor enricher = new DataEnricherExecutor();
-        static IBankDataAnalyzer analyzer = new AllIfsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Tags.xml"));
         static FileInfo servicesConfigFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Accounts.xml");
         static FileInfo googleWriterConfigFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Google\GoogleWriterSettings.xml");
         private static DateTime startTime = DateTime.Today.AddMonths(-12);
@@ -53,7 +52,8 @@ namespace BankSyncRunner
             await enricher.EnrichData(bankDataSheet, startTime, endTime);
             Console.WriteLine("Data enriched");
 
-            analyzer.AssignCategories(bankDataSheet);
+            var analyzersExecutor = new DataAnalyzersExecutor();
+            analyzersExecutor.AnalyzeData(bankDataSheet);
             Console.WriteLine("Data categorized");
 
             await Write(bankDataSheet);

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BankSync.Analyzers.AI\BankSync.Analyzers.AI.csproj" />
+    <ProjectReference Include="..\BankSync.Analyzers.InternalTransactions\BankSync.Analyzers.InternalTransactions.csproj" />
     <ProjectReference Include="..\BankSync.Config\BankSync.Config.csproj" />
     <ProjectReference Include="..\BankSync.DataMapping\BankSync.DataMapping.csproj" />
     <ProjectReference Include="..\BankSync.Enrichers.Allegro\BankSync.Enrichers.Allegro.csproj" />
