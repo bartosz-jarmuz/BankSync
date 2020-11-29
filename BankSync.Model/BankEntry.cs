@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace BankSync.Model
 {
@@ -12,22 +13,9 @@ namespace BankSync.Model
 
         public static BankEntry Clone(BankEntry toBeCloned)
         {
-            return new BankEntry()
-            {
-                Account = toBeCloned.Account,
-                Payer = toBeCloned.Payer,
-                Recipient = toBeCloned.Recipient,
-                PaymentType = toBeCloned.PaymentType,
-                Balance = toBeCloned.Balance,
-                Date = toBeCloned.Date,
-                Currency = toBeCloned.Currency,
-                Amount = toBeCloned.Amount,
-                Note = toBeCloned.Note,
-                Category = toBeCloned.Category,
-                Subcategory = toBeCloned.Subcategory,
-                FullDetails = toBeCloned.FullDetails,
-                Tags = toBeCloned.Tags
-            };
+            var serialized = JsonConvert.SerializeObject(toBeCloned);
+
+            return JsonConvert.DeserializeObject<BankEntry>(serialized);
         }
 
         

@@ -338,7 +338,7 @@ namespace BankSync.Writers.GoogleSheets
                     {
                         this.logger.Warning($"Potentially duplicated entry with different IDs: " +
                                           $"Missing: {missingEntry.BankEntryId} - " +
-                                          $"Details of existing: {potentiallyExistingEntry.Value}");
+                                          $"Details of existing: {potentiallyExistingEntry.Value}\r\nMissing: {missingEntry}");
                         trulyMissing = false;
                         break;
                     }
