@@ -103,29 +103,8 @@ namespace BankSync.Enrichers.Allegro
 
                         updatedEntries.Add(newEntry);
                     }
-                    
-                    if (allegroEntry.delivery.cost.amount != "0.00")
-                    {
-                        //lets add a delivery cost as a separate entry, but assign it a category etc. of the most expensive item
-                        // Offer mostExpensive =
-                        //     allegroEntry.offers.OrderByDescending(x => Convert.ToDecimal(x.offerPrice.amount)).First();
-                        //
-                        Offer mostExpensive = null;
-                        mostExpensive =
-                            allegroEntry.offers.OrderByDescending(x => Convert.ToDecimal(x.offerPrice.amount)).First();
-                        BankEntry deliveryEntry = BankEntry.Clone(entry);
-                        deliveryEntry.Amount = Convert.ToDecimal(allegroEntry.delivery.cost.amount)*-1;
-                        deliveryEntry.Note = $"DOSTAWA: {mostExpensive.title} (Oferta {mostExpensive.id}, Suma zamówień: {allegroEntry.offers.Length})";
-                        deliveryEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
-                        deliveryEntry.Tags.Add("dostawa");
-                        if (string.IsNullOrEmpty(deliveryEntry.Payer))
-                        {
-                            deliveryEntry.Payer = container.ServiceUserName;
-                        }
-                        deliveryEntry.FullDetails += $"\r\nPłatność Allegro: {allegroEntry.payment.id}.\r\n URL: {mostExpensive.friendlyUrl}";
-                        updatedEntries.Add(deliveryEntry);
 
-                    } 
+                    AddDeliveryCost(entry, updatedEntries, allegroEntry, container);
                 }
             }
             else
@@ -133,6 +112,32 @@ namespace BankSync.Enrichers.Allegro
                 //that's either not Allegro entry or not entry of this person, but needs to be preserved on the list
                 EnrichUnrecognizedAllegroOffer(entry, container, potentiallyRelatedOfferIds);
                 updatedEntries.Add(entry);
+            }
+        }
+
+        private static void AddDeliveryCost(BankEntry entry, List<BankEntry> updatedEntries, Myorder allegroEntry,
+            AllegroDataContainer container)
+        {
+            if (allegroEntry.delivery.cost.amount != "0.00")
+            {
+                //lets add a delivery cost as a separate entry, but assign it a category etc. of the most expensive item
+                Offer mostExpensive =
+                    allegroEntry.offers.OrderByDescending(x => Convert.ToDecimal(x.offerPrice.amount)).First();
+
+                BankEntry deliveryEntry = BankEntry.Clone(entry);
+                deliveryEntry.Amount = Convert.ToDecimal(allegroEntry.delivery.cost.amount) * -1;
+                deliveryEntry.Note =
+                    $"DOSTAWA: {mostExpensive.title} (Oferta {mostExpensive.id}, Suma zamówień: {allegroEntry.offers.Length})";
+                deliveryEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
+                deliveryEntry.Tags.Add("dostawa");
+                if (string.IsNullOrEmpty(deliveryEntry.Payer))
+                {
+                    deliveryEntry.Payer = container.ServiceUserName;
+                }
+
+                deliveryEntry.FullDetails +=
+                    $"\r\nPłatność Allegro: {allegroEntry.payment.id}.\r\n URL: {mostExpensive.friendlyUrl}";
+                updatedEntries.Add(deliveryEntry);
             }
         }
 
