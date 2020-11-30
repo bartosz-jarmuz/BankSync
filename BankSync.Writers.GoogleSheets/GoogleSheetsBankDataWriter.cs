@@ -337,7 +337,7 @@ namespace BankSync.Writers.GoogleSheets
                     if (this.EntriesAreMatched(missingEntry, potentiallyExistingEntry.Value))
                     {
                         this.logger.Warning($"Potentially duplicated entry with different IDs: " +
-                                          $"Missing: {missingEntry.BankEntryId} - " +
+                                          $"Missing: {missingEntry.BankEntryId}\r\n" +
                                           $"Details of existing: {potentiallyExistingEntry.Value}\r\nMissing: {missingEntry}");
                         trulyMissing = false;
                         break;
@@ -508,6 +508,7 @@ namespace BankSync.Writers.GoogleSheets
                     PaymentType =row[this.paymentTypeRow.Value]?.ToString(),
                     Recipient = row[this.recipientRow.Value]?.ToString(),
                     Payer = row[this.payerRow.Value]?.ToString(),
+                    Note = row[this.noteRow.Value]?.ToString(),
                     FullDetails =row[this.fullDetailsRow.Value]?.ToString()
                     // ReSharper restore PossibleInvalidOperationException
                 };
