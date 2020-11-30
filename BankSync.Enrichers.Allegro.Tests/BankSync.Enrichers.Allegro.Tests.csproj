@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+        <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
+        <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
+        <PackageReference Include="coverlet.collector" Version="1.2.0" />
+        <PackageReference Include="NFluent" Version="2.7.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Input\Allegro\SingleOrderWithDelivery_Banana.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Bank\SingleEntry_Banana.xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Bank\MultipleEntriesSamePriceVariousDates_Banana.xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Allegro\MultiOrderWithoutDelivery_Prunes.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Bank\NoRefunds_Prunes.xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Bank\FullRefund_Prunes.xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Bank\RefundOfOne_ByPrice_Prunes.xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Allegro\OrdersFromTwoSellers_SinglePayment_Discount_Boots.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Bank\NoRefunds_Boots.xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Bank\PartialRefund_Boots.xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Allegro\OrderFromOneSeller_NoDiscount_DifferentBuyerPaidAmount_Fish.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Bank\NoRefunds_Fish.xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Input\Bank\RefundOfTwo_PriceDoesNotMatch_Prunes.xml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BankSync.Enrichers.Allegro\BankSync.Enrichers.Allegro.csproj" />
+      <ProjectReference Include="..\BankSync.Exporters.Ipko\BankSync.Exporters.Ipko.csproj" />
+    </ItemGroup>
+
+</Project>

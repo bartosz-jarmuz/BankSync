@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<account-history>
+    <search>
+        <account>000000000000008</account>
+        <date since='2020-01-01' to='2020-11-20'/>
+        <filtering>Wszystkie</filtering>
+    </search>
+    <operations>
+
+        <operation>
+            <exec-date>2020-07-02</exec-date>
+            <order-date>2020-07-01</order-date>
+            <type>Płatność web - kod mobilny</type>
+            <description>Numer telefonu: PayerPhone
+                Lokalizacja: Adres: allegro.pl
+                Data i czas operacji: 2020-07-01 20:49:51
+                Numer referencyjny: 00000052708353467</description>
+            <amount curr='PLN'>-43.77</amount>
+            <ending-balance curr='PLN'>00</ending-balance>
+        </operation>
+  
+    </operations>
+</account-history>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<account-history>
+    <search>
+        <account>000000000000008</account>
+        <date since='2020-01-01' to='2020-11-20'/>
+        <filtering>Wszystkie</filtering>
+    </search>
+    <operations>
+
+        
+        <operations>
+            <operation>
+                <exec-date>2020-09-28</exec-date>
+                <order-date>2020-09-27</order-date>
+                <type>Płatność web - kod mobilny</type>
+                <description>Numer telefonu: PayerPhone
+                    Lokalizacja: Adres: allegro.pl
+                    Data i czas operacji: 2020-09-27 19:32:53
+                    Numer referencyjny: TOO NEW</description>
+                <amount curr='PLN'>-20.97</amount>
+                <ending-balance curr='PLN'>0</ending-balance>
+            </operation>
+        </operations>
+        
+        <operation>
+            <exec-date>2020-07-28</exec-date>
+            <order-date>2020-07-27</order-date>
+            <type>Płatność web - kod mobilny</type>
+            <description>Numer telefonu: PayerPhone
+                Lokalizacja: Adres: allegro.pl
+                Data i czas operacji: 2020-07-27 19:32:53
+                Numer referencyjny: JUST RIGHT</description>
+            <amount curr='PLN'>-20.97</amount>
+            <ending-balance curr='PLN'>0</ending-balance>
+        </operation>
+    
+    
+        <operation>
+            <exec-date>2020-02-28</exec-date>
+            <order-date>2020-02-27</order-date>
+            <type>Płatność web - kod mobilny</type>
+            <description>Numer telefonu: PayerPhone
+                Lokalizacja: Adres: allegro.pl
+                Data i czas operacji: 2020-02-27 19:32:53
+                Numer referencyjny: TOO OLD</description>
+            <amount curr='PLN'>-20.97</amount>
+            <ending-balance curr='PLN'>0</ending-balance>
+        </operation>
+    </operations>
+</account-history>

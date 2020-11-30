@@ -1,0 +1,184 @@
+{
+  "Model": {
+    "parameters": {
+      "detailsUrl": "/moje-allegro/zakupy/kupione",
+      "countryCode": {
+        "code": "pl"
+      },
+      "timeToShowCancelPaymentButton": 5,
+      "forceFallbackAjaxUpdateForEmptyDS": false,
+      "myorders": {
+        "myorders": [
+          {
+            "id": "9a9606a3-bbcb-11ea-8887-5f4bd1b36afb",
+            "purchaseId": "9a9606a2-bbcb-11ea-8887-5f4bd1b36afb",
+            "seller": {
+              "id": "60063733",
+              "login": "Seller"
+            },
+            "offers": [
+              {
+                "id": "8133476102",
+                "orderOfferId": "9a9606a0-bbcb-11ea-8887-5f4bd1b36afb",
+                "unitPrice": {
+                  "amount": "21.99",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "21.99",
+                  "currency": "PLN"
+                },
+                "quantity": 1,
+                "orderDate": "2020-07-01T18:49:50.209Z",
+                "title": "Fish",
+                "friendlyUrl": "https://allegro.pl/oferta/pistolet-ryba-delfin-banki-mydlane-swieci-dzwiek-8133476102?snapshot=MjAyMC0wNy0wMVQxODo0OTo1MC4yMDlaO2J1eWVyOzE3OGJjN2JkZDU0MzgxZDFiMzQxMTI5NTE0MTYwMDU0OTk2YTA1ZDI1MmI2MTQwMWE2NTU1ZjFmYTA0Njc4MDM%3D",
+                "type": "UNIT",
+                "imageUrl": "https://a.allegroimg.com/original/11a6fd/8f98b3a949338a1bc64bbf4a6592",
+                "productId": null,
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "21.99",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              },
+              {
+                "id": "9125409639",
+                "orderOfferId": "9a9606a1-bbcb-11ea-8887-5f4bd1b36afb",
+                "unitPrice": {
+                  "amount": "10.89",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "10.89",
+                  "currency": "PLN"
+                },
+                "quantity": 2,
+                "orderDate": "2020-07-01T18:49:50.209Z",
+                "title": "Other Item",
+                "friendlyUrl": "https://allegro.pl/oferta/plyn-do-robienia-baniek-mydlanych-1l-9125409639?snapshot=MjAyMC0wNy0wMVQxODo0OTo1MC4yMDlaO2J1eWVyOzgzZWMyZDYyYzU2YTc3NmFlYmNmODAzOTVjMTIyZWE4MGIzNDI5ZjU4NjM2OGRkZDFhYTc4MjdhNGI5MzQzZGQ%3D",
+                "type": "UNIT",
+                "imageUrl": "https://a.allegroimg.com/original/112eae/fce86ba0417ebc7993459e713d9e",
+                "productId": null,
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "21.78",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              }
+            ],
+            "delivery": {
+              "addressId": "d4a0519c-22c7-4aaf-b370-22a68e840986",
+              "cost": {
+                "amount": "0.00",
+                "currency": "PLN"
+              },
+              "name": "Allegro miniKurier24 InPost",
+              "methodId": "9081532b-5ad3-467d-80bc-9252982e9dd8",
+              "paymentType": {
+                "name": "płatne z góry",
+                "type": "PREPAID"
+              },
+              "type": {
+                "name": "standardowy",
+                "type": "STANDARD"
+              },
+              "orderDeliveryId": "9b13e930-bbcb-11ea-84d5-f10462d45ec6",
+              "parcelStatusInfo": null,
+              "selfCollect": false,
+              "generalDelivery": null,
+              "discount": {
+                "originalCost": {
+                  "amount": "10.95",
+                  "currency": "PLN"
+                },
+                "type": "FREEBOX",
+                "planType": "FREEBOX_STANDARD"
+              }
+            },
+            "totalCost": {
+              "amount": "43.77",
+              "currency": "PLN"
+            },
+            "payment": {
+              "id": "9b38fd61-bbcb-11ea-afe2-9fa45c8e6764",
+              "method": "BLIK",
+              "methodId": "OCP-blik",
+              "provider": "P24",
+              "status": "COMPLETED",
+              "startDate": "2020-07-01T18:49:34.518Z",
+              "endDate": "2020-07-01T18:49:57.799Z",
+              "amount": {
+                "amount": "54.72",
+                "currency": "PLN"
+              },
+              "buyerPaidAmount": {
+                "amount": "43.77",
+                "currency": "PLN"
+              },
+              "installments": false,
+              "availability": {
+                "available": false,
+                "reason": "ALREADY_PAID"
+              },
+              "freeboxSubscriptionIncluded": false,
+              "multipleSellers": false,
+              "mask": null
+            },
+            "surcharge": {
+              "status": "EMPTY"
+            },
+            "coins": null,
+            "timestamp": "2020-07-01T18:49:57.799Z",
+            "createDate": "2020-07-01T18:49:33.45Z",
+            "orderDate": "2020-07-01T18:49:50.209Z",
+            "invoiceAddressId": null,
+            "missingDependencies": null,
+            "orderVersion": "V1",
+            "serviceCountry": "PL",
+            "hasRelatedOrders": false,
+            "markedAsPaid": false,
+            "hiddenInMyOrders": false,
+            "boughtOnDevice": "IOS",
+            "tooOldToPay": false,
+            "onlinePaymentAvailable": true,
+            "cancelled": false,
+            "announcement": false,
+            "readOnly": false,
+            "messageToSeller": null
+          }
+        ],
+        "total": 1
+      }
+    },
+    "slots": {
+      "additionalBanner": null,
+      "topBanner": null,
+      "listingBanner": "<div data-box-name=\"banner\" data-box-id=\"Ibu8jpSNS5qMrs3BkLxmJQ==qXlqnDp3QPK-sd9bs89c7Q==\" data-prototype-id=\"layout.container\" data-prototype-version=\"8.1\" data-analytics-category=\"layout.container\" data-analytics-groups=\"%5B%22myorders%20listing%22%5D\"><a name=\"banner\"></a><div class=\"opbox-sheet-wrapper m7er_k4 munh_56 m3h2_56 _26e29_2AYAm mjru_ey\" >  <div class=\"opbox-sheet _26e29_11PCu\" style=\"\"> <div data-box-name=\"allegro.performance.mark\" data-box-id=\"Ibu8jpSNS5qMrs3BkLxmJQ==EiCoMC8lS16xLJQlQqiEdg==\" data-prototype-id=\"allegro.performance.mark\" data-prototype-version=\"0.2\" data-analytics-enabled data-analytics-category=\"allegro.performance.mark\" data-analytics-groups=\"%5B%22myorders%20listing%22%5D\"><a name=\"allegro-performance-mark\"></a><script nonce=\"4WBr/DU+06TYmPA0lOpf2g==\">opbox.performance.markFirstContentfulPaint()</script></div> </div></div></div>"
+    },
+    "context": {
+      "prototype": {
+        "name": "allegro.myorder.listing",
+        "version": {
+          "major": 0,
+          "minor": 9
+        }
+      },
+      "variant": null,
+      "slug": "allegro-myorder-listing",
+      "name": "allegro.myorder.listing",
+      "boxId": "Ibu8jpSNS5qMrs3BkLxmJQ==H4E4LkjhQwev_aInJqfGgQ==",
+      "nonce": "4WBr/DU+06TYmPA0lOpf2g==",
+      "language": "pl-PL",
+      "isDevMode": false
+    }
+  },
+  "ServiceUserName": "Bartek",
+  "OldestEntry": "2020-07-27T17:32:52.168Z",
+  "NewestEntry": "2020-07-27T17:32:52.168Z"
+}

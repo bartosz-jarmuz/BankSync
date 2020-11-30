@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<account-history>
+    <search>
+        <account>000000000000008</account>
+        <date since='2020-01-01' to='2020-11-20'/>
+        <filtering>Wszystkie</filtering>
+    </search>
+    <operations>
+
+        <operation>
+            <exec-date>2020-10-26</exec-date>
+            <order-date>2020-10-23</order-date>
+            <type>Zwrot w terminalu</type>
+            <description>Numer telefonu: +48 725 795 234
+                Lokalizacja: Adres: allegro.pl
+                Data i czas operacji: 2020-10-23 01:35:12
+                Numer referencyjny: 00000054977497766</description>
+            <amount curr='PLN'>+99.99</amount>
+            <ending-balance curr='PLN'>+649.86</ending-balance>
+        </operation>
+        
+        <operation>
+            <exec-date>2020-10-26</exec-date>
+            <order-date>2020-10-23</order-date>
+            <type>Płatność web - kod mobilny</type>
+            <description>Numer telefonu: PayerPhone
+                Lokalizacja: Adres: allegro.pl
+                Data i czas operacji: 2020-10-23 13:44:37
+                Numer referencyjny: 00000054973621560</description>
+            <amount curr='PLN'>-247.99</amount>
+            <ending-balance curr='PLN'>+549.87</ending-balance>
+        </operation>
+  
+    </operations>
+</account-history>

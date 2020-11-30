@@ -1,0 +1,158 @@
+{
+  "Model": {
+    "parameters": {
+      "detailsUrl": "/moje-allegro/zakupy/kupione",
+      "countryCode": {
+        "code": "pl"
+      },
+      "timeToShowCancelPaymentButton": 5,
+      "forceFallbackAjaxUpdateForEmptyDS": false,
+      "myorders": {
+        "myorders": [
+          {
+            "id": "21018712-d02f-11ea-bf4a-95fa683a347c",
+            "purchaseId": "21018711-d02f-11ea-bf4a-95fa683a347c",
+            "seller": {
+              "id": "22",
+              "login": "Seller"
+            },
+            "offers": [
+              {
+                "id": "9465723732",
+                "orderOfferId": "21018710-d02f-11ea-bf4a-95fa683a347c",
+                "unitPrice": {
+                  "amount": "5.99",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "5.99",
+                  "currency": "PLN"
+                },
+                "quantity": 2,
+                "orderDate": "2020-07-27T17:32:52.168Z",
+                "title": "Banana",
+                "friendlyUrl": "https://allegro.pl/oferta/wewnetrzna-blokada-zabezpieczenia-szafek-szuflad-9465723732?snapshot=MjAyMC0wNy0yN1QxNzozMjo1Mi4xNjhaO2J1eWVyOzVjMzFkYTAyMzNjOGIzMWE2OWQ4NjNhODJkODY3NTEwZDBmZWQzNTk4NjAwMmE1NmI3OGVjMzg0ZjEzNGEwZDA%3D",
+                "type": "UNIT",
+                "imageUrl": "https://a.allegroimg.com/original/03b48c/57f5e9604fe7b56feafb3832223b",
+                "productId": "32f47fe7-3f90-4ebb-9ac2-4a4e1ace1a69",
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "11.98",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              }
+            ],
+            "delivery": {
+              "addressId": "702a7b5f-9bdf-4301-9d2d-ef428ea80676",
+              "cost": {
+                "amount": "8.99",
+                "currency": "PLN"
+              },
+              "name": "Allegro Paczkomaty 24/7 InPost",
+              "methodId": "2488f7b7-5d1c-4d65-b85c-4cbcf253fd93",
+              "paymentType": {
+                "name": "płatne z góry",
+                "type": "PREPAID"
+              },
+              "type": {
+                "name": "Odbiór w punkcie",
+                "type": "GENERAL_DELIVERY"
+              },
+              "orderDeliveryId": "2112c520-d02f-11ea-8410-b5a3c15da710",
+              "parcelStatusInfo": null,
+              "selfCollect": false,
+              "generalDelivery": {
+                "name": "Paczkomat BYD24A",
+                "description": "Przy markecie POLOmarket",
+                "address": {
+                  "street": "Fordońska 410",
+                  "code": "85-096",
+                  "city": "Bydgoszcz"
+                }
+              },
+              "discount": null
+            },
+            "totalCost": {
+              "amount": "20.97",
+              "currency": "PLN"
+            },
+            "payment": {
+              "id": "214287b1-d02f-11ea-8b74-b951f5a257eb",
+              "method": "BLIK",
+              "methodId": "OCP-blik",
+              "provider": "P24",
+              "status": "COMPLETED",
+              "startDate": "2020-07-27T17:32:22.827Z",
+              "endDate": "2020-07-27T17:33:02.226Z",
+              "amount": {
+                "amount": "20.97",
+                "currency": "PLN"
+              },
+              "buyerPaidAmount": {
+                "amount": "20.97",
+                "currency": "PLN"
+              },
+              "installments": false,
+              "availability": {
+                "available": false,
+                "reason": "ALREADY_PAID"
+              },
+              "freeboxSubscriptionIncluded": false,
+              "multipleSellers": false,
+              "mask": null
+            },
+            "surcharge": {
+              "status": "EMPTY"
+            },
+            "coins": null,
+            "timestamp": "2020-07-27T17:33:02.226Z",
+            "createDate": "2020-07-27T17:32:22.401Z",
+            "orderDate": "2020-07-27T17:32:52.168Z",
+            "invoiceAddressId": null,
+            "missingDependencies": null,
+            "orderVersion": "V1",
+            "serviceCountry": "PL",
+            "hasRelatedOrders": false,
+            "markedAsPaid": false,
+            "hiddenInMyOrders": false,
+            "boughtOnDevice": "ANDROID",
+            "tooOldToPay": false,
+            "onlinePaymentAvailable": true,
+            "cancelled": false,
+            "announcement": false,
+            "readOnly": false,
+            "messageToSeller": null
+          }
+        ],
+        "total": 1
+      }
+    },
+    "slots": {
+      "additionalBanner": null,
+      "topBanner": null,
+      "listingBanner": "<div data-box-name=\"banner\" data-box-id=\"Ibu8jpSNS5qMrs3BkLxmJQ==qXlqnDp3QPK-sd9bs89c7Q==\" data-prototype-id=\"layout.container\" data-prototype-version=\"8.1\" data-analytics-category=\"layout.container\" data-analytics-groups=\"%5B%22myorders%20listing%22%5D\"><a name=\"banner\"></a><div class=\"opbox-sheet-wrapper m7er_k4 munh_56 m3h2_56 _26e29_2AYAm mjru_ey\" >  <div class=\"opbox-sheet _26e29_11PCu\" style=\"\"> <div data-box-name=\"allegro.performance.mark\" data-box-id=\"Ibu8jpSNS5qMrs3BkLxmJQ==EiCoMC8lS16xLJQlQqiEdg==\" data-prototype-id=\"allegro.performance.mark\" data-prototype-version=\"0.2\" data-analytics-enabled data-analytics-category=\"allegro.performance.mark\" data-analytics-groups=\"%5B%22myorders%20listing%22%5D\"><a name=\"allegro-performance-mark\"></a><script nonce=\"4WBr/DU+06TYmPA0lOpf2g==\">opbox.performance.markFirstContentfulPaint()</script></div> </div></div></div>"
+    },
+    "context": {
+      "prototype": {
+        "name": "allegro.myorder.listing",
+        "version": {
+          "major": 0,
+          "minor": 9
+        }
+      },
+      "variant": null,
+      "slug": "allegro-myorder-listing",
+      "name": "allegro.myorder.listing",
+      "boxId": "Ibu8jpSNS5qMrs3BkLxmJQ==H4E4LkjhQwev_aInJqfGgQ==",
+      "nonce": "4WBr/DU+06TYmPA0lOpf2g==",
+      "language": "pl-PL",
+      "isDevMode": false
+    }
+  },
+  "ServiceUserName": "Bartek",
+  "OldestEntry": "2020-07-27T17:32:52.168Z",
+  "NewestEntry": "2020-07-27T17:32:52.168Z"
+}

@@ -1,0 +1,301 @@
+{
+  "Model": {
+    "parameters": {
+      "detailsUrl": "/moje-allegro/zakupy/kupione",
+      "countryCode": {
+        "code": "pl"
+      },
+      "timeToShowCancelPaymentButton": 5,
+      "forceFallbackAjaxUpdateForEmptyDS": false,
+      "myorders": {
+        "myorders": [
+          {
+            "id": "daec0944-1524-11eb-b699-77299d35941c",
+            "purchaseId": "daec0942-1524-11eb-b699-77299d35941c",
+            "seller": {
+              "id": "47173156",
+              "login": "SellerOne"
+            },
+            "offers": [
+              {
+                "id": "8748604592",
+                "orderOfferId": "daec0941-1524-11eb-b699-77299d35941c",
+                "unitPrice": {
+                  "amount": "99.99",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "99.99",
+                  "currency": "PLN"
+                },
+                "quantity": 1,
+                "orderDate": "2020-10-23T11:44:34.807Z",
+                "title": "Boots",
+                "friendlyUrl": "https://allegro.pl/oferta/kurtka-zimowa-dziewczeca-na-misiu-r-116-cm-8748604592?snapshot=MjAyMC0xMC0yM1QxMTo0NDozNC44MDdaO2J1eWVyOzJiMDFiYjM5YjAyYWEwMDEyODY5ODM0ZDg4OGY1MWNmNTI3YTllMDI2MWJmNzRkYWE4NDRjZTZlMDdlOGMyMTE%3D",
+                "type": "UNIT",
+                "imageUrl": "https://a.allegroimg.com/original/035a6b/2d4831d64e9ea7afa5ac084fe649",
+                "productId": null,
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "99.99",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              }
+            ],
+            "delivery": {
+              "addressId": "9ee83bc6-49a6-474e-ba0f-7c85c5a48247",
+              "cost": {
+                "amount": "0.00",
+                "currency": "PLN"
+              },
+              "name": "Allegro Paczkomaty InPost",
+              "methodId": "2488f7b7-5d1c-4d65-b85c-4cbcf253fd93",
+              "paymentType": {
+                "name": "płatne z góry",
+                "type": "PREPAID"
+              },
+              "type": {
+                "name": "Odbiór w punkcie",
+                "type": "GENERAL_DELIVERY"
+              },
+              "orderDeliveryId": "005d9b81-1525-11eb-9e1c-81236432c0c6",
+              "parcelStatusInfo": {
+                "status": "DELIVERED",
+                "type": "STATUS",
+                "label": "przesyłka doręczona",
+                "link": "https://inpost.pl/pl/pomoc/znajdz-przesylke?parcel=688100307085096123731080",
+                "externalLink": true
+              },
+              "selfCollect": false,
+              "generalDelivery": {
+                "name": "Paczkomat BYD24A",
+                "description": "Przy markecie POLOmarket",
+                "address": {
+                  "street": "Fordońska 410",
+                  "code": "85-096",
+                  "city": "Bydgoszcz"
+                }
+              },
+              "discount": {
+                "originalCost": {
+                  "amount": "8.99",
+                  "currency": "PLN"
+                },
+                "type": "FREEBOX",
+                "planType": "FREEBOX_STANDARD"
+              }
+            },
+            "totalCost": {
+              "amount": "99.99",
+              "currency": "PLN"
+            },
+            "payment": {
+              "id": "00910790-1525-11eb-9f56-0bd703f0f67d",
+              "method": "BLIK",
+              "methodId": "OCP-blik",
+              "provider": "P24",
+              "status": "COMPLETED",
+              "startDate": "2020-10-23T11:43:43.24Z",
+              "endDate": "2020-10-23T11:44:53.586Z",
+              "amount": {
+                "amount": "257.99",
+                "currency": "PLN"
+              },
+              "buyerPaidAmount": {
+                "amount": "247.99",
+                "currency": "PLN"
+              },
+              "installments": false,
+              "availability": {
+                "available": false,
+                "reason": "ALREADY_PAID"
+              },
+              "freeboxSubscriptionIncluded": false,
+              "multipleSellers": true,
+              "mask": null
+            },
+            "surcharge": {
+              "status": "EMPTY"
+            },
+            "coins": null,
+            "timestamp": "2020-10-23T11:44:53.586Z",
+            "createDate": "2020-10-23T11:42:40.084Z",
+            "orderDate": "2020-10-23T11:44:34.807Z",
+            "invoiceAddressId": null,
+            "missingDependencies": null,
+            "orderVersion": "V1",
+            "serviceCountry": "PL",
+            "hasRelatedOrders": false,
+            "markedAsPaid": false,
+            "hiddenInMyOrders": false,
+            "boughtOnDevice": "IOS",
+            "tooOldToPay": false,
+            "onlinePaymentAvailable": true,
+            "cancelled": false,
+            "announcement": false,
+            "readOnly": false,
+            "messageToSeller": null
+          },
+          {
+            "id": "daec0943-1524-11eb-b699-77299d35941c",
+            "purchaseId": "daec0942-1524-11eb-b699-77299d35941c",
+            "seller": {
+              "id": "9729825",
+              "login": "SellerTwo"
+            },
+            "offers": [
+              {
+                "id": "9740390684",
+                "orderOfferId": "daec0940-1524-11eb-b699-77299d35941c",
+                "unitPrice": {
+                  "amount": "158",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "158",
+                  "currency": "PLN"
+                },
+                "quantity": 1,
+                "orderDate": "2020-10-23T11:44:34.807Z",
+                "title": "Other Item",
+                "friendlyUrl": "https://allegro.pl/oferta/bartek-91763-trzewiki-ocieplane-zimowe-kozaczki-22-9740390684?snapshot=MjAyMC0xMC0yM1QxMTo0NDozNC44MDdaO2J1eWVyOzVkOTIxM2NmMzQ5ZGMzOTEyZDA4ZjYxYThkNzExMzg1Zjg1ZTNiNjJkMThiY2QwODdkNmJkOGZkMzkwYWJlOTI%3D",
+                "type": "PAIR",
+                "imageUrl": "https://a.allegroimg.com/original/116ea4/ac34f5b24d9fbe14b3324d8387b1",
+                "productId": null,
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "158",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              }
+            ],
+            "delivery": {
+              "addressId": "9ee83bc6-49a6-474e-ba0f-7c85c5a48247",
+              "cost": {
+                "amount": "0.00",
+                "currency": "PLN"
+              },
+              "name": "Allegro Paczkomaty InPost",
+              "methodId": "2488f7b7-5d1c-4d65-b85c-4cbcf253fd93",
+              "paymentType": {
+                "name": "płatne z góry",
+                "type": "PREPAID"
+              },
+              "type": {
+                "name": "Odbiór w punkcie",
+                "type": "GENERAL_DELIVERY"
+              },
+              "orderDeliveryId": "005d9b80-1525-11eb-9e1c-81236432c0c6",
+              "parcelStatusInfo": {
+                "status": "DELIVERED",
+                "type": "STATUS",
+                "label": "przesyłka doręczona",
+                "link": "https://inpost.pl/pl/pomoc/znajdz-przesylke?parcel=642400307085096121083812",
+                "externalLink": true
+              },
+              "selfCollect": false,
+              "generalDelivery": {
+                "name": "Paczkomat BYD24A",
+                "description": "Przy markecie POLOmarket",
+                "address": {
+                  "street": "Fordońska 410",
+                  "code": "85-096",
+                  "city": "Bydgoszcz"
+                }
+              },
+              "discount": {
+                "originalCost": {
+                  "amount": "8.99",
+                  "currency": "PLN"
+                },
+                "type": "FREEBOX",
+                "planType": "FREEBOX_STANDARD"
+              }
+            },
+            "totalCost": {
+              "amount": "158.00",
+              "currency": "PLN"
+            },
+            "payment": {
+              "id": "00910790-1525-11eb-9f56-0bd703f0f67d",
+              "method": "BLIK",
+              "methodId": "OCP-blik",
+              "provider": "P24",
+              "status": "COMPLETED",
+              "startDate": "2020-10-23T11:43:43.24Z",
+              "endDate": "2020-10-23T11:44:53.586Z",
+              "amount": {
+                "amount": "257.99",
+                "currency": "PLN"
+              },
+              "buyerPaidAmount": {
+                "amount": "247.99",
+                "currency": "PLN"
+              },
+              "installments": false,
+              "availability": {
+                "available": false,
+                "reason": "ALREADY_PAID"
+              },
+              "freeboxSubscriptionIncluded": false,
+              "multipleSellers": true,
+              "mask": null
+            },
+            "surcharge": {
+              "status": "EMPTY"
+            },
+            "coins": null,
+            "timestamp": "2020-10-23T11:44:53.586Z",
+            "createDate": "2020-10-23T11:42:40.084Z",
+            "orderDate": "2020-10-23T11:44:34.807Z",
+            "invoiceAddressId": null,
+            "missingDependencies": null,
+            "orderVersion": "V1",
+            "serviceCountry": "PL",
+            "hasRelatedOrders": false,
+            "markedAsPaid": false,
+            "hiddenInMyOrders": false,
+            "boughtOnDevice": "IOS",
+            "tooOldToPay": false,
+            "onlinePaymentAvailable": true,
+            "cancelled": false,
+            "announcement": false,
+            "readOnly": false,
+            "messageToSeller": ""
+          }
+        ],
+        "total": 1
+      }
+    },
+    "slots": {
+      "additionalBanner": null,
+      "topBanner": null,
+      "listingBanner": "<div data-box-name=\"banner\" data-box-id=\"Ibu8jpSNS5qMrs3BkLxmJQ==qXlqnDp3QPK-sd9bs89c7Q==\" data-prototype-id=\"layout.container\" data-prototype-version=\"8.1\" data-analytics-category=\"layout.container\" data-analytics-groups=\"%5B%22myorders%20listing%22%5D\"><a name=\"banner\"></a><div class=\"opbox-sheet-wrapper m7er_k4 munh_56 m3h2_56 _26e29_2AYAm mjru_ey\" >  <div class=\"opbox-sheet _26e29_11PCu\" style=\"\"> <div data-box-name=\"allegro.performance.mark\" data-box-id=\"Ibu8jpSNS5qMrs3BkLxmJQ==EiCoMC8lS16xLJQlQqiEdg==\" data-prototype-id=\"allegro.performance.mark\" data-prototype-version=\"0.2\" data-analytics-enabled data-analytics-category=\"allegro.performance.mark\" data-analytics-groups=\"%5B%22myorders%20listing%22%5D\"><a name=\"allegro-performance-mark\"></a><script nonce=\"4WBr/DU+06TYmPA0lOpf2g==\">opbox.performance.markFirstContentfulPaint()</script></div> </div></div></div>"
+    },
+    "context": {
+      "prototype": {
+        "name": "allegro.myorder.listing",
+        "version": {
+          "major": 0,
+          "minor": 9
+        }
+      },
+      "variant": null,
+      "slug": "allegro-myorder-listing",
+      "name": "allegro.myorder.listing",
+      "boxId": "Ibu8jpSNS5qMrs3BkLxmJQ==H4E4LkjhQwev_aInJqfGgQ==",
+      "nonce": "4WBr/DU+06TYmPA0lOpf2g==",
+      "language": "pl-PL",
+      "isDevMode": false
+    }
+  },
+  "ServiceUserName": "Bartek",
+  "OldestEntry": "2020-07-27T17:32:52.168Z",
+  "NewestEntry": "2020-07-27T17:32:52.168Z"
+}

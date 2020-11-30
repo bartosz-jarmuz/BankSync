@@ -1,0 +1,265 @@
+{
+  "Model": {
+    "parameters": {
+      "detailsUrl": "/moje-allegro/zakupy/kupione",
+      "countryCode": {
+        "code": "pl"
+      },
+      "timeToShowCancelPaymentButton": 5,
+      "forceFallbackAjaxUpdateForEmptyDS": false,
+      "myorders": {
+        "myorders": [
+          {
+            "id": "df2a2440-784c-11ea-bfc0-43631bc4b76e",
+            "purchaseId": "df2a243f-784c-11ea-bfc0-43631bc4b76e",
+            "seller": {
+              "id": "222",
+              "login": "Seller"
+            },
+            "offers": [
+              {
+                "id": "8483637399",
+                "orderOfferId": "df2a2432-784c-11ea-bfc0-43631bc4b76e",
+                "unitPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "quantity": 1,
+                "orderDate": "2020-04-06T21:23:59.719Z",
+                "title": "PRUNES",
+                "friendlyUrl": "https://allegro.pl/oferta/balon-foliowy-zwierzatko-lew-31cmx-28cm-8483637399?snapshot=MjAyMC0wNC0wNlQyMToyMzo1OS43MTlaO2J1eWVyOzE0NzMzMzg1NTc0ZDAzMTJkMjI3ZmRkNmM1ODY5MmI1MWNhYjMyMzQyN2UyZWE3ZjMwOTViMjhkMTI2MjBmODU%3D",
+                "type": "UNIT",
+                "imageUrl": "https://a.allegroimg.com/original/11b543/64501c2b440288a9afff248f0c10",
+                "productId": null,
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              },
+              {
+                "id": "8483632182",
+                "orderOfferId": "df2a2435-784c-11ea-bfc0-43631bc4b76e",
+                "unitPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "quantity": 1,
+                "orderDate": "2020-04-06T21:23:59.739Z",
+                "title": "BALOON 1",
+                "friendlyUrl": "https://allegro.pl/oferta/balon-foliowy-zwierzatko-malpka-33cmx-24cm-8483632182?snapshot=MjAyMC0wNC0wNlQyMToyMzo1OS43MzlaO2J1eWVyOzQzOTYxNjQ0MDUxZmFkZjAwN2UxNmE5MGU0MTVhNzE5YjRlYWRlZTFhOGJkOTQ2NDNiODBmMGUyZjM2MmRkOTY%3D",
+                "type": "UNIT",
+                "imageUrl": "https://a.allegroimg.com/original/112686/79ed4a764656ba9b180a0f1e1ee3",
+                "productId": null,
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              },
+              {
+                "id": "8483761110",
+                "orderOfferId": "df2a2433-784c-11ea-bfc0-43631bc4b76e",
+                "unitPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "quantity": 1,
+                "orderDate": "2020-04-06T21:23:59.748Z",
+                "title": "BALOON 2",
+                "friendlyUrl": "https://allegro.pl/oferta/balon-foliowy-zwierzatko-zebra-34x26cm-8483761110?snapshot=MjAyMC0wNC0wNlQyMToyMzo1OS43NDhaO2J1eWVyOzJhMmFhMDhmODJmMjI1ZmU5Y2JkZTRjMmE4ZDU0Yzk4ZWVmYTljOWNhMGVkNzk4MWFiOWJkYmJiNDRhYmU0MjA%3D",
+                "type": "UNIT",
+                "imageUrl": "https://a.allegroimg.com/original/11528c/68566cd24f07a396f1a4d08c74a9",
+                "productId": null,
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              },
+              {
+                "id": "8483632226",
+                "orderOfferId": "df2a2431-784c-11ea-bfc0-43631bc4b76e",
+                "unitPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "3.45",
+                  "currency": "PLN"
+                },
+                "quantity": 2,
+                "orderDate": "2020-04-06T21:23:59.742Z",
+                "title": "BALOON 3",
+                "friendlyUrl": "https://allegro.pl/oferta/balon-foliowy-zwierzatko-zyrafa-43cmx-25cm-8483632226?snapshot=MjAyMC0wNC0wNlQyMToyMzo1OS43NDJaO2J1eWVyO2NmNWM2MDM1ZDY4YzlhNDIzM2M2N2YxYTE5ZTliY2JjNmM2OWY3MmE0MDU2NTYxYjBkZTBlOWU4NGI0MjQzOGQ%3D",
+                "type": "UNIT",
+                "imageUrl": "https://a.allegroimg.com/original/114d46/5ed9b9984c60a75d9376691fda22",
+                "productId": null,
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "6.90",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              },
+              {
+                "id": "8520966268",
+                "orderOfferId": "df2a243a-784c-11ea-bfc0-43631bc4b76e",
+                "unitPrice": {
+                  "amount": "13.69",
+                  "currency": "PLN"
+                },
+                "originalPrice": {
+                  "amount": "13.69",
+                  "currency": "PLN"
+                },
+                "quantity": 1,
+                "orderDate": "2020-04-06T21:24:00.312Z",
+                "title": "Carpet",
+                "friendlyUrl": "https://allegro.pl/oferta/na-stol-obrus-bieznik-jutowy-0-28x2-75m-8520966268?snapshot=MjAyMC0wNC0wNlQyMToyNDowMC4zMTJaO2J1eWVyO2M4ZGE3OTRmM2E4ZDQ1YmI4ZTIyZjA0OTYyZjhiYjE2MjhjM2IwNzljMTViYmVlNGQwNDQ4ZmEzYmY5MmE0ODY%3D",
+                "type": "UNIT",
+                "imageUrl": "https://a.allegroimg.com/original/119b87/551d8e7c47708df739d46a0d2d57",
+                "productId": null,
+                "gold": false,
+                "auction": false,
+                "pharmacy": false,
+                "offerPrice": {
+                  "amount": "13.69",
+                  "currency": "PLN"
+                },
+                "rebate": null
+              }
+            ],
+            "delivery": {
+              "addressId": "d4a0519c-22c7-4aaf-b370-22a68e840986",
+              "cost": {
+                "amount": "0.00",
+                "currency": "PLN"
+              },
+              "name": "Allegro miniKurier24 InPost",
+              "methodId": "9081532b-5ad3-467d-80bc-9252982e9dd8",
+              "paymentType": {
+                "name": "płatne z góry",
+                "type": "PREPAID"
+              },
+              "type": {
+                "name": "standardowy",
+                "type": "STANDARD"
+              },
+              "orderDeliveryId": "df6fdfc0-784c-11ea-b00f-4b41b70b1044",
+              "parcelStatusInfo": null,
+              "selfCollect": false,
+              "generalDelivery": null,
+              "discount": {
+                "originalCost": {
+                  "amount": "10.95",
+                  "currency": "PLN"
+                },
+                "type": "FREEBOX",
+                "planType": "FREEBOX_STANDARD"
+              }
+            },
+            "totalCost": {
+              "amount": "103.43",
+              "currency": "PLN"
+            },
+            "payment": {
+              "id": "df8feaf0-784c-11ea-8fd3-df7850c9d657",
+              "method": "BLIK",
+              "methodId": "OCP-blik",
+              "provider": "P24",
+              "status": "COMPLETED",
+              "startDate": "2020-04-06T21:23:35.182Z",
+              "endDate": "2020-04-06T21:24:13.74Z",
+              "amount": {
+                "currency": "PLN",
+                "amount": "30.94"
+              },
+              "buyerPaidAmount": {
+                "amount": "30.94",
+                "currency": "PLN"
+              },
+              "installments": false,
+              "availability": {
+                "available": false,
+                "reason": "ALREADY_PAID"
+              },
+              "freeboxSubscriptionIncluded": false,
+              "multipleSellers": false,
+              "mask": null
+            },
+            "surcharge": {
+              "status": "EMPTY"
+            },
+            "coins": null,
+            "timestamp": "2020-04-06T21:24:13.74Z",
+            "createDate": "2020-04-06T21:23:34.515Z",
+            "orderDate": "2020-04-06T21:24:00.367Z",
+            "invoiceAddressId": null,
+            "missingDependencies": null,
+            "orderVersion": "V1",
+            "serviceCountry": "PL",
+            "hasRelatedOrders": false,
+            "markedAsPaid": false,
+            "hiddenInMyOrders": false,
+            "boughtOnDevice": "IOS",
+            "tooOldToPay": false,
+            "onlinePaymentAvailable": true,
+            "cancelled": false,
+            "announcement": false,
+            "readOnly": false,
+            "messageToSeller": "Proszę o pilną wysyłkę. Dziękuję!"
+          }
+        ],
+        "total": 1
+      }
+    },
+    "slots": {
+      "additionalBanner": null,
+      "topBanner": null,
+      "listingBanner": "<div data-box-name=\"banner\" data-box-id=\"Ibu8jpSNS5qMrs3BkLxmJQ==qXlqnDp3QPK-sd9bs89c7Q==\" data-prototype-id=\"layout.container\" data-prototype-version=\"8.1\" data-analytics-category=\"layout.container\" data-analytics-groups=\"%5B%22myorders%20listing%22%5D\"><a name=\"banner\"></a><div class=\"opbox-sheet-wrapper m7er_k4 munh_56 m3h2_56 _26e29_2AYAm mjru_ey\" >  <div class=\"opbox-sheet _26e29_11PCu\" style=\"\"> <div data-box-name=\"allegro.performance.mark\" data-box-id=\"Ibu8jpSNS5qMrs3BkLxmJQ==EiCoMC8lS16xLJQlQqiEdg==\" data-prototype-id=\"allegro.performance.mark\" data-prototype-version=\"0.2\" data-analytics-enabled data-analytics-category=\"allegro.performance.mark\" data-analytics-groups=\"%5B%22myorders%20listing%22%5D\"><a name=\"allegro-performance-mark\"></a><script nonce=\"4WBr/DU+06TYmPA0lOpf2g==\">opbox.performance.markFirstContentfulPaint()</script></div> </div></div></div>"
+    },
+    "context": {
+      "prototype": {
+        "name": "allegro.myorder.listing",
+        "version": {
+          "major": 0,
+          "minor": 9
+        }
+      },
+      "variant": null,
+      "slug": "allegro-myorder-listing",
+      "name": "allegro.myorder.listing",
+      "boxId": "Ibu8jpSNS5qMrs3BkLxmJQ==H4E4LkjhQwev_aInJqfGgQ==",
+      "nonce": "4WBr/DU+06TYmPA0lOpf2g==",
+      "language": "pl-PL",
+      "isDevMode": false
+    }
+  },
+  "ServiceUserName": "Bartek",
+  "OldestEntry": "2020-07-27T17:32:52.168Z",
+  "NewestEntry": "2020-07-27T17:32:52.168Z"
+}
