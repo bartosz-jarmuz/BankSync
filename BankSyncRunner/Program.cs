@@ -19,50 +19,60 @@ namespace BankSyncRunner
 {
     class Program
     {
-        private static IDataMapper mapper = new ConfigurableDataMapper(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Mappings.xml"));
+        private static IDataMapper mapper =
+            new ConfigurableDataMapper(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Mappings.xml"));
+
         static DataEnricherExecutor enricher = new DataEnricherExecutor();
         static FileInfo servicesConfigFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Accounts.xml");
-        static FileInfo googleWriterConfigFile = new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Google\GoogleWriterSettings.xml");
+
+        static FileInfo googleWriterConfigFile =
+            new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Google\GoogleWriterSettings.xml");
+
         private static DateTime startTime = DateTime.Today.AddMonths(-12);
         private static DateTime endTime = DateTime.Today;
         private static IBankSyncLogger logger = new ContextAwareLogger(new ConsoleLogger());
-        
+
         static async Task Main(string[] args)
         {
-
-            BankSyncConfig config = new BankSyncConfig(servicesConfigFile, GetInput);
-
-            List<BankDataSheet> datasets = new List<BankDataSheet>();
-            foreach (ServiceConfig configService in config.Services)
+            try
             {
-                try
+                BankSyncConfig config = new BankSyncConfig(servicesConfigFile, GetInput);
+
+                List<BankDataSheet> datasets = new List<BankDataSheet>();
+                foreach (ServiceConfig configService in config.Services)
                 {
-                    await ProcessServices(configService, datasets);
+                    try
+                    {
+                        await ProcessServices(configService, datasets);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error($"Error while processing service: {configService.Name}", ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    logger.Error($"Error while processing service: {configService.Name}" , ex);
-                }
+
+                BankDataSheet bankDataSheet = BankDataSheet.Consolidate(datasets);
+
+                logger.Info("Data downloaded");
+
+                enricher.LoadEnrichers(config, logger);
+                await enricher.EnrichData(bankDataSheet, startTime, endTime);
+                logger.Info("Data enriched");
+
+                var analyzersExecutor = new DataAnalyzersExecutor(logger);
+                analyzersExecutor.AnalyzeData(bankDataSheet);
+                logger.Info("Data categorized");
+
+                await Write(bankDataSheet);
+
+                logger.Info("All done!");
             }
-
-            BankDataSheet bankDataSheet = BankDataSheet.Consolidate(datasets);
-
-            logger.Info("Data downloaded");
-
-            enricher.LoadEnrichers(config, logger);
-            await enricher.EnrichData(bankDataSheet, startTime, endTime);
-            logger.Info("Data enriched");
-
-            var analyzersExecutor = new DataAnalyzersExecutor(logger);
-            analyzersExecutor.AnalyzeData(bankDataSheet);
-            logger.Info("Data categorized");
-
-            await Write(bankDataSheet);
-
-            logger.Info("All done!");
-            #if !DEBUG
+            catch (Exception ex)
+            {
+                logger.Error("Unexpected error!",ex);
+            }
             Console.ReadKey();
-#endif
+
         }
 
         private static async Task ProcessServices(ServiceConfig configServiceConfig, List<BankDataSheet> datasets)
@@ -77,6 +87,7 @@ namespace BankSyncRunner
                     logger.Debug($"Loaded {dataset.Entries.Count} entries from IPKO for {configServiceUser.UserName}");
                 }
             }
+
             if (string.Equals(configServiceConfig.Name, "Citibank", StringComparison.OrdinalIgnoreCase))
             {
                 foreach (ServiceUser configServiceUser in configServiceConfig.Users)
@@ -84,7 +95,8 @@ namespace BankSyncRunner
                     IBankDataExporter downloader = new CitibankDataDownloader(configServiceUser, mapper);
                     var dataset = await downloader.GetData(startTime, endTime);
                     datasets.Add(dataset);
-                    logger.Debug($"Loaded {dataset.Entries.Count} entries from Citibank for {configServiceUser.UserName}");
+                    logger.Debug(
+                        $"Loaded {dataset.Entries.Count} entries from Citibank for {configServiceUser.UserName}");
                 }
             }
         }
@@ -128,5 +140,4 @@ namespace BankSyncRunner
             return filePath;
         }
     }
-
 }
