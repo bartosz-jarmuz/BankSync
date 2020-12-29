@@ -199,7 +199,10 @@ namespace BankSync.Writers.GoogleSheets
                 }
             }
 
-            await this.AddEntries(sheetsService.Spreadsheets, missingEntries);
+            if (missingEntries.Any())
+            {
+                await this.AddEntries(sheetsService.Spreadsheets, missingEntries);
+            }
 
             return missingEntries.Count;
         }

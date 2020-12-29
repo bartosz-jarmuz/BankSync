@@ -8,19 +8,23 @@ using System.Text;
 using System.Threading.Tasks;
 using BankSync.Config;
 using BankSync.Enrichers.Allegro.Model;
+using BankSync.Logging;
 using BankSync.Utilities;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
+using Polly;
 
 namespace BankSync.Enrichers.Allegro
 {
     internal class AllegroDataDownloader
     {
         private readonly ServiceUser userConfig;
+        private readonly IBankSyncLogger logger;
 
-        public AllegroDataDownloader(ServiceUser userConfig)
+        public AllegroDataDownloader(ServiceUser userConfig, IBankSyncLogger logger)
         {
             this.userConfig = userConfig;
+            this.logger = logger;
             this.cookies = new CookieContainer();
             HttpClientHandler handler = new HttpClientHandler()
             {
@@ -40,7 +44,31 @@ namespace BankSync.Enrichers.Allegro
         {
             await this.LogIn();
 
-            return await this.LoadData(oldestEntry);
+            AllegroDataContainer data = await Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(new []
+                {
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(3)
+                }, (exception, timeSpan, retryCount, context) => {
+                    if (retryCount > 1)
+                    {
+                        this.logger.Warning($"Exception while downloading data from Allegro. Will retry. Attempt {retryCount} of 3");
+                    }
+                    else
+                    {
+                        this.logger.Debug($"Exception while downloading data from Allegro. Will retry. Attempt {retryCount} of 3");
+                    }
+                })
+                .ExecuteAsync(()=>
+                {
+                    Task<AllegroDataContainer> returnValue = this.LoadData(oldestEntry);
+                    this.logger.Debug("Successfully downloaded data.");
+                    return returnValue;
+                });
+            
+            return data;
         }
 
         private async Task LogIn()
@@ -86,6 +114,11 @@ namespace BankSync.Enrichers.Allegro
                 {
                     throw new InvalidOperationException("Error while logging to Allegro");
                 }
+                else
+                {
+                    this.logger.Debug($"Logged in to Allegro for: {this.userConfig.Credentials.Id}");
+                }
+                
             }
 
         }
@@ -117,14 +150,23 @@ namespace BankSync.Enrichers.Allegro
 
         private static async Task<AllegroData> GetDataFromResponse(HttpResponseMessage response)
         {
-            string stringified = await response.Content.ReadAsStringAsync();
-            HtmlDocument htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(stringified);
+            string stringified = "Not loaded yet";
+            try
+            {
 
-            IEnumerable<HtmlNode> scripts = htmlDoc.DocumentNode.Descendants("script");
-            HtmlNode myOrdersScript = scripts.Where(x => x.InnerHtml.Contains("myorders"))
-                .OrderByDescending(x => x.InnerHtml.Length).FirstOrDefault();
-            return JsonConvert.DeserializeObject<AllegroData>(myOrdersScript.InnerText);
+                stringified= await response.Content.ReadAsStringAsync();
+                HtmlDocument htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(stringified);
+
+                IEnumerable<HtmlNode> scripts = htmlDoc.DocumentNode.Descendants("script");
+                HtmlNode myOrdersScript = scripts.Where(x => x.InnerHtml.Contains("myorders"))
+                    .OrderByDescending(x => x.InnerHtml.Length).FirstOrDefault();
+                return JsonConvert.DeserializeObject<AllegroData>(myOrdersScript.InnerText);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidDataException($"Failed to find proper data in the response body: {stringified}", ex);
+            }
         }
     }
 }

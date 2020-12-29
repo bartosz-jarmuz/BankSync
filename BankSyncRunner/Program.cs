@@ -59,7 +59,7 @@ namespace BankSyncRunner
                 await enricher.EnrichData(bankDataSheet, startTime, endTime);
                 logger.Info("Data enriched");
 
-                var analyzersExecutor = new DataAnalyzersExecutor(logger);
+                DataAnalyzersExecutor analyzersExecutor = new DataAnalyzersExecutor(logger);
                 analyzersExecutor.AnalyzeData(bankDataSheet);
                 logger.Info("Data categorized");
 
@@ -82,9 +82,9 @@ namespace BankSyncRunner
                 foreach (ServiceUser configServiceUser in configServiceConfig.Users)
                 {
                     IBankDataExporter downloader = new IpkoDataDownloader(configServiceUser, mapper, logger);
-                    var dataset = await downloader.GetData(startTime, endTime);
+                    BankDataSheet dataset = await downloader.GetData(startTime, endTime);
                     datasets.Add(dataset);
-                    logger.Debug($"Loaded {dataset.Entries.Count} entries from IPKO for {configServiceUser.UserName}");
+                    logger.Debug($"IPKO - Loaded total of {dataset.Entries.Count} entries for {configServiceUser.UserName}");
                 }
             }
 
@@ -93,10 +93,10 @@ namespace BankSyncRunner
                 foreach (ServiceUser configServiceUser in configServiceConfig.Users)
                 {
                     IBankDataExporter downloader = new CitibankDataDownloader(configServiceUser, mapper);
-                    var dataset = await downloader.GetData(startTime, endTime);
+                    BankDataSheet dataset = await downloader.GetData(startTime, endTime);
                     datasets.Add(dataset);
                     logger.Debug(
-                        $"Loaded {dataset.Entries.Count} entries from Citibank for {configServiceUser.UserName}");
+                        $"Citibank - Loaded total of {dataset.Entries.Count} entries  for {configServiceUser.UserName}");
                 }
             }
         }
@@ -104,7 +104,7 @@ namespace BankSyncRunner
 
         private static async Task Write(BankDataSheet ipkoData)
         {
-            var writers = new List<IBankDataWriter>();
+            List<IBankDataWriter> writers = new List<IBankDataWriter>();
             string path = GetOutputPath();
             writers.Add(new ExcelBankDataWriter(path + ".xlsx"));
             writers.Add(new JsonBankDataWriter(path + ".json"));

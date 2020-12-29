@@ -2,16 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BankSync.Config;
+using BankSync.Logging;
 
 namespace BankSync.Enrichers.Allegro
 {
     internal class AllegroDataLoader : IAllegroDataLoader
     {
         private readonly ServiceConfig config;
+        private readonly IBankSyncLogger logger;
 
-        public AllegroDataLoader(ServiceConfig config)
+        public AllegroDataLoader(ServiceConfig config, IBankSyncLogger logger)
         {
             this.config = config;
+            this.logger = logger;
         }
 
         public async Task<List<AllegroDataContainer>> LoadAllData(DateTime oldestEntry)
@@ -25,7 +28,7 @@ namespace BankSync.Enrichers.Allegro
 
                 DateTime oldestEntryAdjusted = AdjustOldestEntryToDownloadBasedOnOldData(oldestEntry, oldData);
 
-                AllegroDataContainer newData = await new AllegroDataDownloader(serviceUser).GetData(oldestEntryAdjusted);
+                AllegroDataContainer newData = await new AllegroDataDownloader(serviceUser, this.logger).GetData(oldestEntryAdjusted);
                 oldDataManager.StoreData(newData);
 
                 AllegroDataContainer consolidatedData =  AllegroDataContainer.Consolidate(new List<AllegroDataContainer>() { newData, oldData });

@@ -26,7 +26,7 @@ namespace BankSync.Enrichers.Allegro
         public AllegroBankDataEnricher(ServiceConfig config, IBankSyncLogger logger)
         {
             this.logger = logger;
-            this.dataLoader = new AllegroDataLoader(config);
+            this.dataLoader = new AllegroDataLoader(config,logger);
         }
         
         internal AllegroBankDataEnricher(IBankSyncLogger logger, IAllegroDataLoader dataLoader)
