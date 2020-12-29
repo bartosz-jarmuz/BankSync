@@ -57,7 +57,7 @@ namespace BankSync.Exporters.Ipko
             {
                 DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, account.Number);
                 BankDataSheet data = await this.GetAccountData(account.Number, oldestEntryAdjusted, endTime);
-                this.logger.Debug($"IPKO Account [{account.Number.Substring(account.Number.Length - 4)}] - Loaded {data.Entries.Count} entries.");
+                this.logger.Debug($"IPKO Account [{this.mapper.Map(account.Number)}] - Loaded {data.Entries.Count} entries.");
                 datasets.Add(data);
             }
             foreach (Card card in this.serviceUserConfig.Cards)
@@ -65,7 +65,7 @@ namespace BankSync.Exporters.Ipko
                 DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, card.Number);
             
                 BankDataSheet data = await this.GetCardData(card.Number, oldestEntryAdjusted, endTime);
-                this.logger.Debug($"IPKO Card [{card.Number.Substring(card.Number.Length - 4)}] - Loaded {data.Entries.Count} entries.");
+                this.logger.Debug($"IPKO Card [{this.mapper.Map(card.Number)}] - Loaded {data.Entries.Count} entries.");
 
                 datasets.Add(data);
             }
