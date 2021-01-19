@@ -132,13 +132,15 @@ namespace BankSync.Enrichers.Allegro
 
             int limit = 25;
             int offset = 25;
-            while (AllegroDataContainer.GetOldestDate(data) > oldestEntry)
+            do
             {
-                response = await this.client.GetAsync($"https://allegro.pl/moje-allegro/zakupy/kupione?limit={limit}&offset={offset}");
+                response = await this.client.GetAsync(
+                    $"https://allegro.pl/moje-allegro/zakupy/kupione?limit={limit}&offset={offset}");
                 data = await GetDataFromResponse(response);
                 dataList.Add(new AllegroDataContainer(data, this.userConfig.UserName));
                 offset += 25;
-            }
+            } while (AllegroDataContainer.GetOldestDate(data) > oldestEntry);
+            
 
             
             return AllegroDataContainer.Consolidate(dataList);

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using BankSync.Model;
+using BankSync.Utilities;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
 {
@@ -93,7 +94,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             //card entries in TSV (copied from archive IPKO PDFs) are inverted, i.e. amount spent is positive,
             //and amount paid back to the card is negative
             //NOTE: this is not like that in the XML files
-            return Convert.ToDecimal(line[4].Replace(" ","")) * -1;
+            return BankSyncConverter.ToDecimal(line[4].Replace(" ","")) * -1;
         }
 
         private string GetCurrency(string[] line)

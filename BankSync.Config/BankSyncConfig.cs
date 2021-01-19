@@ -124,7 +124,7 @@ namespace BankSync.Config
             else
             {
                 string newLogin = provideInput(
-                    $"Provide '{this.ServiceConfig.Name}' login for user '{this.UserName}' (WILL BE STORED ENCRYPTED)");
+                    $"Provide '{this.ServiceConfig.Name}' {elementToBeLoadedName} for user '{this.UserName}' (WILL BE STORED ENCRYPTED)");
                 userElement.Add(new XElement(elementToBeLoadedName, newLogin.ToSecureString().EncryptString()));
                 updateConfig();
                 return newLogin.ToSecureString();

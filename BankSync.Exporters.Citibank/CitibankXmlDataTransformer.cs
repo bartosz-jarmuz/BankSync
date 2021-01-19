@@ -126,14 +126,7 @@ namespace BankSync.Exporters.Citibank
             XElement element = operation.Element("amount");
             if (element != null)
             {
-                try
-                {
-                    return BankSyncConverter.ConvertWithAssumptions(element.Value);
-                }
-                catch (Exception)
-                {
-                    //todo handle maybe sometime?
-                }
+                return BankSyncConverter.ToDecimal(element.Value);
             }
             return 0;
         }

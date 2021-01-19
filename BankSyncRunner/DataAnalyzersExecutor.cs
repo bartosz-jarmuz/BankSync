@@ -21,10 +21,10 @@ namespace BankSyncRunner
 {
     public class DataAnalyzersExecutor
     {
-        public DataAnalyzersExecutor(IBankSyncLogger logger)
+        public DataAnalyzersExecutor(IBankSyncLogger logger, DirectoryInfo workingDir)
         {
-            allIfsAnalyzer = new AllIfsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\Tags.xml"), logger);
-            internalTransfersAnalyzer = new InternalTransactionsAnalyzer(new FileInfo(@"C:\Users\bjarmuz\Documents\BankSync\InternalTransactions.xml"));
+            allIfsAnalyzer = new AllIfsAnalyzer(new FileInfo(Path.Combine(workingDir.FullName, "Tags.xml")), logger);
+            internalTransfersAnalyzer = new InternalTransactionsAnalyzer(new FileInfo(Path.Combine(workingDir.FullName,"InternalTransactions.xml")));
         }
 
         private IBankDataAnalyzer allIfsAnalyzer;

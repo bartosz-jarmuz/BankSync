@@ -4,6 +4,7 @@ using System.Linq;
 using BankSync.Enrichers.Allegro.Model;
 using BankSync.Logging;
 using BankSync.Model;
+using BankSync.Utilities;
 
 namespace BankSync.Enrichers.Allegro
 {
@@ -52,7 +53,7 @@ namespace BankSync.Enrichers.Allegro
 
             if (relevantOrders.All(x => x.payment.id == payment.id))
             {
-                return Convert.ToDecimal(payment.buyerPaidAmount.amount) *-1;
+                return BankSyncConverter.ToDecimal(payment.buyerPaidAmount.amount) *-1;
             }
             else
             {
@@ -61,7 +62,7 @@ namespace BankSync.Enrichers.Allegro
                 foreach (IGrouping<string, Myorder> grouping in groupings)
                 {
                    Payment groupPayment = grouping.First().payment;
-                    decimal partial =   Convert.ToDecimal(groupPayment.buyerPaidAmount.amount);
+                    decimal partial =   BankSyncConverter.ToDecimal(groupPayment.buyerPaidAmount.amount);
                     totalAmount += partial;
                 }
 
@@ -73,7 +74,7 @@ namespace BankSync.Enrichers.Allegro
         {
             Offer offer = allegroEntry.offers[offerIndex];
             BankEntry newEntry = BankEntry.Clone(entry);
-            newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount) * -1;
+            newEntry.Amount = BankSyncConverter.ToDecimal(offer.offerPrice.amount) * -1;
 
             newEntry.Note = $"{offer.title} (Ilość sztuk: {offer.quantity}, Oferta {offer.id}, Pozycja {offerIndex + 1}/{allegroEntry.offers.Length})";
             newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
@@ -147,10 +148,10 @@ namespace BankSync.Enrichers.Allegro
             {
                 //lets add a delivery cost as a separate entry, but assign it a category etc. of the most expensive item
                 Offer mostExpensive =
-                    allegroEntry.offers.OrderByDescending(x => Convert.ToDecimal(x.offerPrice.amount)).First();
+                    allegroEntry.offers.OrderByDescending(x => BankSyncConverter.ToDecimal(x.offerPrice.amount)).First();
 
                 BankEntry deliveryEntry = BankEntry.Clone(entry);
-                deliveryEntry.Amount = Convert.ToDecimal(allegroEntry.delivery.cost.amount) * -1;
+                deliveryEntry.Amount = BankSyncConverter.ToDecimal(allegroEntry.delivery.cost.amount) * -1;
                 deliveryEntry.Note =
                     $"DOSTAWA: {mostExpensive.title} (Oferta {mostExpensive.id}, Suma zamówień: {allegroEntry.offers.Length})";
                 deliveryEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
@@ -201,7 +202,7 @@ namespace BankSync.Enrichers.Allegro
                 .Where(x => x.orderDate.Date <= entry.Date.Date)
                 .Where(x => ( entry.Date.Date - x.orderDate.Date).TotalDays < 30)
                 .Where(x =>
-                    Convert.ToDecimal(x.payment.buyerPaidAmount.amount) == Convert.ToDecimal(entry.Amount.ToString().Trim('-'))
+                    BankSyncConverter.ToDecimal(x.payment.buyerPaidAmount.amount) == BankSyncConverter.ToDecimal(entry.Amount.ToString().Trim('-'))
                 ).ToList();
 
 

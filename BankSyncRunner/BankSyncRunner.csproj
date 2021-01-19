@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
   </ItemGroup>
@@ -25,6 +27,12 @@
     <ProjectReference Include="..\BankSync.Writers.Excel\BankSync.Writers.Excel.csproj" />
     <ProjectReference Include="..\BankSync.Writers.GoogleSheets\BankSync.Writers.GoogleSheets.csproj" />
     <ProjectReference Include="..\BankSync.Writers.Json\BankSync.Writers.Json.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

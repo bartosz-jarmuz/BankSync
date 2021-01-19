@@ -4,6 +4,7 @@ using System.Linq;
 using BankSync.Enrichers.Allegro.Model;
 using BankSync.Logging;
 using BankSync.Model;
+using BankSync.Utilities;
 
 namespace BankSync.Enrichers.Allegro
 {
@@ -26,7 +27,7 @@ namespace BankSync.Enrichers.Allegro
             {
                 foreach (Myorder order in relevantOrders)
                 {
-                    if (entry.Amount == Convert.ToDecimal(order.payment.buyerPaidAmount.amount))
+                    if (entry.Amount == BankSyncConverter.ToDecimal(order.payment.buyerPaidAmount.amount))
                     {
                         for (int offerIndex = 0; offerIndex < order.offers.Length; offerIndex++)
                         {
@@ -55,7 +56,7 @@ namespace BankSync.Enrichers.Allegro
             AllegroDataContainer container)
         {
             List<Offer> offersWithProperPrice =
-                order.offers.Where(x => Convert.ToDecimal(x.offerPrice.amount) == entry.Amount).ToList();
+                order.offers.Where(x => BankSyncConverter.ToDecimal(x.offerPrice.amount) == entry.Amount).ToList();
 
             if (offersWithProperPrice.Any())
             {
@@ -92,7 +93,7 @@ namespace BankSync.Enrichers.Allegro
             Offer offer = allegroEntry.offers[offerIndex];
             BankEntry newEntry = BankEntry.Clone(entry);
             
-            newEntry.Amount = Convert.ToDecimal(offer.offerPrice.amount);
+            newEntry.Amount = BankSyncConverter.ToDecimal(offer.offerPrice.amount);
 
             newEntry.Note = $"ZWROT: {offer.title} (Ilość sztuk: {offer.quantity}, Oferta {offer.id}, Pozycja {offerIndex + 1}/{allegroEntry.offers.Length})";
            
@@ -150,7 +151,7 @@ namespace BankSync.Enrichers.Allegro
             List<Myorder> allegroOrders = model.parameters.myorders.myorders
                 .Where(x => x.payment.startDate.Date <= entry.Date)
                 .Where(x =>
-                    Convert.ToDecimal(x.payment.buyerPaidAmount.amount) == Convert.ToDecimal(entry.Amount.ToString().Trim('-'))
+                    BankSyncConverter.ToDecimal(x.payment.buyerPaidAmount.amount) == BankSyncConverter.ToDecimal(entry.Amount.ToString().Trim('-'))
                 ).ToList();
 
             
@@ -161,7 +162,7 @@ namespace BankSync.Enrichers.Allegro
                     //  .Where(x=>x.payment.startDate < entry.Date)
                     .Where(x =>
                         x.offers.Any(x =>
-                            Convert.ToDecimal(x.offerPrice.amount) == Convert.ToDecimal(entry.Amount.ToString().Trim('-')))
+                            BankSyncConverter.ToDecimal(x.offerPrice.amount) == BankSyncConverter.ToDecimal(entry.Amount.ToString().Trim('-')))
                     ).ToList();
             }
 
@@ -235,7 +236,7 @@ namespace BankSync.Enrichers.Allegro
                 //too bad there is no refund note or reference
                 offersMatchingPrice = dateFilteredEntries
                     .SelectMany(x => x.offers.Where(x =>
-                        Convert.ToDecimal(x.offerPrice.amount) == Convert.ToDecimal(entry.Amount.ToString().Trim('-')))
+                        BankSyncConverter.ToDecimal(x.offerPrice.amount) == BankSyncConverter.ToDecimal(entry.Amount.ToString().Trim('-')))
                     ).ToList();
 
                 return null;

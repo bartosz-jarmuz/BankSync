@@ -39,7 +39,7 @@ namespace BankSync.Model
         {
             get
             {
-                var input = $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount}{this.Note}{this.FullDetails}";
+                var input = $"{this.Account}{this.Date:O}{this.Payer}{this.Recipient}{this.Amount.ToString().Replace(",", ".")}{this.Note}{this.FullDetails}";
                 return GetStableHashCode(input);
             }
         }
@@ -66,7 +66,7 @@ namespace BankSync.Model
         public override string ToString()
         {
             return $"ID: [{this.BankEntryId}], " +
-                   $"DATE: [{this.Date:dd-MM-yyyy hh-mm-ss}], " +
+                   $"DATE: [{this.Date:dd-MM-yyyy HH-mm-ss}], " +
                    $"ACCOUNT: [{this.Account}], " +
                    $"AMOUNT: [{this.Amount}], " +
                    $"PAYER [{this.Payer}]," +

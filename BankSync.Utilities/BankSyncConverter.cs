@@ -10,7 +10,7 @@ namespace BankSync.Utilities
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static decimal ConvertWithAssumptions(string input)
+        public static decimal ToDecimal(string input)
         {
             string spaceless = input?.Replace(" ", "")??"";
             try
@@ -26,14 +26,14 @@ namespace BankSync.Utilities
                     int indexDot = spaceless.LastIndexOf('.');
                     if (indexDot > indexComma)
                     {
-                        return ConvertWithAssumptions(spaceless
+                        return ToDecimal(spaceless
                             .Replace(",", "")
                             .Replace(".", ",")
                         );
                     }
                     else
                     {
-                        return ConvertWithAssumptions(spaceless
+                        return ToDecimal(spaceless
                             .Replace(".","")
                             .Replace(",",".")
                         );

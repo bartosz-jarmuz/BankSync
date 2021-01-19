@@ -3,6 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using BankSync.Logging;
 using BankSync.Model;
+using BankSync.Utilities;
 
 namespace BankSync.Exporters.Ipko.DataTransformation
 {
@@ -230,7 +231,14 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             XElement element = operation.Element("amount");
             if (element != null)
             {
-                return Convert.ToDecimal(element.Value);
+                try
+                {
+                    return BankSyncConverter.ToDecimal(element.Value);
+                }
+                catch (Exception ex)
+                {
+                    throw new FormatException($"Failed to convert {element.Value} to decimal.", ex);
+                }
             }
             return 0;
         }
@@ -240,7 +248,14 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             XElement element = operation.Element("ending-balance");
             if (element != null)
             {
-                return Convert.ToDecimal(element.Value);
+                try
+                {
+                    return BankSyncConverter.ToDecimal(element.Value);
+                }
+                catch (Exception ex)
+                {
+                    throw new FormatException($"Failed to convert {element.Value} to decimal.", ex);
+                }
             }
             return 0;
         }

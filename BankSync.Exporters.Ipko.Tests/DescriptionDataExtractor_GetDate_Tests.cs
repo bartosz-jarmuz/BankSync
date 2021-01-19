@@ -17,11 +17,11 @@ namespace BankSync.Exporters.Ipko.Tests
         {
             string input = @"Tytuł: 000498849 74230780303086100480000
 Lokalizacja: Kraj: POLSKA Miasto: BYDGOSZCZ Adres: KARAFKA
-Data i czas operacji: 2020-10-29
+Data i czas operacji: 2020-10-29 20:48:22
 Oryginalna kwota operacji: 61,00 PLN
 Numer karty: 005125******0000";
 
-            Check.That(new DescriptionDataExtractor(this.logger).GetDate(input)).IsEqualTo(new DateTime(2020,10,29));
+            Check.That(new DescriptionDataExtractor(this.logger).GetDate(input)).IsEqualTo(new DateTime(2020,10,29, 20,48,22));
         } 
         
         [TestMethod]
