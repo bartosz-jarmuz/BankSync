@@ -23,7 +23,7 @@ namespace BankSync.Enrichers.Allegro
 
             foreach (ServiceUser serviceUser in this.config.Users)
             {
-                OldDataManager oldDataManager = new OldDataManager(serviceUser);
+                OldDataManager oldDataManager = new OldDataManager(serviceUser, this.logger);
                 AllegroDataContainer oldData = oldDataManager.GetOldData();
 
                 DateTime oldestEntryAdjusted = AdjustOldestEntryToDownloadBasedOnOldData(oldestEntry, oldData);

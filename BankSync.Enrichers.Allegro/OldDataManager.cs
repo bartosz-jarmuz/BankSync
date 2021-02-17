@@ -4,11 +4,13 @@
 //  </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using BankSync.Config;
+using BankSync.Logging;
 using Newtonsoft.Json;
 
 namespace BankSync.Enrichers.Allegro
@@ -16,11 +18,13 @@ namespace BankSync.Enrichers.Allegro
     internal class OldDataManager
     {
         private readonly ServiceUser serviceUserConfig;
+        private readonly IBankSyncLogger logger;
         private readonly DirectoryInfo dataRetentionDirectory;
 
-        public OldDataManager(ServiceUser serviceUserConfig)
+        public OldDataManager(ServiceUser serviceUserConfig, IBankSyncLogger logger)
         {
             this.serviceUserConfig = serviceUserConfig;
+            this.logger = logger;
             this.dataRetentionDirectory = this.GetDataRetentionDirectory();
         }
 
@@ -32,10 +36,17 @@ namespace BankSync.Enrichers.Allegro
             {
                 foreach (FileInfo fileInfo in this.dataRetentionDirectory.GetFiles("*.json"))
                 {
-                    AllegroDataContainer deserialized = JsonConvert.DeserializeObject<AllegroDataContainer>(File.ReadAllText(fileInfo.FullName));
-                    if (deserialized.ServiceUserName == this.serviceUserConfig.UserName)
+                    try
                     {
-                        sheets.Add(deserialized);
+                        AllegroDataContainer deserialized = JsonConvert.DeserializeObject<AllegroDataContainer>(File.ReadAllText(fileInfo.FullName));
+                        if (deserialized.ServiceUserName == this.serviceUserConfig.UserName && deserialized.Model.myorders != null)
+                        {
+                            sheets.Add(deserialized);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.logger.Warning($"Exception while loading old data from {fileInfo.Name}. {ex.Message}");
                     }
                 }
             }

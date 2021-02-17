@@ -12,10 +12,12 @@ namespace BankSync.Enrichers.Allegro
     {
 
         private readonly IBankSyncLogger logger;
+        private readonly BankSyncConverter converter;
 
         public RefundEnricher(IBankSyncLogger logger)
         {
             this.logger = logger;
+            this.converter = new BankSyncConverter();
         }
 
         public void EnrichAllegroEntry(BankEntry entry, List<AllegroDataContainer> allData, List<BankEntry> updatedEntries, out decimal discount)
@@ -27,7 +29,7 @@ namespace BankSync.Enrichers.Allegro
             {
                 foreach (Myorder order in relevantOrders)
                 {
-                    if (entry.Amount == BankSyncConverter.ToDecimal(order.payment.buyerPaidAmount.amount))
+                    if (entry.Amount == this.converter.ToDecimal(order.payment.amount.amount))
                     {
                         for (int offerIndex = 0; offerIndex < order.offers.Length; offerIndex++)
                         {
@@ -52,11 +54,11 @@ namespace BankSync.Enrichers.Allegro
             }
         }
 
-        private static void HandlePartialRefunds(BankEntry entry, List<BankEntry> updatedEntries, Myorder order,
+        private void HandlePartialRefunds(BankEntry entry, List<BankEntry> updatedEntries, Myorder order,
             AllegroDataContainer container)
         {
             List<Offer> offersWithProperPrice =
-                order.offers.Where(x => BankSyncConverter.ToDecimal(x.offerPrice.amount) == entry.Amount).ToList();
+                order.offers.Where(x => this.converter.ToDecimal(x.offerPrice.amount) == entry.Amount).ToList();
 
             if (offersWithProperPrice.Any())
             {
@@ -87,13 +89,13 @@ namespace BankSync.Enrichers.Allegro
             }
         }
 
-        private static BankEntry PrepareNewBankEntryForOffer(Myorder allegroEntry, int offerIndex, BankEntry entry,
+        private BankEntry PrepareNewBankEntryForOffer(Myorder allegroEntry, int offerIndex, BankEntry entry,
             AllegroDataContainer container)
         {
             Offer offer = allegroEntry.offers[offerIndex];
             BankEntry newEntry = BankEntry.Clone(entry);
             
-            newEntry.Amount = BankSyncConverter.ToDecimal(offer.offerPrice.amount);
+            newEntry.Amount = this.converter.ToDecimal(offer.offerPrice.amount);
 
             newEntry.Note = $"ZWROT: {offer.title} (Ilość sztuk: {offer.quantity}, Oferta {offer.id}, Pozycja {offerIndex + 1}/{allegroEntry.offers.Length})";
            
@@ -145,24 +147,24 @@ namespace BankSync.Enrichers.Allegro
         }
 
         
-        private static List<Myorder> FindOrdersWhichMatchEntryPriceFullyOrPartially(BankEntry entry, AllegroData model)
+        private List<Myorder> FindOrdersWhichMatchEntryPriceFullyOrPartially(BankEntry entry, AllegroData model)
         {
             //first try finding the orders which fully correspond to the price
-            List<Myorder> allegroOrders = model.parameters.myorders.myorders
+            List<Myorder> allegroOrders = model.myorders.myorders
                 .Where(x => x.payment.startDate.Date <= entry.Date)
                 .Where(x =>
-                    BankSyncConverter.ToDecimal(x.payment.buyerPaidAmount.amount) == BankSyncConverter.ToDecimal(entry.Amount.ToString().Trim('-'))
+                    this.converter.ToDecimal(x.payment.amount.amount) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-'))
                 ).ToList();
 
             
             if (allegroOrders.Count == 0)
             {
                 //and if that doesnt succeed, find orders where at least one offer matches the price
-                allegroOrders = model.parameters.myorders.myorders
+                allegroOrders = model.myorders.myorders
                     //  .Where(x=>x.payment.startDate < entry.Date)
                     .Where(x =>
                         x.offers.Any(x =>
-                            BankSyncConverter.ToDecimal(x.offerPrice.amount) == BankSyncConverter.ToDecimal(entry.Amount.ToString().Trim('-')))
+                            this.converter.ToDecimal(x.offerPrice.amount) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-')))
                     ).ToList();
             }
 
@@ -222,7 +224,7 @@ namespace BankSync.Enrichers.Allegro
                 }
             }
         }
-        private static List<Myorder> FindRefundEntries(BankEntry entry, ref List<Offer> offersMatchingPrice, List<Myorder> allegroEntries)
+        private List<Myorder> FindRefundEntries(BankEntry entry, ref List<Offer> offersMatchingPrice, List<Myorder> allegroEntries)
         {
             List<Myorder> dateFilteredEntries;
             //if it's a refund, then we have one more chance of finding the right one
@@ -236,7 +238,7 @@ namespace BankSync.Enrichers.Allegro
                 //too bad there is no refund note or reference
                 offersMatchingPrice = dateFilteredEntries
                     .SelectMany(x => x.offers.Where(x =>
-                        BankSyncConverter.ToDecimal(x.offerPrice.amount) == BankSyncConverter.ToDecimal(entry.Amount.ToString().Trim('-')))
+                        this.converter.ToDecimal(x.offerPrice.amount) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-')))
                     ).ToList();
 
                 return null;

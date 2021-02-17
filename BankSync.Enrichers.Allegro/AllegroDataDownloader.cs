@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BankSync.Config;
 using BankSync.Enrichers.Allegro.Model;
+using BankSync.Exceptions;
 using BankSync.Logging;
 using BankSync.Utilities;
 using HtmlAgilityPack;
@@ -31,7 +32,7 @@ namespace BankSync.Enrichers.Allegro
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             };
             handler.CookieContainer = this.cookies;
-          
+
 
             this.client = new HttpClient(handler);
         }
@@ -46,28 +47,29 @@ namespace BankSync.Enrichers.Allegro
 
             AllegroDataContainer data = await Policy
                 .Handle<Exception>()
-                .WaitAndRetryAsync(new []
+                .WaitAndRetryAsync(new[]
                 {
                     TimeSpan.FromSeconds(1),
                     TimeSpan.FromSeconds(2),
                     TimeSpan.FromSeconds(3)
-                }, (exception, timeSpan, retryCount, context) => {
+                }, (exception, timeSpan, retryCount, context) =>
+                {
                     if (retryCount > 1)
                     {
-                        this.logger.Warning($"Exception while downloading data from Allegro. Will retry. Attempt {retryCount} of 3");
+                        this.logger.Warning($"Exception while downloading data from Allegro for {userConfig.UserName}. Will retry. Attempt {retryCount} of 3. {exception.Message}");
                     }
                     else
                     {
-                        this.logger.Debug($"Exception while downloading data from Allegro. Will retry. Attempt {retryCount} of 3");
+                        this.logger.Debug($"Exception while downloading data from Allegro for {userConfig.UserName}. Will retry. Attempt {retryCount} of 3. {exception.Message}");
                     }
                 })
-                .ExecuteAsync(()=>
+                .ExecuteAsync(() =>
                 {
                     Task<AllegroDataContainer> returnValue = this.LoadData(oldestEntry);
-                    this.logger.Debug("Successfully downloaded data.");
                     return returnValue;
                 });
-            
+
+            this.logger.Debug("Successfully downloaded data.");
             return data;
         }
 
@@ -104,65 +106,115 @@ namespace BankSync.Enrichers.Allegro
                 requestMessage.Headers.Add("Sec-Fetch-Site", "same-origin");
 
                 requestMessage.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0");
-                
+
                 requestMessage.Headers.Add("csrf-token", this.csrfToken);
                 requestMessage.Headers.Add("dpr", "1");
                 requestMessage.Headers.Add("x-fp", "POST");
 
                 HttpResponseMessage response = await this.client.SendAsync(requestMessage);
+                string stringified = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new InvalidOperationException("Error while logging to Allegro");
+                    throw new LogInException("Log in request unsuccessful.");
                 }
                 else
                 {
                     this.logger.Debug($"Logged in to Allegro for: {this.userConfig.Credentials.Id}");
                 }
-                
+
             }
 
         }
 
-        private async Task<AllegroDataContainer> LoadData(DateTime oldestEntry)
+        private async Task<AllegroDataContainer> LoadData(DateTime oldestEntryToDownload)
         {
             List<AllegroDataContainer> dataList = new List<AllegroDataContainer>();
-            HttpResponseMessage response = await this.client.GetAsync("https://allegro.pl/moje-allegro/zakupy/kupione");
-            AllegroData data = await GetDataFromResponse(response);
-            dataList.Add(new AllegroDataContainer(data, this.userConfig.UserName));
+            AllegroData data = await GetFirstBatchOfDataSkippingAnyIntermediatePages();
 
-            int limit = 25;
-            int offset = 25;
-            do
+            if (data?.myorders != null)
             {
-                response = await this.client.GetAsync(
-                    $"https://allegro.pl/moje-allegro/zakupy/kupione?limit={limit}&offset={offset}");
-                data = await GetDataFromResponse(response);
+                this.logger.StartLogProgress("Downloading Allegro Data: ");
+                this.logger.LogProgress("|");
                 dataList.Add(new AllegroDataContainer(data, this.userConfig.UserName));
-                offset += 25;
-            } while (AllegroDataContainer.GetOldestDate(data) > oldestEntry);
-            
 
-            
+                int offset = 0;
+                var oldestDateInCurrentBatch = AllegroDataContainer.GetOldestDate(data);
+                int getOlderDateAttemptsCount = 0;
+                do
+                {
+                    offset += 25;
+                    HttpResponseMessage response = await this.client.GetAsync(
+                        $"https://allegro.pl/moje-allegro/zakupy/nowe-kupione?filter=all&limit=25&offset={offset}&sort=orderdate&order=DESC&decorate=paymentInfo");
+                    string stringified = await response.Content.ReadAsStringAsync();
+
+                    data = GetDataFromResponse(stringified);
+                    dataList.Add(new AllegroDataContainer(data, this.userConfig.UserName));
+                    this.logger.LogProgress("|");
+                    if (oldestDateInCurrentBatch == AllegroDataContainer.GetOldestDate(data))
+                    {
+                        getOlderDateAttemptsCount++;
+                        if (getOlderDateAttemptsCount > 2)
+                        {
+                            throw new InvalidOperationException(
+                                "There was a problem with fetching older data from Allegro. There might be a problem with getting older data from Allegro.");
+                        }
+                    }
+                } while (AllegroDataContainer.GetOldestDate(data) > oldestEntryToDownload);
+                this.logger.EndLogProgress("_");
+            }
+            else
+            {
+                throw new InvalidDataException($"Failed to load myorders data in the response body.");
+            }
+
             return AllegroDataContainer.Consolidate(dataList);
         }
 
-    
 
-
-
-        private static async Task<AllegroData> GetDataFromResponse(HttpResponseMessage response)
+        /// <summary>
+        /// It can happen that even though we are logged in, the first page that we try to access will be redirected to something else.
+        /// Therefore, try accessing the page again (once), if the data is not loaded.
+        /// </summary>
+        /// <returns></returns>
+        private async Task<AllegroData> GetFirstBatchOfDataSkippingAnyIntermediatePages()
         {
-            string stringified = "Not loaded yet";
+            HttpResponseMessage response = await this.client.GetAsync("https://allegro.pl/moje-allegro/zakupy/nowe-kupione?filter=all&limit=25&offset=0&sort=orderdate&order=DESC&decorate=paymentInfo");
+            string stringified = await response.Content.ReadAsStringAsync();
+
+            AllegroData data = GetDataFromResponse(stringified);
+
+            if (data?.myorders == null)
+            {
+                response = await this.client.GetAsync("https://allegro.pl/moje-allegro/zakupy/nowe-kupione?filter=all&limit=25&offset=0&sort=orderdate&order=DESC&decorate=paymentInfo");
+                stringified = await response.Content.ReadAsStringAsync();
+                data = GetDataFromResponse(stringified);
+                if (data != null)
+                {
+                    this.logger.Debug("Loaded data on second attempt");
+                }
+            }
+            return data;
+        }
+
+
+        private AllegroData GetDataFromResponse(string stringified)
+        {
             try
             {
 
-                stringified= await response.Content.ReadAsStringAsync();
                 HtmlDocument htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(stringified);
 
                 IEnumerable<HtmlNode> scripts = htmlDoc.DocumentNode.Descendants("script");
                 HtmlNode myOrdersScript = scripts.Where(x => x.InnerHtml.Contains("myorders"))
                     .OrderByDescending(x => x.InnerHtml.Length).FirstOrDefault();
+                if (myOrdersScript == null)
+                {
+                    this.logger.Warning("Failed to find myorders script page in the response body.");   
+                    return null;
+
+                }
                 return JsonConvert.DeserializeObject<AllegroData>(myOrdersScript.InnerText);
             }
             catch (Exception ex)

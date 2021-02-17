@@ -11,10 +11,12 @@ namespace BankSync.Enrichers.Allegro
     internal class PurchaseEnricher
     {
         private readonly IBankSyncLogger logger;
+        private readonly BankSyncConverter converter;
 
         public PurchaseEnricher(IBankSyncLogger logger)
         {
             this.logger = logger;
+            this.converter = new BankSyncConverter();
         }
 
         public void EnrichAllegroEntry(BankEntry entry, List<AllegroDataContainer> allData, List<BankEntry> updatedEntries, out decimal buyerPaidAmount)
@@ -53,7 +55,7 @@ namespace BankSync.Enrichers.Allegro
 
             if (relevantOrders.All(x => x.payment.id == payment.id))
             {
-                return BankSyncConverter.ToDecimal(payment.buyerPaidAmount.amount) *-1;
+                return this.converter.ToDecimal(payment.amount.amount) *-1;
             }
             else
             {
@@ -62,7 +64,7 @@ namespace BankSync.Enrichers.Allegro
                 foreach (IGrouping<string, Myorder> grouping in groupings)
                 {
                    Payment groupPayment = grouping.First().payment;
-                    decimal partial =   BankSyncConverter.ToDecimal(groupPayment.buyerPaidAmount.amount);
+                    decimal partial =   this.converter.ToDecimal(groupPayment.amount.amount);
                     totalAmount += partial;
                 }
 
@@ -70,11 +72,11 @@ namespace BankSync.Enrichers.Allegro
             }
         }
 
-        private static BankEntry PrepareNewBankEntryForOffer(Myorder allegroEntry, int offerIndex, BankEntry entry, AllegroDataContainer container)
+        private BankEntry PrepareNewBankEntryForOffer(Myorder allegroEntry, int offerIndex, BankEntry entry, AllegroDataContainer container)
         {
             Offer offer = allegroEntry.offers[offerIndex];
             BankEntry newEntry = BankEntry.Clone(entry);
-            newEntry.Amount = BankSyncConverter.ToDecimal(offer.offerPrice.amount) * -1;
+            newEntry.Amount = this.converter.ToDecimal(offer.offerPrice.amount) * -1;
 
             newEntry.Note = $"{offer.title} (Ilość sztuk: {offer.quantity}, Oferta {offer.id}, Pozycja {offerIndex + 1}/{allegroEntry.offers.Length})";
             newEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
@@ -141,17 +143,17 @@ namespace BankSync.Enrichers.Allegro
             return alternativeContainers;
         }
 
-        private static void AddDeliveryCost(BankEntry entry, List<BankEntry> updatedEntries, Myorder allegroEntry,
+        private void AddDeliveryCost(BankEntry entry, List<BankEntry> updatedEntries, Myorder allegroEntry,
             AllegroDataContainer container)
         {
             if (allegroEntry.delivery.cost.amount != "0.00")
             {
                 //lets add a delivery cost as a separate entry, but assign it a category etc. of the most expensive item
                 Offer mostExpensive =
-                    allegroEntry.offers.OrderByDescending(x => BankSyncConverter.ToDecimal(x.offerPrice.amount)).First();
+                    allegroEntry.offers.OrderByDescending(x => this.converter.ToDecimal(x.offerPrice.amount)).First();
 
                 BankEntry deliveryEntry = BankEntry.Clone(entry);
-                deliveryEntry.Amount = BankSyncConverter.ToDecimal(allegroEntry.delivery.cost.amount) * -1;
+                deliveryEntry.Amount = this.converter.ToDecimal(allegroEntry.delivery.cost.amount) * -1;
                 deliveryEntry.Note =
                     $"DOSTAWA: {mostExpensive.title} (Oferta {mostExpensive.id}, Suma zamówień: {allegroEntry.offers.Length})";
                 deliveryEntry.Recipient = "allegro.pl - " + allegroEntry.seller.login;
@@ -198,11 +200,13 @@ namespace BankSync.Enrichers.Allegro
         private List<Myorder> GetAllegroOrders(BankEntry entry, AllegroData model)
         {
             //first try finding the orders which fully correspond to the price and more or less the date
-            List<Myorder> allegroOrders = model.parameters.myorders.myorders
+            List<Myorder> dateFiltered = model.myorders.myorders
                 .Where(x => x.orderDate.Date <= entry.Date.Date)
-                .Where(x => ( entry.Date.Date - x.orderDate.Date).TotalDays < 30)
+                .Where(x => (entry.Date.Date - x.orderDate.Date).TotalDays < 30).ToList();
+
+            List<Myorder> allegroOrders = dateFiltered
                 .Where(x =>
-                    BankSyncConverter.ToDecimal(x.payment.buyerPaidAmount.amount) == BankSyncConverter.ToDecimal(entry.Amount.ToString().Trim('-'))
+                    this.converter.ToDecimal(x.payment.amount.amount) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-'))
                 ).ToList();
 
 
@@ -216,7 +220,11 @@ namespace BankSync.Enrichers.Allegro
             }
             else
             {
-                List<Myorder> dateFilteredOrders = allegroOrders.Where(x => x.payment.endDate.Date == entry.Date.Date).ToList();
+                List<Myorder> dateFilteredOrders = allegroOrders.Where(
+                    x => x.payment.endDate.Date == entry.Date.Date
+                    || (x.payment.endDate.Date.Year == 0001
+                    && x.orderDate.Date == entry.Date.Date)
+                    ).ToList();
                 if (dateFilteredOrders.Count < 1)
                 {
                     this.logger.Warning($"Unrecognized entry. {allegroOrders.Count} orders matched the price, but none matched the payment date. {entry}");
@@ -233,11 +241,11 @@ namespace BankSync.Enrichers.Allegro
         {
             if (entry.Note == entry.FullDetails)
             {
-                entry.Note = AllegroBankDataEnricher.NierozpoznanyZakup;
+                entry.Note = AllegroBankDataEnricher.UnrecognizedEntry;
             }
             else
             {
-                entry.Note = AllegroBankDataEnricher.NierozpoznanyZakup + " - " + entry.Note;
+                entry.Note = AllegroBankDataEnricher.UnrecognizedEntry + " - " + entry.Note;
             }
         }
 

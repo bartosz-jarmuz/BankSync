@@ -31,28 +31,37 @@ namespace BankSync.Enrichers.Allegro
 
         private void AssignTimeRange()
         {
-            List<DateTime> allDates = GetAllDates(this.Model);
+            if (this.Model?.myorders != null)
+            {
 
-            this.NewestEntry = allDates.First();
-            this.OldestEntry = allDates.Last();
+                List<DateTime> allDates = GetAllDates(this.Model);
+
+                this.NewestEntry = allDates.First();
+                this.OldestEntry = allDates.Last();
+            }
         }
 
         public static DateTime GetOldestDate(AllegroData model)
         {
+            if (model.myorders == null)
+            {
+                return DateTime.MinValue;
+                
+            }
             List<DateTime> allDates = GetAllDates(model);
             return allDates.Last();
         }
 
         public static AllegroDataContainer Consolidate(List<AllegroDataContainer> dataList)
         {
-            dataList = dataList.Where(x => x != null).ToList();
+            dataList = dataList.Where(x => x?.Model.myorders != null).ToList();
             
 
             AllegroData first = dataList.First().Model;
-            IEnumerable<Myorder> allOrders = dataList.SelectMany(x => x.Model.parameters.myorders.myorders);
+            IEnumerable<Myorder> allOrders = dataList.SelectMany(x => x.Model.myorders.myorders);
             Myorder[] distinct = allOrders.GroupBy(x => x.id).Select(g => g.First()).OrderByDescending(x => x.orderDate).ToArray();
 
-            first.parameters.myorders.myorders = distinct;
+            first.myorders.myorders = distinct;
             return new AllegroDataContainer(first, dataList.First().ServiceUserName);
         }
 
@@ -60,13 +69,13 @@ namespace BankSync.Enrichers.Allegro
         {
             var list = new List<AllegroDataContainer>();
             IEnumerable<IGrouping<string, Myorder>> groupings =
-                container.Model.parameters.myorders.myorders.GroupBy(x => x.orderDate.ToString("yyyy-MM"));
+                container.Model.myorders.myorders.GroupBy(x => x.orderDate.ToString("yyyy-MM"));
 
             foreach (IGrouping<string, Myorder> grouping in groupings)
             {
                 AllegroDataContainer clone = container.Clone();
-                clone.Model.parameters.myorders.myorders = grouping.ToArray();
-                clone.Model.parameters.myorders.total = clone.Model.parameters.myorders.myorders.Length;
+                clone.Model.myorders.myorders = grouping.ToArray();
+                clone.Model.myorders.total = clone.Model.myorders.myorders.Length;
                 clone.AssignTimeRange();
                 list.Add(clone);
             }
@@ -77,7 +86,7 @@ namespace BankSync.Enrichers.Allegro
 
         private static List<DateTime> GetAllDates(AllegroData model)
         {
-            return  model.parameters.myorders.myorders.Select(x => Convert.ToDateTime(x.orderDate))
+            return  model.myorders.myorders.Select(x => Convert.ToDateTime(x.orderDate))
                 .OrderByDescending(x => x).ToList();
         }
 

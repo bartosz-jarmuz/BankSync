@@ -19,7 +19,7 @@ namespace BankSync.Enrichers.Allegro
 {
     public class AllegroBankDataEnricher : IBankDataEnricher
     {
-        internal const string NierozpoznanyZakup = "Nierozpoznany zakup";
+        internal const string UnrecognizedEntry = "Nierozpoznany zakup";
         private readonly IBankSyncLogger logger;
         private readonly IAllegroDataLoader dataLoader;
 
@@ -66,7 +66,7 @@ namespace BankSync.Enrichers.Allegro
                     purchases.EnrichAllegroEntry(entry, allData, entriesForThisPayment, out buyerPaidAmount);
                     if (buyerPaidAmount != entry.Amount)
                     {
-                        if (!entry.Note.Contains(NierozpoznanyZakup))
+                        if (!entry.Note.Contains(UnrecognizedEntry))
                         {
 
                             this.logger.Error("ERROR", new InvalidOperationException(

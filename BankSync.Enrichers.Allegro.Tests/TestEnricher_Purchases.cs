@@ -57,7 +57,7 @@ namespace BankSync.Enrichers.Allegro.Tests
             //assert
             Check.That(data.Entries.Count).IsEqualTo(4);
 
-            var matched = data.Entries.Where(x => !x.Note.Contains(AllegroBankDataEnricher.NierozpoznanyZakup)).ToList();
+            var matched = data.Entries.Where(x => !x.Note.Contains(AllegroBankDataEnricher.UnrecognizedEntry)).ToList();
             
             
             
@@ -75,7 +75,7 @@ namespace BankSync.Enrichers.Allegro.Tests
             Check.That(delivery.Recipient).IsEqualTo("allegro.pl - Seller");
             Check.That(delivery.Payer).IsEqualTo("PayerPhone");
             
-            var unmatched = data.Entries.Where(x => x.Note.Contains(AllegroBankDataEnricher.NierozpoznanyZakup)).ToList();
+            var unmatched = data.Entries.Where(x => x.Note.Contains(AllegroBankDataEnricher.UnrecognizedEntry)).ToList();
             Check.That(unmatched.First().Date.Date).IsEqualTo(new DateTime(2020,09,27));
             Check.That(unmatched.Last().Date.Date).IsEqualTo(new DateTime(2020,02,27));
 

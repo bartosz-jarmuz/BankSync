@@ -6,23 +6,16 @@ namespace BankSync.Enrichers.Allegro.Model
 
     public class AllegroData
     {
-        public Parameters parameters { get; set; }
         public Slots slots { get; set; }
-        public Context context { get; set; }
-    }
-
-    public class Parameters
-    {
-        public string detailsUrl { get; set; }
-        public Countrycode countryCode { get; set; }
-        public int timeToShowCancelPaymentButton { get; set; }
-        public bool forceFallbackAjaxUpdateForEmptyDS { get; set; }
+        public object context { get; set; }
         public Myorders myorders { get; set; }
     }
 
-    public class Countrycode
+    public class Slots
     {
-        public string code { get; set; }
+        public object additionalBanner { get; set; }
+        public object topBanner { get; set; }
+        public object listingBanner { get; set; }
     }
 
     public class Myorders
@@ -40,14 +33,14 @@ namespace BankSync.Enrichers.Allegro.Model
         public Delivery delivery { get; set; }
         public Totalcost totalCost { get; set; }
         public Payment payment { get; set; }
-        public Surcharge surcharge { get; set; }
+        public object surcharge { get; set; }
         public object coins { get; set; }
         public DateTime timestamp { get; set; }
         public DateTime createDate { get; set; }
         public DateTime orderDate { get; set; }
-        public string invoiceAddressId { get; set; }
+        public object invoiceAddressId { get; set; }
         public object missingDependencies { get; set; }
-        public string orderVersion { get; set; }
+        public object orderVersion { get; set; }
         public string serviceCountry { get; set; }
         public bool hasRelatedOrders { get; set; }
         public bool markedAsPaid { get; set; }
@@ -73,10 +66,10 @@ namespace BankSync.Enrichers.Allegro.Model
         public Cost cost { get; set; }
         public string name { get; set; }
         public string methodId { get; set; }
-        public Paymenttype paymentType { get; set; }
-        public Type type { get; set; }
-        public string orderDeliveryId { get; set; }
-        public Parcelstatusinfo parcelStatusInfo { get; set; }
+        public object paymentType { get; set; }
+        public object type { get; set; }
+        public object orderDeliveryId { get; set; }
+        public object parcelStatusInfo { get; set; }
         public bool selfCollect { get; set; }
         public Generaldelivery generalDelivery { get; set; }
         public Discount discount { get; set; }
@@ -86,27 +79,6 @@ namespace BankSync.Enrichers.Allegro.Model
     {
         public string amount { get; set; }
         public string currency { get; set; }
-    }
-
-    public class Paymenttype
-    {
-        public string name { get; set; }
-        public string type { get; set; }
-    }
-
-    public class Type
-    {
-        public string name { get; set; }
-        public string type { get; set; }
-    }
-
-    public class Parcelstatusinfo
-    {
-        public string status { get; set; }
-        public string type { get; set; }
-        public string label { get; set; }
-        public string link { get; set; }
-        public bool externalLink { get; set; }
     }
 
     public class Generaldelivery
@@ -152,12 +124,11 @@ namespace BankSync.Enrichers.Allegro.Model
         public DateTime startDate { get; set; }
         public DateTime endDate { get; set; }
         public Amount amount { get; set; }
-        public Buyerpaidamount buyerPaidAmount { get; set; }
         public bool installments { get; set; }
-        public Availability availability { get; set; }
+        public object availability { get; set; }
         public bool freeboxSubscriptionIncluded { get; set; }
         public bool multipleSellers { get; set; }
-        public string mask { get; set; }
+        public object mask { get; set; }
     }
 
     public class Amount
@@ -166,27 +137,10 @@ namespace BankSync.Enrichers.Allegro.Model
         public string currency { get; set; }
     }
 
-    public class Buyerpaidamount
-    {
-        public string amount { get; set; }
-        public string currency { get; set; }
-    }
-
-    public class Availability
-    {
-        public bool available { get; set; }
-        public string reason { get; set; }
-    }
-
-    public class Surcharge
-    {
-        public string status { get; set; }
-    }
-
     public class Offer
     {
         public string id { get; set; }
-        public string orderOfferId { get; set; }
+        public object orderOfferId { get; set; }
         public Unitprice unitPrice { get; set; }
         public Originalprice originalPrice { get; set; }
         public int quantity { get; set; }
@@ -200,7 +154,7 @@ namespace BankSync.Enrichers.Allegro.Model
         public bool auction { get; set; }
         public bool pharmacy { get; set; }
         public Offerprice offerPrice { get; set; }
-        public Rebate rebate { get; set; }
+        public object rebate { get; set; }
     }
 
     public class Unitprice
@@ -221,46 +175,5 @@ namespace BankSync.Enrichers.Allegro.Model
         public string currency { get; set; }
     }
 
-    public class Rebate
-    {
-        public string id { get; set; }
-        public Label label { get; set; }
-    }
 
-    public class Label
-    {
-        public string badge { get; set; }
-        public string message { get; set; }
-    }
-
-    public class Slots
-    {
-        public object additionalBanner { get; set; }
-        public object topBanner { get; set; }
-        public string listingBanner { get; set; }
-    }
-
-    public class Context
-    {
-        public Prototype prototype { get; set; }
-        public object variant { get; set; }
-        public string slug { get; set; }
-        public string name { get; set; }
-        public string boxId { get; set; }
-        public string nonce { get; set; }
-        public string language { get; set; }
-        public bool isDevMode { get; set; }
-    }
-
-    public class Prototype
-    {
-        public string name { get; set; }
-        public Version version { get; set; }
-    }
-
-    public class Version
-    {
-        public int major { get; set; }
-        public int minor { get; set; }
-    }
 }
