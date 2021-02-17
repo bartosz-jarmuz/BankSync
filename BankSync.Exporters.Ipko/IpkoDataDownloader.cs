@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using BankSync.Config;
+using BankSync.Exceptions;
 using BankSync.Exporters.Ipko.DataTransformation;
 using BankSync.Exporters.Ipko.DTO;
 using BankSync.Logging;
@@ -138,7 +139,7 @@ namespace BankSync.Exporters.Ipko
 
                 if (step1Response.state_id == "captcha")
                 {
-                    throw new InvalidOperationException(
+                    throw new LogInException(
                         "You need to go to browser, enter captcha and log in - then try again.");
                 }
 
@@ -148,25 +149,26 @@ namespace BankSync.Exporters.Ipko
                     new HttpRequestMessage(HttpMethod.Post, "https://www.ipko.pl/ipko3/login"))
                 {
                     requestMessage.Content = new StringContent(JsonConvert.SerializeObject(step2Request));
-                    string h = response1.Headers
-                        .First(x => x.Key.Equals("x-session-id", StringComparison.OrdinalIgnoreCase)).Value.First()
-                        .ToString();
-                    requestMessage.Headers.Add("x-session-id", h);
+                    var sessionId = GetSessionIdHeader(response1);
+                    if (sessionId == null)
+                    {
+                        throw new LogInException("Session Id was not obtained.");
+                    }
+                    requestMessage.Headers.Add("x-session-id", sessionId);
                     HttpResponseMessage response2 = await this.client.SendAsync(requestMessage);
                     string stringified2 = await response2.Content.ReadAsStringAsync();
+
                     LoginStep2Response step2Response =
                         (LoginStep2Response)JsonConvert.DeserializeObject(stringified2, typeof(LoginStep2Response));
                     if (!step2Response.finished )
                     {
-                        throw new InvalidOperationException(
+                        throw new LogInException(
                             "You need to go to browser and log in - then try again.");
                     }
-                    this.sessionId = response2.Headers
-                        .First(x => x.Key.Equals("x-session-id", StringComparison.OrdinalIgnoreCase)).Value.First()
-                        .ToString();
-                    if (step2Response?.token == null)
+                    this.sessionId = GetSessionIdHeader(response2);
+                    if (step2Response?.token == null || string.IsNullOrEmpty(this.sessionId))
                     {
-                        throw new InvalidOperationException("Failed to log in");
+                        throw new LogInException("Failed to log in");
                     }
                 }
 
@@ -175,7 +177,20 @@ namespace BankSync.Exporters.Ipko
 
         }
 
+        private string GetSessionIdHeader(HttpResponseMessage response1)
+        {
+            KeyValuePair<string, IEnumerable<string>> sessionIdHeader = response1.Headers
+                .FirstOrDefault(x => x.Key.Equals("x-session-id", StringComparison.OrdinalIgnoreCase));
+                
+                
+            
+            string sessionIdValue = sessionIdHeader.Value?.FirstOrDefault();
+            if (string.IsNullOrEmpty(sessionIdValue))
+            {
+                this.logger.Warning("Session ID is null or empty.");
+            }
 
-
+            return sessionIdValue;
+        }
     }
 }

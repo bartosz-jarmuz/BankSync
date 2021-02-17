@@ -11,11 +11,13 @@ namespace BankSync.Exporters.Ipko.DataTransformation
     {
         private readonly IDataMapper mapper;
         private readonly DescriptionDataExtractor descriptionDataExtractor;
+        private readonly BankSyncConverter converter;
 
         public IpkoXmlDataTransformer(IDataMapper mapper, IBankSyncLogger logger)
         {
             this.mapper = mapper;
             this.descriptionDataExtractor = new DescriptionDataExtractor(logger);
+            this.converter = new BankSyncConverter();
         }
 
         public BankDataSheet TransformXml(XDocument xDocument)
@@ -233,7 +235,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 try
                 {
-                    return BankSyncConverter.ToDecimal(element.Value);
+                    return this.converter.ToDecimal(element.Value);
                 }
                 catch (Exception ex)
                 {
@@ -250,7 +252,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 try
                 {
-                    return BankSyncConverter.ToDecimal(element.Value);
+                    return this.converter.ToDecimal(element.Value);
                 }
                 catch (Exception ex)
                 {

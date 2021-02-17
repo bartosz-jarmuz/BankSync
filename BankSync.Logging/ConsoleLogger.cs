@@ -5,6 +5,30 @@ namespace BankSync.Logging
 {
     public class ConsoleLogger : IBankSyncLogger
     {
+        public void LogProgress(string progress)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.DarkBlue;
+            Console.Write(progress);
+            Console.ForegroundColor = color;
+        }
+
+        public void EndLogProgress(string endProgressMessage)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine(endProgressMessage);
+            Console.ForegroundColor = color;
+        }
+
+        public void StartLogProgress(string startProgressMessage)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.DarkBlue;
+            Console.Write(startProgressMessage);
+            Console.ForegroundColor = color;
+        }
+
         public void Debug(string message)
         {
             var color = Console.ForegroundColor;

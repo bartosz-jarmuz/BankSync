@@ -43,6 +43,7 @@ namespace BankSync.Writers.GoogleSheets
         private int? subcategoryRow;
         private int? tagsRow;
         private int? fullDetailsRow;
+        private readonly BankSyncConverter converter;
 
         private int?[] allHeadersIndexes => new int?[]
         {
@@ -70,6 +71,7 @@ namespace BankSync.Writers.GoogleSheets
             this.credentialsPath = xDoc.Root.Element("CredentialsPath").Value;
             this.spreadsheetId = xDoc.Root.Element("SpreadsheetId").Value;
             this.dataSheetId = Convert.ToInt32(xDoc.Root.Element("DataSheetId").Value);
+            this.converter = new BankSyncConverter();
         }
 
         public async Task Write(BankDataSheet data)
@@ -506,8 +508,8 @@ namespace BankSync.Writers.GoogleSheets
                     Account  = row[this.accountRow.Value]?.ToString(),
                     Date = Convert.ToDateTime(row[this.dateRow.Value]?.ToString()), 
                     Currency = row[this.currencyRow.Value]?.ToString(),
-                    Amount = BankSyncConverter.ToDecimal( row[this.amountRow.Value]?.ToString()),
-                    Balance = BankSyncConverter.ToDecimal(row[this.balanceRow.Value]?.ToString()),
+                    Amount = this.converter.ToDecimal( row[this.amountRow.Value]?.ToString()),
+                    Balance = this.converter.ToDecimal(row[this.balanceRow.Value]?.ToString()),
                     PaymentType =row[this.paymentTypeRow.Value]?.ToString(),
                     Recipient = row[this.recipientRow.Value]?.ToString(),
                     Payer = row[this.payerRow.Value]?.ToString(),

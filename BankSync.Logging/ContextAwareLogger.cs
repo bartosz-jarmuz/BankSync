@@ -52,5 +52,31 @@ namespace BankSync.Logging
                 logger.Error(prefixed, ex);
             }
         }
+
+        public void LogProgress(string progress)
+        {
+            foreach (IBankSyncLogger logger in this.loggers)
+            {
+                logger.LogProgress(progress);
+            }
+        }
+
+        public void EndLogProgress(string endProgressMessage)
+        {
+            foreach (IBankSyncLogger logger in this.loggers)
+            {
+                logger.EndLogProgress(endProgressMessage);
+            }
+        }
+
+        public void StartLogProgress(string startProgressMessage)
+        {
+            string prefixed = this.Timestamp + " - " + startProgressMessage;
+
+            foreach (IBankSyncLogger logger in this.loggers)
+            {
+                logger.StartLogProgress(prefixed);
+            }
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using BankSync.Config;
 using BankSync.DataMapping;
+using BankSync.Exceptions;
 using BankSync.Exporters.Citibank;
 using BankSync.Exporters.Ipko;
 using BankSync.Logging;
@@ -23,6 +24,7 @@ namespace BankSyncRunner
                 new ConfigurableDataMapper(new FileInfo(Path.Combine(workingFolderPath, @"Mappings.xml")));
             googleWriterConfigFile = new FileInfo(Path.Combine(workingFolderPath, @"Google\GoogleWriterSettings.xml"));
             analyzersExecutor = new DataAnalyzersExecutor(logger, new DirectoryInfo(workingFolderPath));
+            enricher = new DataEnricherExecutor(logger);
         }
         
         private readonly DateTime startTime = DateTime.Today.AddMonths(-12);
@@ -33,7 +35,7 @@ namespace BankSyncRunner
         private readonly FileInfo googleWriterConfigFile;
 
         private readonly IBankSyncLogger logger = new ContextAwareLogger(new ConsoleLogger());
-        private readonly DataEnricherExecutor enricher = new DataEnricherExecutor();
+        private readonly DataEnricherExecutor enricher;
         private readonly DataAnalyzersExecutor analyzersExecutor;
 
         public async Task Run()
@@ -59,7 +61,7 @@ namespace BankSyncRunner
 
                 logger.Info("Data downloaded");
 
-                enricher.LoadEnrichers(config, logger);
+                enricher.LoadEnrichers(config);
                 await enricher.EnrichData(bankDataSheet, startTime, endTime);
                 logger.Info("Data enriched");
 
@@ -93,6 +95,11 @@ namespace BankSyncRunner
                         logger.Debug(
                             $"IPKO - Loaded total of {dataset.Entries.Count} entries for {configServiceUser.UserName}");
                     }
+                    catch (LogInException)
+                    {
+                        logger.Warning(
+                            $"IPKO - {configServiceUser.UserName}. Could not log in.");
+                    }
                     catch (Exception ex)
                     {
                         logger.Warning(
@@ -107,12 +114,16 @@ namespace BankSyncRunner
                 {
                     try
                     {
-
                         IBankDataExporter downloader = new CitibankDataDownloader(configServiceUser, mapper);
                         BankDataSheet dataset = await downloader.GetData(startTime, endTime);
                         datasets.Add(dataset);
                         logger.Debug(
                             $"Citibank - Loaded total of {dataset.Entries.Count} entries  for {configServiceUser.UserName}");
+                    }
+                    catch (LogInException)
+                    {
+                        logger.Warning(
+                            $"Citibank - {configServiceUser.UserName}. Could not log in.");
                     }
                     catch (Exception ex)
                     {

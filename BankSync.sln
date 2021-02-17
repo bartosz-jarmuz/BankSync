@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Writers.Json", "Ba
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Writers", "Writers", "{936DCA8C-5B7A-4466-A845-440B2F45012C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Config", "BankSync.Config\BankSync.Config.csproj", "{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Config", "BankSync.Config\BankSync.Config.csproj", "{AD7FE9E8-ED2B-4555-9176-99F62F6A3968}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Exporters", "Exporters", "{F7D70F82-55C8-47BE-B1CB-893928F858AC}"
 EndProject
@@ -37,19 +37,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Enrichers", "Enrichers", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{E3F75FD5-2ABB-4B90-91E0-8D920682501B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Writers.GoogleSheets", "BankSync.Writers.GoogleSheets\BankSync.Writers.GoogleSheets.csproj", "{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Writers.GoogleSheets", "BankSync.Writers.GoogleSheets\BankSync.Writers.GoogleSheets.csproj", "{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Exporters.Citibank", "BankSync.Exporters.Citibank\BankSync.Exporters.Citibank.csproj", "{A903039B-3337-46A1-AC36-198CC3F9C5B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Exporters.Citibank", "BankSync.Exporters.Citibank\BankSync.Exporters.Citibank.csproj", "{A903039B-3337-46A1-AC36-198CC3F9C5B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Exporters.Citibank.Tests", "BankSync.Exporters.Citibank.Tests\BankSync.Exporters.Citibank.Tests.csproj", "{ADD14A74-24EC-4D8D-BCCC-8CA9440324A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Exporters.Citibank.Tests", "BankSync.Exporters.Citibank.Tests\BankSync.Exporters.Citibank.Tests.csproj", "{ADD14A74-24EC-4D8D-BCCC-8CA9440324A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.DataMapping", "BankSync.DataMapping\BankSync.DataMapping.csproj", "{8D644B06-2D97-4D55-B284-60A94E5DDBAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.DataMapping", "BankSync.DataMapping\BankSync.DataMapping.csproj", "{8D644B06-2D97-4D55-B284-60A94E5DDBAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Analyzers.InternalTransactions", "BankSync.Analyzers.InternalTransactions\BankSync.Analyzers.InternalTransactions.csproj", "{370D6F49-D2A1-44A1-96F1-DBFEAA48AD62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Analyzers.InternalTransactions", "BankSync.Analyzers.InternalTransactions\BankSync.Analyzers.InternalTransactions.csproj", "{370D6F49-D2A1-44A1-96F1-DBFEAA48AD62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Logging", "BankSync.Logging\BankSync.Logging.csproj", "{A82230F0-BB8F-4FDE-9DBF-B76904483146}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Logging", "BankSync.Logging\BankSync.Logging.csproj", "{A82230F0-BB8F-4FDE-9DBF-B76904483146}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Enrichers.Allegro.Tests", "BankSync.Enrichers.Allegro.Tests\BankSync.Enrichers.Allegro.Tests.csproj", "{238F6516-4CBF-4099-AA39-644D796B1384}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BankSync.Enrichers.Allegro.Tests", "BankSync.Enrichers.Allegro.Tests\BankSync.Enrichers.Allegro.Tests.csproj", "{238F6516-4CBF-4099-AA39-644D796B1384}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankSync.Exceptions", "BankSync.Exceptions\BankSync.Exceptions.csproj", "{5B174A57-E0F6-4C7B-A108-1459E01148F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,19 +135,23 @@ Global
 		{238F6516-4CBF-4099-AA39-644D796B1384}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{238F6516-4CBF-4099-AA39-644D796B1384}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{238F6516-4CBF-4099-AA39-644D796B1384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B174A57-E0F6-4C7B-A108-1459E01148F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B174A57-E0F6-4C7B-A108-1459E01148F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B174A57-E0F6-4C7B-A108-1459E01148F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B174A57-E0F6-4C7B-A108-1459E01148F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{B61CB87D-E324-4F7C-8611-0A1F3E43C6C9} = {8888123D-E035-44DE-8CBA-DFD98B737499}
-		{62462F20-AF33-461A-9963-FAF7D16A5478} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
-		{22A9610B-B3BE-4FA6-B156-173BB6EB7E99} = {8888123D-E035-44DE-8CBA-DFD98B737499}
-		{9437C088-3507-4FB3-A025-BAC2B4654ECD} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
-		{0AF92A09-FCFA-44C2-80F2-CC0DF445A78A} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
 		{4B9C1138-96BB-42BA-95B7-6247777C3A3B} = {F7D70F82-55C8-47BE-B1CB-893928F858AC}
+		{B61CB87D-E324-4F7C-8611-0A1F3E43C6C9} = {8888123D-E035-44DE-8CBA-DFD98B737499}
+		{0AF92A09-FCFA-44C2-80F2-CC0DF445A78A} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
+		{62462F20-AF33-461A-9963-FAF7D16A5478} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
 		{BA4C0CB9-903B-4419-95BA-015415010F08} = {6B01CE87-4F8A-43C9-B95A-0FAD9F5608C0}
 		{D178BBF7-815B-44CF-BC1C-D1AFA0C0E1C0} = {E3F75FD5-2ABB-4B90-91E0-8D920682501B}
+		{22A9610B-B3BE-4FA6-B156-173BB6EB7E99} = {8888123D-E035-44DE-8CBA-DFD98B737499}
+		{9437C088-3507-4FB3-A025-BAC2B4654ECD} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
 		{93EC02E1-2900-4A86-A5EC-8C57EFFCE9C9} = {936DCA8C-5B7A-4466-A845-440B2F45012C}
 		{A903039B-3337-46A1-AC36-198CC3F9C5B0} = {F7D70F82-55C8-47BE-B1CB-893928F858AC}
 		{ADD14A74-24EC-4D8D-BCCC-8CA9440324A6} = {8888123D-E035-44DE-8CBA-DFD98B737499}

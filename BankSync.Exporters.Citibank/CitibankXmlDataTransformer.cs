@@ -17,11 +17,13 @@ namespace BankSync.Exporters.Citibank
         // ReSharper restore InconsistentNaming
         private readonly IDataMapper mapper;
         private readonly DescriptionDataExtractor descriptionDataExtractor;
+        private BankSyncConverter converter;
 
         public CitibankXmlDataTransformer(IDataMapper mapper)
         {
             this.mapper = mapper;
             this.descriptionDataExtractor = new DescriptionDataExtractor();
+            this.converter = new BankSyncConverter();
         }
 
         public BankDataSheet TransformXml(XDocument xDocument, string accountName)
@@ -126,7 +128,7 @@ namespace BankSync.Exporters.Citibank
             XElement element = operation.Element("amount");
             if (element != null)
             {
-                return BankSyncConverter.ToDecimal(element.Value);
+                return converter.ToDecimal(element.Value);
             }
             return 0;
         }

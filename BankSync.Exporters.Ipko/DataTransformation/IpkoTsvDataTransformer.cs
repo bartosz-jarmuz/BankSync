@@ -10,10 +10,12 @@ namespace BankSync.Exporters.Ipko.DataTransformation
     public class IpkoTsvDataTransformer
     {
         private readonly IDataMapper mapper;
+        private readonly BankSyncConverter converter;
 
         public IpkoTsvDataTransformer(IDataMapper mapper)
         {
             this.mapper = mapper;
+            this.converter = new BankSyncConverter();
         }
 
         public BankDataSheet TransformTsv(FileInfo file)
@@ -94,7 +96,7 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             //card entries in TSV (copied from archive IPKO PDFs) are inverted, i.e. amount spent is positive,
             //and amount paid back to the card is negative
             //NOTE: this is not like that in the XML files
-            return BankSyncConverter.ToDecimal(line[4].Replace(" ","")) * -1;
+            return this.converter.ToDecimal(line[4].Replace(" ","")) * -1;
         }
 
         private string GetCurrency(string[] line)

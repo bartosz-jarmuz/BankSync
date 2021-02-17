@@ -11,42 +11,56 @@ namespace BankSync.Utilities.Tests
         [TestMethod]
         public void Dots()
         {
-            Check.That(BankSyncConverter.ToDecimal("55.90")).IsEqualTo(55.9M);
+            BankSyncConverter converter = new BankSyncConverter();
+            Check.That(converter.ToDecimal("55.90")).IsEqualTo(55.9M);
         }
         
         [TestMethod]
         public void Commas()
         {
-            Check.That(BankSyncConverter.ToDecimal("-55,99")).IsEqualTo(-55.99M);
+            BankSyncConverter converter = new BankSyncConverter();
+            Check.That(converter.ToDecimal("-55,99")).IsEqualTo(-55.99M);
         }
         
         [TestMethod]
         public void Spaces()
         {
-            Check.That(BankSyncConverter.ToDecimal("1 055,99")).IsEqualTo(1055.99M);
+            BankSyncConverter converter = new BankSyncConverter();
+            Check.That(converter.ToDecimal("1 055,99")).IsEqualTo(1055.99M);
         }
-        
+
+        [TestMethod]
+        public void Test()
+        {
+            BankSyncConverter converter = new BankSyncConverter();
+            Check.That(converter.ToDecimal("2.721,55")).IsEqualTo(2721.55M);
+
+            Check.That(converter.ToDecimal("2.721,55")).IsEqualTo(2721.55M);
+        }
+
         [TestMethod]
         public void BigNumbers()
         {
-            Check.That(BankSyncConverter.ToDecimal("1,055.99")).IsEqualTo(1055.99M);
+            BankSyncConverter converter = new BankSyncConverter();
+            Check.That(converter.ToDecimal("1,055.99")).IsEqualTo(1055.99M);
             
-            Check.That(BankSyncConverter.ToDecimal("1.055,99")).IsEqualTo(1055.99M);
+            Check.That(converter.ToDecimal("1.055,99")).IsEqualTo(1055.99M);
             
-            Check.That(BankSyncConverter.ToDecimal("-1,000,055.99")).IsEqualTo(-1000055.99M);
+            Check.That(converter.ToDecimal("-1,000,055.99")).IsEqualTo(-1000055.99M);
             
-            Check.That(BankSyncConverter.ToDecimal("1.000.055,99")).IsEqualTo(1000055.99M);
+            Check.That(converter.ToDecimal("1.000.055,99")).IsEqualTo(1000055.99M);
         }
         
         [TestMethod]
         public void Ambiguous_ShouldThrow()
         {
-            Check.ThatCode(() => BankSyncConverter.ToDecimal("1.000,055,99"))
+            BankSyncConverter converter = new BankSyncConverter();
+            Check.ThatCode(() => converter.ToDecimal("1.000,055,99"))
                 .Throws<FormatException>();
-            Check.ThatCode(() => BankSyncConverter.ToDecimal("1,000,055,99"))
+            Check.ThatCode(() => converter.ToDecimal("1,000,055,99"))
                 .Throws<FormatException>();
             
-            Check.ThatCode(() => BankSyncConverter.ToDecimal("1.00.99"))
+            Check.ThatCode(() => converter.ToDecimal("1.00.99"))
                 .Throws<FormatException>();
         }
     }

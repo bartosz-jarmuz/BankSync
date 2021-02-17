@@ -8,5 +8,8 @@ namespace BankSync.Logging
         void Info(string message);
         void Warning(string message);
         void Error(string message, Exception ex);
+        void LogProgress(string progress);
+        void EndLogProgress(string startProgressMessage);
+        void StartLogProgress(string startProgressMessage);
     }
 }
