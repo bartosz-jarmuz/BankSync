@@ -45,6 +45,7 @@ namespace BankSyncRunner
                 BankSyncConfig config = new BankSyncConfig(servicesConfigFile, GetInput);
 
                 List<BankDataSheet> datasets = new List<BankDataSheet>();
+                logger.Info("SyncRunner started. Getting data from connected bank services...");
                 foreach (ServiceConfig configService in config.Services)
                 {
                     try
@@ -59,15 +60,15 @@ namespace BankSyncRunner
 
                 BankDataSheet bankDataSheet = BankDataSheet.Consolidate(datasets);
 
-                logger.Info("Data downloaded");
+                logger.Info("Data downloaded. Starting data enriching...");
 
                 enricher.LoadEnrichers(config);
                 await enricher.EnrichData(bankDataSheet, startTime, endTime);
-                logger.Info("Data enriched");
-
                 
+                logger.Info("Data enriched. Proceeding to analysis and categorization...");
                 analyzersExecutor.AnalyzeData(bankDataSheet);
-                logger.Info("Data categorized");
+                
+                logger.Info("Data categorized. Proceeding to writing...");
 
                 await Write(bankDataSheet);
 
@@ -75,8 +76,9 @@ namespace BankSyncRunner
             }
             catch (Exception ex)
             {
-                logger.Error("Unexpected error!",ex);
+                logger.Error("Process failed!",ex);
             }
+            Console.WriteLine("Press any key to exit.");
             Console.ReadKey();
 
         }

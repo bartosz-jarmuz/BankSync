@@ -57,7 +57,7 @@ namespace BankSync.Logging
         {
             var color = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(message + " " + ex);
+            Console.WriteLine(message + " " + ex.Message);
             Console.ForegroundColor = color;
         }
         

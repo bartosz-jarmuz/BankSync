@@ -75,9 +75,51 @@ namespace BankSync.Enrichers.Allegro
 
         private async Task LogIn()
         {
-            await this.client.GetAsync("https://allegro.pl/login/form?authorization_uri=https%3A%2F%2Fallegro.pl%2Fauth%2Foauth%2Fauthorize%3Fclient_id%3Dtb5SFf3cRxEyspDN%26redirect_uri%3Dhttps%3A%2F%2Fallegro.pl%2Flogin%2Fauth%26response_type%3Dcode%26state%3DWwARxT&oauth=true");
+            
+            using (HttpRequestMessage requestMessage =
+                new HttpRequestMessage(HttpMethod.Get, "https://allegro.pl/logowanie"))
+            {
+                requestMessage.Headers.Add("Accept", "application/json, text/plain, */*");
+                requestMessage.Headers.Add("Accept-Encoding", "gzip, deflate, br");
+                requestMessage.Headers.Add("Accept-Language", "pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7,la;q=0.6");
 
-            IEnumerable<Cookie> responseCookies = this.cookies.GetCookies(new Uri("https://allegro.pl/login/form")).Cast<Cookie>();
+                requestMessage.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0");
+
+                requestMessage.Headers.Add("csrf-token", this.csrfToken);
+                requestMessage.Headers.Add("dpr", "1");
+                requestMessage.Headers.Add("origin", "https://allegro.pl"); 
+                requestMessage.Headers.Add("referrer", "https://allegro.pl/logowanie");
+                
+                requestMessage.Headers.Add("sec-ch-ua", "Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99");
+                requestMessage.Headers.Add("sec-ch-ua-mobile", "?0");
+                requestMessage.Headers.Add("Sec-Fetch-Dest", "empty");
+                requestMessage.Headers.Add("Sec-Fetch-Mode", "cors");
+                requestMessage.Headers.Add("Sec-Fetch-Site", "same-origin");
+                
+                requestMessage.Headers.Add("x-fp", "POST");
+
+                HttpResponseMessage response = await this.client.SendAsync(requestMessage);
+                string stringified = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    if (stringified.Contains("captcha", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new LogInException(this.GetType(),"Log in request unsuccessful. Captcha might be required.");
+                    }
+                    throw new LogInException(this.GetType(),"Log in request unsuccessful.");
+                }
+                else
+                {
+                    this.logger.Debug($"Logged in to Allegro for: {this.userConfig.Credentials.Id}");
+                }
+
+            }
+            
+            var loginPageResponse = await this.client.GetAsync("");
+            var loginPageResponseStringified = await loginPageResponse.Content.ReadAsStringAsync();
+            
+            IEnumerable<Cookie> responseCookies = this.cookies.GetCookies(new Uri("https://allegro.pl/logowanie")).Cast<Cookie>();
             foreach (Cookie cookie in responseCookies)
             {
                 if (cookie.Name == "CSRF-TOKEN")
@@ -86,11 +128,12 @@ namespace BankSync.Enrichers.Allegro
                 }
             }
 
+            await Task.Delay(15000);
 
             LoginRequest payload = new LoginRequest(this.userConfig.Credentials.Id, this.userConfig.Credentials.Password.ToInsecureString());
 
             using (HttpRequestMessage requestMessage =
-                new HttpRequestMessage(HttpMethod.Post, "https://allegro.pl/login/authenticate"))
+                new HttpRequestMessage(HttpMethod.Post, "https://allegro.pl/authentication/credentials/web/verification"))
             {
                 string json = JsonConvert.SerializeObject(payload);
                 requestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -99,16 +142,19 @@ namespace BankSync.Enrichers.Allegro
                 requestMessage.Headers.Add("Accept-Encoding", "gzip, deflate, br");
                 requestMessage.Headers.Add("Accept-Language", "pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7,la;q=0.6");
 
-                requestMessage.Headers.Add("Origin", "https://allegro.pl");
-
-                requestMessage.Headers.Add("Sec-Fetch-Dest", "empty");
-                requestMessage.Headers.Add("Sec-Fetch-Mode", "cors");
-                requestMessage.Headers.Add("Sec-Fetch-Site", "same-origin");
-
                 requestMessage.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0");
 
                 requestMessage.Headers.Add("csrf-token", this.csrfToken);
                 requestMessage.Headers.Add("dpr", "1");
+                requestMessage.Headers.Add("origin", "https://allegro.pl"); 
+                requestMessage.Headers.Add("referrer", "https://allegro.pl/logowanie");
+                
+                requestMessage.Headers.Add("sec-ch-ua", "Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99");
+                requestMessage.Headers.Add("sec-ch-ua-mobile", "?0");
+                requestMessage.Headers.Add("Sec-Fetch-Dest", "empty");
+                requestMessage.Headers.Add("Sec-Fetch-Mode", "cors");
+                requestMessage.Headers.Add("Sec-Fetch-Site", "same-origin");
+                
                 requestMessage.Headers.Add("x-fp", "POST");
 
                 HttpResponseMessage response = await this.client.SendAsync(requestMessage);
@@ -116,7 +162,11 @@ namespace BankSync.Enrichers.Allegro
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new LogInException("Log in request unsuccessful.");
+                    if (stringified.Contains("captcha", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new LogInException(this.GetType(),"Log in request unsuccessful. Captcha might be required.");
+                    }
+                    throw new LogInException(this.GetType(),"Log in request unsuccessful.");
                 }
                 else
                 {

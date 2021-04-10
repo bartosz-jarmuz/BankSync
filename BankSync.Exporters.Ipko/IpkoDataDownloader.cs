@@ -139,7 +139,7 @@ namespace BankSync.Exporters.Ipko
 
                 if (step1Response.state_id == "captcha")
                 {
-                    throw new LogInException(
+                    throw new LogInException(this.GetType(),
                         "You need to go to browser, enter captcha and log in - then try again.");
                 }
 
@@ -152,7 +152,7 @@ namespace BankSync.Exporters.Ipko
                     var sessionId = GetSessionIdHeader(response1);
                     if (sessionId == null)
                     {
-                        throw new LogInException("Session Id was not obtained.");
+                        throw new LogInException(this.GetType(),"Session Id was not obtained.");
                     }
                     requestMessage.Headers.Add("x-session-id", sessionId);
                     HttpResponseMessage response2 = await this.client.SendAsync(requestMessage);
@@ -163,12 +163,12 @@ namespace BankSync.Exporters.Ipko
                     if (!step2Response.finished )
                     {
                         throw new LogInException(
-                            "You need to go to browser and log in - then try again.");
+                            this.GetType(),"You need to go to browser and log in - then try again.");
                     }
                     this.sessionId = GetSessionIdHeader(response2);
                     if (step2Response?.token == null || string.IsNullOrEmpty(this.sessionId))
                     {
-                        throw new LogInException("Failed to log in");
+                        throw new LogInException(this.GetType(),"Failed to log in");
                     }
                 }
 

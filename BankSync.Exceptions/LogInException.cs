@@ -4,7 +4,7 @@ namespace BankSync.Exceptions
 {
     public class LogInException : Exception
     {
-        public LogInException(string message) : base(message)
+        public LogInException(Type serviceType, string message) : base(serviceType.Name + " - " + message)
         {
         }
     }

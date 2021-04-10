@@ -47,15 +47,9 @@ namespace BankSyncRunner
                 {
                     await bankDataEnricher.Enrich(data, startTime, endTime);
                 }
-                catch (LogInException ex)
-                {
-                    this.logger.Error($"Failed to log in to enricher service.", ex);
-                    throw;
-                }
                 catch (Exception ex)
                 {
-                    this.logger.Error($"Error while processing enricher service.", ex);
-                    throw;
+                    this.logger.Warning($"{bankDataEnricher.GetType().Name} - Failed to enrich data. {ex.Message}");
                 }
             }
         }
