@@ -135,8 +135,16 @@ namespace BankSync.Exporters.Ipko.DataTransformation
         private static string GetAddress(string description)
         {
             string address = description.Substring(description.IndexOf("Adres:", StringComparison.Ordinal) + "Adres:".Length);
-            address = address.Remove(address.IndexOf("Data i czas operacji:", StringComparison.Ordinal)).Trim();
-            return address;
+            if (address.IndexOf("Data i czas operacji: ") != -1)
+            {
+                address = address.Remove(address.IndexOf("Data i czas operacji:", StringComparison.Ordinal)).Trim();
+                return address;
+            }
+            else
+            {
+                return address.Remove(address.IndexOf('\n'));
+            }
+           
         }
 
         private static string GetCity(string description)

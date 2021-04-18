@@ -6,6 +6,6 @@ namespace BankSync.Enrichers.Allegro
 {
     internal interface IAllegroDataLoader
     {
-        Task<List<AllegroDataContainer>> LoadAllData(DateTime oldestEntry);
+        void LoadAllData(DateTime oldestEntry, Action<List<AllegroDataContainer>> completionCallback);
     }
 }

@@ -23,10 +23,10 @@ namespace BankSync.Enrichers.Allegro
         private readonly IBankSyncLogger logger;
         private readonly IAllegroDataLoader dataLoader;
 
-        public AllegroBankDataEnricher(ServiceConfig config, IBankSyncLogger logger)
+        public AllegroBankDataEnricher(ServiceConfig config, IAllegroDataDownloader dataLoader, IBankSyncLogger logger)
         {
             this.logger = logger;
-            this.dataLoader = new AllegroDataLoader(config,logger);
+            this.dataLoader = new AllegroDataLoader(config, dataLoader, logger);
         }
         
         internal AllegroBankDataEnricher(IBankSyncLogger logger, IAllegroDataLoader dataLoader)
@@ -35,18 +35,26 @@ namespace BankSync.Enrichers.Allegro
             this.dataLoader = dataLoader;
         }
        
-        public async Task Enrich(BankDataSheet data, DateTime startTime, DateTime endTime)
+        public void Enrich(BankDataSheet data, DateTime startTime, DateTime endTime, Action<BankDataSheet> completionCallback)
         {
-            List<AllegroDataContainer> allData = await this.dataLoader.LoadAllData(startTime);
+           this.dataLoader.LoadAllData(startTime, list => EnrichProvidedData(data, list, completionCallback));
+        }
+
+        private void EnrichProvidedData(BankDataSheet data, List<AllegroDataContainer> allAllegroData,
+            Action<BankDataSheet> completionCallback)
+        {
             List<BankEntry> allUpdatedEntries = new List<BankEntry>();
             RefundEnricher refunds = new RefundEnricher(this.logger);
             PurchaseEnricher purchases = new PurchaseEnricher(this.logger);
             foreach (BankEntry entry in data.Entries)
             {
-                List<BankEntry> newEntries = ExtractAllegroEntries(entry, refunds, allData, purchases);
+                List<BankEntry> newEntries = ExtractAllegroEntries(entry, refunds, allAllegroData, purchases);
                 allUpdatedEntries.AddRange(newEntries);
             }
+
             data.Entries = allUpdatedEntries;
+            completionCallback(data);
+
         }
 
         private List<BankEntry> ExtractAllegroEntries(BankEntry entry, RefundEnricher refunds, List<AllegroDataContainer> allData,

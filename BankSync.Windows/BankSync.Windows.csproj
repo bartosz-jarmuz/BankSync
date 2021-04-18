@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+      <TargetFramework>net5.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+      <UseWindowsForms>true</UseWindowsForms>
+      <Platforms>AnyCPU;x86</Platforms>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Geckofx45" Version="45.0.34" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BankSync.DataMapping\BankSync.DataMapping.csproj" />
+      <ProjectReference Include="..\BankSync.Enrichers.Allegro\BankSync.Enrichers.Allegro.csproj" />
+      <ProjectReference Include="..\BankSyncRunner\BankSyncRunner.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+</Project>

@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>BankSync.Enrichers.Allegro</AssemblyName>
     <RootNamespace>BankSync.Enrichers.Allegro</RootNamespace>
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

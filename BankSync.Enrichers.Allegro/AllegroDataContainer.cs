@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 
 namespace BankSync.Enrichers.Allegro
 {
-    internal class AllegroDataContainer 
+    public class AllegroDataContainer 
     {
         public AllegroData Model { get; internal set; }
         public string ServiceUserName { get; internal set; }

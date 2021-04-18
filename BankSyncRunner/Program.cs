@@ -10,7 +10,7 @@ namespace BankSyncRunner
     /// </summary>
     static class Program
     {
-        static async Task Main()
+        static void Main()
         {
 
             var config = new ConfigurationBuilder()
@@ -27,9 +27,6 @@ namespace BankSyncRunner
                 return;
             }
             
-            BankSyncConsoleRunner consoleRunner = new BankSyncConsoleRunner(workingFolderPath);
-
-            await consoleRunner.Run();
         }
 
       

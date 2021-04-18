@@ -9,15 +9,19 @@ namespace BankSync.Enrichers.Allegro
     internal class AllegroDataLoader : IAllegroDataLoader
     {
         private readonly ServiceConfig config;
+        private readonly IAllegroDataDownloader dataLoader;
         private readonly IBankSyncLogger logger;
+        private readonly object allUsersProcessedCheckingLock = new object();
+        private int numberOfUsersProcessed = 0;
 
-        public AllegroDataLoader(ServiceConfig config, IBankSyncLogger logger)
+        public AllegroDataLoader(ServiceConfig config, IAllegroDataDownloader dataLoader, IBankSyncLogger logger)
         {
             this.config = config;
+            this.dataLoader = dataLoader;
             this.logger = logger;
         }
 
-        public async Task<List<AllegroDataContainer>> LoadAllData(DateTime oldestEntry)
+        public void LoadAllData(DateTime oldestEntry, Action<List<AllegroDataContainer>> completionCallback)
         {
             List<AllegroDataContainer> allUsersData = new List<AllegroDataContainer>();
 
@@ -28,17 +32,34 @@ namespace BankSync.Enrichers.Allegro
 
                 DateTime oldestEntryAdjusted = AdjustOldestEntryToDownloadBasedOnOldData(oldestEntry, oldData);
 
-                AllegroDataContainer newData = await new AllegroDataDownloader(serviceUser, this.logger).GetData(oldestEntryAdjusted);
-                oldDataManager.StoreData(newData);
+                this.dataLoader.GetData(serviceUser, oldestEntryAdjusted, 
+                    newData => HandleDownloadedData(oldDataManager, newData, oldData, allUsersData, completionCallback)
+                    );
+            }
+        }
 
-                AllegroDataContainer consolidatedData =  AllegroDataContainer.Consolidate(new List<AllegroDataContainer>() { newData, oldData });
+        private void HandleDownloadedData(OldDataManager oldDataManager, AllegroDataContainer newData,
+            AllegroDataContainer oldData, List<AllegroDataContainer> allUsersData,
+            Action<List<AllegroDataContainer>> completionCallback)
+        {
+            oldDataManager.StoreData(newData);
 
-                allUsersData.Add(consolidatedData);
+            AllegroDataContainer consolidatedData =
+                AllegroDataContainer.Consolidate(new List<AllegroDataContainer>() {newData, oldData});
+
+            allUsersData.Add(consolidatedData);
+
+            lock (allUsersProcessedCheckingLock)
+            {
+                numberOfUsersProcessed++;
+                if (numberOfUsersProcessed == this.config.Users.Count)
+                {
+                    completionCallback(allUsersData);
+                }
             }
 
-            return allUsersData;
         }
-        
+
         /// <summary>
         /// Don't download old data if older or equal data is already stored
         /// </summary>
