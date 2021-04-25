@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using BankSync.Config;
@@ -20,7 +21,8 @@ namespace BankSync.Windows
 {
     public class BankSyncWindowsRunner
     {
-        public BankSyncWindowsRunner(string workingFolderPath, IBankSyncLogger windowsLogger, WebView2 browser)
+        public BankSyncWindowsRunner(string workingFolderPath, IBankSyncLogger windowsLogger, WebView2 browser,
+            DateTime startDate)
         {
             this.logger = new ContextAwareLogger(windowsLogger, new SimpleFileLogger(Path.Combine(workingFolderPath, "Logs", $"{DateTime.Now:yyyy-MM-dd HH-mm-ss}.log")));
             this.servicesConfigFile = new FileInfo(Path.Combine(workingFolderPath, @"Accounts.xml"));
@@ -30,10 +32,11 @@ namespace BankSync.Windows
             analyzersExecutor = new DataAnalyzersExecutor(logger, new DirectoryInfo(workingFolderPath));
             enricher = new DataEnricherExecutor(logger, new WebBrowserAllegroDataDownloader(browser, this.logger));
             this.config = new BankSyncConfig(servicesConfigFile, GetInput);
+            this.startTime = startDate;
 
         }
 
-        private readonly DateTime startTime = DateTime.Today.AddMonths(-12);
+        private readonly DateTime startTime;
         private readonly DateTime endTime = DateTime.Today;
 
         private readonly IDataMapper mapper;
@@ -64,8 +67,8 @@ namespace BankSync.Windows
                 }
 
                 logger.Info("Data downloaded.");
-                return BankDataSheet.Consolidate(datasets);
-
+                var consolidated = BankDataSheet.Consolidate(datasets);
+                return consolidated;
             }
             catch (Exception ex)
             {

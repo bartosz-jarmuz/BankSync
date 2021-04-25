@@ -27,7 +27,7 @@ namespace BankSync.Exporters.Ipko
             this.logger = logger;
             this.xmlTransformer = new IpkoXmlDataTransformer(mapper, logger);
             this.sequence = new Sequence();
-            this.oldDataManager = new OldDataManager(serviceUserConfig, this.xmlTransformer, mapper);
+            this.oldDataManager = new OldDataManager(serviceUserConfig, this.xmlTransformer, mapper, logger);
             HttpClientHandler handler = new HttpClientHandler()
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
@@ -52,13 +52,16 @@ namespace BankSync.Exporters.Ipko
         {
             List<BankDataSheet> datasets = new List<BankDataSheet>();
             BankDataSheet oldData = this.oldDataManager.GetOldData();
-            datasets.Add(oldData);
-            
+
+            this.RemoveTooOldData(oldData, startTime);
+
             foreach (Account account in this.serviceUserConfig.Accounts)
             {
                 DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, account.Number);
                 BankDataSheet data = await this.GetAccountData(account.Number, oldestEntryAdjusted, endTime);
+                this.RemoveTooOldData(oldData, startTime);
                 this.logger.Debug($"IPKO Account [{this.mapper.Map(account.Number)}] - Loaded {data.Entries.Count} entries.");
+                this.RemoveOldDataEntriesWhereFreshDataWasLoadedAnyway(data, oldData);
                 datasets.Add(data);
             }
             foreach (Card card in this.serviceUserConfig.Cards)
@@ -66,18 +69,63 @@ namespace BankSync.Exporters.Ipko
                 DateTime oldestEntryAdjusted = this.AdjustOldestEntryToDownloadBasedOnOldData(startTime, oldData, card.Number);
             
                 BankDataSheet data = await this.GetCardData(card.Number, oldestEntryAdjusted, endTime);
+                this.RemoveTooOldData(oldData, startTime);
                 this.logger.Debug($"IPKO Card [{this.mapper.Map(card.Number)}] - Loaded {data.Entries.Count} entries.");
-
+                this.RemoveOldDataEntriesWhereFreshDataWasLoadedAnyway(data, oldData);
                 datasets.Add(data);
             }
+            datasets.Add(oldData);
 
-            BankDataSheet dataset = BankDataSheet.Consolidate(datasets);
-            
-            return dataset;
+            return BankDataSheet.Consolidate(datasets);
+        }
+
+        private void RemoveTooOldData(BankDataSheet data, DateTime startTime)
+        {
+            List<BankEntry> redundantEntries = new List<BankEntry>();
+
+            foreach (BankEntry entry in data.Entries)
+            {
+                if (entry.Date.Date < startTime.Date)
+                {
+                    redundantEntries.Add(entry);
+                }
+            }
+            int oldDataCountBefore = data.Entries.Count;
+            foreach (BankEntry redundantEntry in redundantEntries)
+            {
+                data.Entries.Remove(redundantEntry);
+            }
+            this.logger.Debug($"Removed {redundantEntries.Count} entries from old data list because it's older than required. " +
+                              $"Before: {oldDataCountBefore}. After: {data.Entries.Count}");
+
+        }
+
+        private void RemoveOldDataEntriesWhereFreshDataWasLoadedAnyway(BankDataSheet freshData, BankDataSheet oldData)
+        {
+            if (!freshData.Entries.Any() || !oldData.Entries.Any())
+            {
+                return;
+            }
+
+            List<BankEntry> oldEntriesForCurrentAccount = oldData.Entries.Where(x => x.Account == freshData.Entries[0].Account).ToList();
+            if (!oldEntriesForCurrentAccount.Any())
+            {
+                return;
+            }
+
+            List<BankEntry> redundantEntries = oldEntriesForCurrentAccount.Where(oldEntry =>
+                freshData.Entries.Any(freshDate => freshDate.Date.Date == oldEntry.Date.Date)).ToList();
+            int oldDataCountBefore = oldData.Entries.Count;
+            foreach (BankEntry redundantEntry in redundantEntries)
+            {
+                oldData.Entries.Remove(redundantEntry);
+            }
+            this.logger.Debug($"Removed {redundantEntries.Count} entries from old data list because it exists in the latest payload. " +
+                              $"Old data entries before: {oldDataCountBefore}. After: {oldData.Entries.Count}");
         }
 
         /// <summary>
-        /// Don't donwload old data if older or equal data is already stored
+        /// Don't download old data if older or equal data is already stored
         /// </summary>
         /// <param name="oldestEntryToBeFetched"></param>
         /// <param name="oldData"></param>
@@ -87,7 +135,7 @@ namespace BankSync.Exporters.Ipko
         {
             if (oldData != null )
             {
-                var oldestAvailable = oldData.GetOldestEntryFor(this.mapper.Map(accountNumber));
+                DateTime oldestAvailable = oldData.GetOldestEntryFor(this.mapper.Map(accountNumber));
 
                 if (oldestAvailable != default && oldestAvailable <= oldestEntryToBeFetched)
                 {
@@ -149,7 +197,7 @@ namespace BankSync.Exporters.Ipko
                     new HttpRequestMessage(HttpMethod.Post, "https://www.ipko.pl/ipko3/login"))
                 {
                     requestMessage.Content = new StringContent(JsonConvert.SerializeObject(step2Request));
-                    var sessionId = GetSessionIdHeader(response1);
+                    string sessionId = GetSessionIdHeader(response1);
                     if (sessionId == null)
                     {
                         throw new LogInException(this.GetType(),"Session Id was not obtained.");

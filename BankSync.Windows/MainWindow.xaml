@@ -8,12 +8,20 @@
 Name="ThisUc"
 
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="800">
+        Title="Bank Sync" Height="Auto" Width="Auto">
     <DockPanel LastChildFill="True">
 
-        <Button DockPanel.Dock="Top" x:Name="StartButton" Click="StartButton_OnClick" Content="Start" Margin="10" Height="25"/>
-        <wpf:WebView2 DockPanel.Dock="Top" Height="600" Width="Auto" Name="Browser" Visibility="{Binding ElementName=ThisUc,  Path=WebViewVisibility}"/>
-        <ListBox DockPanel.Dock="Right" x:Name="OutputBox"/>
+        <DockPanel DockPanel.Dock="Top">
+            <GroupBox Header="Starting date" Margin="3">
+                <DatePicker SelectedDate="{Binding ElementName=ThisUc, Path=StartDate, Mode=TwoWay}"></DatePicker>
+            </GroupBox>
+            <Button DockPanel.Dock="Top" FontWeight="Bold"  x:Name="StartButton" Click="StartButton_OnClick" Content="Download and populate bank data" Margin="5,10" Height="25"/>
+        </DockPanel>
+        <wpf:WebView2 Height="600" Name="Browser" DockPanel.Dock="Top" Margin="3" Visibility="{Binding ElementName=ThisUc, Path=WebViewVisibility}" />
+        
+        <GroupBox Header="Progress log" Margin="3">
+            <ListBox DockPanel.Dock="Right" x:Name="OutputBox"/>
+        </GroupBox>
 
     </DockPanel>
 </Window>

@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using BankSync.Model;
+using BankSync.Utilities;
 using BankSyncRunner;
 using Microsoft.Extensions.Configuration;
 using MessageBox = System.Windows.MessageBox;
@@ -29,6 +30,7 @@ namespace BankSync.Windows
     {
         private readonly TextBoxLogger logger;
         private Visibility webViewVisibility = Visibility.Collapsed;
+        private DateTime startDate = DateTime.Now.AddMonths(-1).FirstDayOfMonth();
 
         public Visibility WebViewVisibility
         {
@@ -37,6 +39,16 @@ namespace BankSync.Windows
             {
                 webViewVisibility = value;
                 this.OnPropertyChanged(nameof(WebViewVisibility));
+            }
+        }
+
+        public DateTime StartDate
+        {
+            get => startDate;
+            set
+            {
+                startDate = value;
+                this.OnPropertyChanged(nameof(StartDate));
             }
         }
 
@@ -49,7 +61,7 @@ namespace BankSync.Windows
 
         private async void StartButton_OnClick(object sender, RoutedEventArgs e)
         {
-            var config = new ConfigurationBuilder()
+            IConfigurationRoot config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", true, true)
                 .Build();
             string workingFolderPath = config["WorkingFolderPath"];
@@ -65,7 +77,7 @@ namespace BankSync.Windows
             await this.Browser.EnsureCoreWebView2Async();
 
             logger.Info("Starting");
-            BankSyncWindowsRunner runner = new BankSyncWindowsRunner(workingFolderPath, logger, this.Browser);
+            BankSyncWindowsRunner runner = new BankSyncWindowsRunner(workingFolderPath, logger, this.Browser, this.StartDate);
             try
             {
                var data = await Task.Run(() => runner.DownloadData());

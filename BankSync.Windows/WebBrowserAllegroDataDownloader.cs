@@ -13,6 +13,7 @@ using BankSync.Config;
 using BankSync.Enrichers.Allegro;
 using BankSync.Enrichers.Allegro.Model;
 using BankSync.Logging;
+using BankSync.Utilities;
 using HtmlAgilityPack;
 using Microsoft.Web.WebView2.Wpf;
 using Newtonsoft.Json;
@@ -81,8 +82,10 @@ namespace BankSync.Windows
 
             if (this.browser.Source.ToString().Contains("/logowanie"))
             {
-                await Task.Delay(1000);
+                await Task.Delay(1001);
                 await SendInput("login", userConfig.Credentials.Id);
+                await Task.Delay(501);
+                await SendInput("password", userConfig.Credentials.Password.ToInsecureString());
                 this.loggedInDuringThisRun = true;
             }
 
@@ -91,6 +94,19 @@ namespace BankSync.Windows
 
         private async Task SendInput(string id, string value)
         {
+            var script = @".dispatchEvent(new MouseEvent('mousedown', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+    button: 0
+  }));";
+            var script2 = @".dispatchEvent(new MouseEvent('mouseup', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+    button: 0
+  }));";
+            var returnValue = await this.browser.CoreWebView2.ExecuteScriptAsync($"document.getElementById('{id}')" +script+  " " + $"document.getElementById('{id}')" + script2  );
             await this.browser.CoreWebView2.ExecuteScriptAsync($"document.getElementById('{id}').value = '{value}'");
         }
 

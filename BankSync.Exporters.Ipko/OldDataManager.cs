@@ -13,6 +13,7 @@ using System.Xml.Serialization;
 using System.Xml.XPath;
 using BankSync.Config;
 using BankSync.Exporters.Ipko.DataTransformation;
+using BankSync.Logging;
 using BankSync.Model;
 using Newtonsoft.Json;
 
@@ -23,12 +24,14 @@ namespace BankSync.Exporters.Ipko
         private readonly DirectoryInfo dataRetentionDirectory;
         private readonly ServiceUser serviceUserConfig;
         private readonly IpkoXmlDataTransformer xmlTransformer;
+        private readonly IBankSyncLogger logger;
         private readonly IpkoTsvDataTransformer tsvTransformer;
 
-        public OldDataManager(ServiceUser serviceUserConfig, IpkoXmlDataTransformer xmlTransformer, IDataMapper mapper)
+        public OldDataManager(ServiceUser serviceUserConfig, IpkoXmlDataTransformer xmlTransformer, IDataMapper mapper, IBankSyncLogger logger)
         {
             this.serviceUserConfig = serviceUserConfig;
             this.xmlTransformer = xmlTransformer;
+            this.logger = logger;
             this.tsvTransformer = new IpkoTsvDataTransformer(mapper);
             this.dataRetentionDirectory = this.GetDataRetentionDirectory();
         }
@@ -41,9 +44,12 @@ namespace BankSync.Exporters.Ipko
             {
                 this.LoadOldDataFromXml(sheets);
                 this.LoadOldDataFromTsv(sheets);
-            }
 
-            return BankDataSheet.Consolidate(sheets);
+            }
+            var consolidated = BankDataSheet.Consolidate(sheets);
+
+            this.logger.Debug($"Returning {consolidated.Entries.Count} old data entries.");
+            return consolidated;
         }
 
         public void StoreData(XDocument sheet, string account)

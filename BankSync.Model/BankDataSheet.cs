@@ -10,13 +10,14 @@ namespace BankSync.Model
         public static BankDataSheet Consolidate(IEnumerable<BankDataSheet> sheets)
         {
             List<BankEntry> uniqueEntries = new List<BankEntry>();
-            foreach (BankDataSheet bankDataSheeta in sheets)
+            foreach (BankDataSheet bankDataSheet in sheets)
             {
-                foreach (BankEntry bankEntry in bankDataSheeta.Entries)
+                foreach (BankEntry bankEntry in bankDataSheet.Entries)
                 {
                     int id = bankEntry.BankEntryId;
                     if (uniqueEntries.All(x => x.BankEntryId != id))
                     {
+
                         uniqueEntries.Add(bankEntry);
                     }
                 }
