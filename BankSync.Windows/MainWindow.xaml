@@ -4,16 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BankSync.Windows"
-        
+        xmlns:wpf="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+Name="ThisUc"
 
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="800">
     <DockPanel LastChildFill="True">
 
         <Button DockPanel.Dock="Top" x:Name="StartButton" Click="StartButton_OnClick" Content="Start" Margin="10" Height="25"/>
-        <WindowsFormsHost Name="FormsHost">
-        </WindowsFormsHost>
-        <ListBox DockPanel.Dock="Bottom" x:Name="OutputBox"/>
+        <wpf:WebView2 DockPanel.Dock="Top" Height="600" Width="Auto" Name="Browser" Visibility="{Binding ElementName=ThisUc,  Path=WebViewVisibility}"/>
+        <ListBox DockPanel.Dock="Right" x:Name="OutputBox"/>
 
     </DockPanel>
 </Window>

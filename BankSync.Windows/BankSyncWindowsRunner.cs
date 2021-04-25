@@ -14,20 +14,21 @@ using BankSync.Writers.Excel;
 using BankSync.Writers.GoogleSheets;
 using BankSync.Writers.Json;
 using BankSyncRunner;
+using Microsoft.Web.WebView2.Wpf;
 
 namespace BankSync.Windows
 {
     public class BankSyncWindowsRunner
     {
-        public BankSyncWindowsRunner(string workingFolderPath, IBankSyncLogger windowsLogger, WebBrowser browser)
+        public BankSyncWindowsRunner(string workingFolderPath, IBankSyncLogger windowsLogger, WebView2 browser)
         {
-            this.logger = new ContextAwareLogger(windowsLogger);
+            this.logger = new ContextAwareLogger(windowsLogger, new SimpleFileLogger(Path.Combine(workingFolderPath, "Logs", $"{DateTime.Now:yyyy-MM-dd HH-mm-ss}.log")));
             this.servicesConfigFile = new FileInfo(Path.Combine(workingFolderPath, @"Accounts.xml"));
             mapper =
                 new ConfigurableDataMapper(new FileInfo(Path.Combine(workingFolderPath, @"Mappings.xml")));
             googleWriterConfigFile = new FileInfo(Path.Combine(workingFolderPath, @"Google\GoogleWriterSettings.xml"));
             analyzersExecutor = new DataAnalyzersExecutor(logger, new DirectoryInfo(workingFolderPath));
-            enricher = new DataEnricherExecutor(logger, new WebBrowserAllegroDataDownloader(browser));
+            enricher = new DataEnricherExecutor(logger, new WebBrowserAllegroDataDownloader(browser, this.logger));
             this.config = new BankSyncConfig(servicesConfigFile, GetInput);
 
         }
@@ -74,14 +75,18 @@ namespace BankSync.Windows
 
         }
 
-        public void EnrichData(BankDataSheet  bankDataSheet)
+        public void EnrichData(BankDataSheet  bankDataSheet, Action allegroDownloadFinishedCallback)
         {
             try
             {
                 logger.Info("Starting data enriching...");
 
                 enricher.LoadEnrichers(config);
-                enricher.EnrichData(bankDataSheet, startTime, endTime, enrichedData => Task.Run(()=>this.AnalyzeAndSend(enrichedData)));
+                enricher.EnrichData(bankDataSheet, startTime, endTime, enrichedData => Task.Run(()=>
+                {
+                    allegroDownloadFinishedCallback();
+                    return this.AnalyzeAndSend(enrichedData);
+                }));
             }
             catch (Exception ex)
             {

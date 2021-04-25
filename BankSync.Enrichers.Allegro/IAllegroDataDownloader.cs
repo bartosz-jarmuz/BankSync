@@ -6,6 +6,6 @@ namespace BankSync.Enrichers.Allegro
 {
     public interface IAllegroDataDownloader
     {
-        void GetData(ServiceUser userConfig, DateTime oldestEntry, Action<AllegroDataContainer> completionCallback);
+        Task GetData(ServiceUser userConfig, DateTime oldestEntry, Action<AllegroDataContainer> completionCallback);
     }
 }

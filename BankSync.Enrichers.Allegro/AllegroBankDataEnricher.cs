@@ -35,9 +35,10 @@ namespace BankSync.Enrichers.Allegro
             this.dataLoader = dataLoader;
         }
        
-        public void Enrich(BankDataSheet data, DateTime startTime, DateTime endTime, Action<BankDataSheet> completionCallback)
+        public async Task Enrich(BankDataSheet data, DateTime startTime, DateTime endTime,
+            Action<BankDataSheet> completionCallback)
         {
-           this.dataLoader.LoadAllData(startTime, list => EnrichProvidedData(data, list, completionCallback));
+            await this.dataLoader.LoadAllData(startTime, list => EnrichProvidedData(data, list, completionCallback));
         }
 
         private void EnrichProvidedData(BankDataSheet data, List<AllegroDataContainer> allAllegroData,

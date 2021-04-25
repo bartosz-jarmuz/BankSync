@@ -39,7 +39,7 @@
 //        private readonly CookieContainer cookies;
 //        private string csrfToken;
 
-//        public async Task<AllegroDataContainer> GetData(ServiceUser userConfig, DateTime oldestEntry)
+//        public async void GetData(ServiceUser userConfig, DateTime oldestEntry, Action<AllegroDataContainer> completionCallback)
 //        {
 //            await this.LogIn(userConfig);
 
@@ -68,12 +68,12 @@
 //                });
 
 //            this.logger.Debug("Successfully downloaded data.");
-//            return data;
+//            completionCallback(data);
 //        }
 
 //        private async Task LogIn(ServiceUser userConfig)
 //        {
-            
+
 //            using (HttpRequestMessage requestMessage =
 //                new HttpRequestMessage(HttpMethod.Get, "https://allegro.pl/logowanie"))
 //            {
@@ -85,15 +85,15 @@
 
 //                requestMessage.Headers.Add("csrf-token", this.csrfToken);
 //                requestMessage.Headers.Add("dpr", "1");
-//                requestMessage.Headers.Add("origin", "https://allegro.pl"); 
+//                requestMessage.Headers.Add("origin", "https://allegro.pl");
 //                requestMessage.Headers.Add("referrer", "https://allegro.pl/logowanie");
-                
+
 //                requestMessage.Headers.Add("sec-ch-ua", "Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99");
 //                requestMessage.Headers.Add("sec-ch-ua-mobile", "?0");
 //                requestMessage.Headers.Add("Sec-Fetch-Dest", "empty");
 //                requestMessage.Headers.Add("Sec-Fetch-Mode", "cors");
 //                requestMessage.Headers.Add("Sec-Fetch-Site", "same-origin");
-                
+
 //                requestMessage.Headers.Add("x-fp", "POST");
 
 //                HttpResponseMessage response = await this.client.SendAsync(requestMessage);
@@ -103,9 +103,9 @@
 //                {
 //                    if (stringified.Contains("captcha", StringComparison.OrdinalIgnoreCase))
 //                    {
-//                        throw new LogInException(this.GetType(),"Log in request unsuccessful. Captcha might be required.");
+//                        throw new LogInException(this.GetType(), "Log in request unsuccessful. Captcha might be required.");
 //                    }
-//                    throw new LogInException(this.GetType(),"Log in request unsuccessful.");
+//                    throw new LogInException(this.GetType(), "Log in request unsuccessful.");
 //                }
 //                else
 //                {
@@ -113,10 +113,10 @@
 //                }
 
 //            }
-            
+
 //            var loginPageResponse = await this.client.GetAsync("");
 //            var loginPageResponseStringified = await loginPageResponse.Content.ReadAsStringAsync();
-            
+
 //            IEnumerable<Cookie> responseCookies = this.cookies.GetCookies(new Uri("https://allegro.pl/logowanie")).Cast<Cookie>();
 //            foreach (Cookie cookie in responseCookies)
 //            {
@@ -144,15 +144,15 @@
 
 //                requestMessage.Headers.Add("csrf-token", this.csrfToken);
 //                requestMessage.Headers.Add("dpr", "1");
-//                requestMessage.Headers.Add("origin", "https://allegro.pl"); 
+//                requestMessage.Headers.Add("origin", "https://allegro.pl");
 //                requestMessage.Headers.Add("referrer", "https://allegro.pl/logowanie");
-                
+
 //                requestMessage.Headers.Add("sec-ch-ua", "Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99");
 //                requestMessage.Headers.Add("sec-ch-ua-mobile", "?0");
 //                requestMessage.Headers.Add("Sec-Fetch-Dest", "empty");
 //                requestMessage.Headers.Add("Sec-Fetch-Mode", "cors");
 //                requestMessage.Headers.Add("Sec-Fetch-Site", "same-origin");
-                
+
 //                requestMessage.Headers.Add("x-fp", "POST");
 
 //                HttpResponseMessage response = await this.client.SendAsync(requestMessage);
@@ -162,9 +162,9 @@
 //                {
 //                    if (stringified.Contains("captcha", StringComparison.OrdinalIgnoreCase))
 //                    {
-//                        throw new LogInException(this.GetType(),"Log in request unsuccessful. Captcha might be required.");
+//                        throw new LogInException(this.GetType(), "Log in request unsuccessful. Captcha might be required.");
 //                    }
-//                    throw new LogInException(this.GetType(),"Log in request unsuccessful.");
+//                    throw new LogInException(this.GetType(), "Log in request unsuccessful.");
 //                }
 //                else
 //                {
@@ -250,7 +250,6 @@
 //        {
 //            try
 //            {
-
 //                HtmlDocument htmlDoc = new HtmlDocument();
 //                htmlDoc.LoadHtml(stringified);
 
@@ -259,7 +258,7 @@
 //                    .OrderByDescending(x => x.InnerHtml.Length).FirstOrDefault();
 //                if (myOrdersScript == null)
 //                {
-//                    this.logger.Warning("Failed to find myorders script page in the response body.");   
+//                    this.logger.Warning("Failed to find myorders script page in the response body.");
 //                    return null;
 
 //                }
@@ -270,5 +269,6 @@
 //                throw new InvalidDataException($"Failed to find proper data in the response body: {stringified}", ex);
 //            }
 //        }
+
 //    }
 //}

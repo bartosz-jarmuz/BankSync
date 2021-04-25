@@ -206,7 +206,8 @@ namespace BankSync.Enrichers.Allegro
 
             List<Myorder> allegroOrders = dateFiltered
                 .Where(x =>
-                    this.converter.ToDecimal(x.payment.amount.amount) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-'))
+                    x.GetAmount(this.converter) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-'))
+                    
                 ).ToList();
 
 

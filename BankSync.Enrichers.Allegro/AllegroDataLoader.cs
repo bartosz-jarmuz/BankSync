@@ -12,7 +12,12 @@ namespace BankSync.Enrichers.Allegro
         private readonly IAllegroDataDownloader dataLoader;
         private readonly IBankSyncLogger logger;
         private readonly object allUsersProcessedCheckingLock = new object();
-        private int numberOfUsersProcessed = 0;
+        private List<string> processedUsers = new List<string>();
+        private int currentUserIndex = 0;
+        private DateTime oldestEntryToDownload;
+        private Action<List<AllegroDataContainer>> allUsersCompletionCallback;
+        private List<AllegroDataContainer> allUsersData;
+
 
         public AllegroDataLoader(ServiceConfig config, IAllegroDataDownloader dataLoader, IBankSyncLogger logger)
         {
@@ -21,26 +26,31 @@ namespace BankSync.Enrichers.Allegro
             this.logger = logger;
         }
 
-        public void LoadAllData(DateTime oldestEntry, Action<List<AllegroDataContainer>> completionCallback)
+        public async Task LoadAllData(DateTime oldestEntry, Action<List<AllegroDataContainer>> completionCallback)
         {
-            List<AllegroDataContainer> allUsersData = new List<AllegroDataContainer>();
+            this.oldestEntryToDownload = oldestEntry;
+            this.allUsersCompletionCallback = completionCallback;
+            this.allUsersData = new List<AllegroDataContainer>();
 
-            foreach (ServiceUser serviceUser in this.config.Users)
-            {
-                OldDataManager oldDataManager = new OldDataManager(serviceUser, this.logger);
-                AllegroDataContainer oldData = oldDataManager.GetOldData();
-
-                DateTime oldestEntryAdjusted = AdjustOldestEntryToDownloadBasedOnOldData(oldestEntry, oldData);
-
-                this.dataLoader.GetData(serviceUser, oldestEntryAdjusted, 
-                    newData => HandleDownloadedData(oldDataManager, newData, oldData, allUsersData, completionCallback)
-                    );
-            }
+            await GetDataForUser();
         }
 
-        private void HandleDownloadedData(OldDataManager oldDataManager, AllegroDataContainer newData,
-            AllegroDataContainer oldData, List<AllegroDataContainer> allUsersData,
-            Action<List<AllegroDataContainer>> completionCallback)
+        private async Task GetDataForUser()
+        {
+            ServiceUser serviceUser = this.config.Users[currentUserIndex];
+            OldDataManager oldDataManager = new OldDataManager(serviceUser, this.logger);
+            AllegroDataContainer oldData = oldDataManager.GetOldData();
+
+            DateTime oldestEntryAdjusted = AdjustOldestEntryToDownloadBasedOnOldData(this.oldestEntryToDownload, oldData);
+
+            await this.dataLoader.GetData(serviceUser, oldestEntryAdjusted, async newData  
+                => await HandleDownloadedData(serviceUser, oldDataManager, newData, oldData, allUsersData)
+            );
+        }
+
+        private async Task HandleDownloadedData(ServiceUser serviceUser, OldDataManager oldDataManager,
+            AllegroDataContainer newData,
+            AllegroDataContainer oldData, List<AllegroDataContainer> allUsersData)
         {
             oldDataManager.StoreData(newData);
 
@@ -49,12 +59,18 @@ namespace BankSync.Enrichers.Allegro
 
             allUsersData.Add(consolidatedData);
 
-            lock (allUsersProcessedCheckingLock)
+            if (!processedUsers.Contains(serviceUser.UserName))
             {
-                numberOfUsersProcessed++;
-                if (numberOfUsersProcessed == this.config.Users.Count)
+                processedUsers.Add(serviceUser.UserName);
+                this.logger.Info($"Processed user {serviceUser.UserName}");
+                if (processedUsers.Count == this.config.Users.Count)
                 {
-                    completionCallback(allUsersData);
+                    allUsersCompletionCallback(allUsersData);
+                }
+                else
+                {
+                    this.currentUserIndex++;
+                    await this.GetDataForUser();
                 }
             }
 

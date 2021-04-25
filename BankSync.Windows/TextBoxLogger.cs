@@ -23,7 +23,7 @@ namespace BankSync.Windows
 
         public void Info(string message)
         {
-            progress.Report(new ProgressMessage(message, Brushes.Black));
+            progress.Report(new ProgressMessage(message, Brushes.DarkGreen));
         }
 
         public void Warning(string message)

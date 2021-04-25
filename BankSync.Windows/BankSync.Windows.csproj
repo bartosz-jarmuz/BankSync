@@ -6,10 +6,11 @@
         <UseWPF>true</UseWPF>
       <UseWindowsForms>true</UseWindowsForms>
       <Platforms>AnyCPU;x86</Platforms>
+      <ApplicationIcon>icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Geckofx45" Version="45.0.34" />
+      <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.818.41" />
     </ItemGroup>
 
     <ItemGroup>

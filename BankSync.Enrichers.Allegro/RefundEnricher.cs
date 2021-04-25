@@ -29,7 +29,7 @@ namespace BankSync.Enrichers.Allegro
             {
                 foreach (Myorder order in relevantOrders)
                 {
-                    if (entry.Amount == this.converter.ToDecimal(order.payment.amount.amount))
+                    if (entry.Amount == order.GetAmount(converter))
                     {
                         for (int offerIndex = 0; offerIndex < order.offers.Length; offerIndex++)
                         {
@@ -153,8 +153,8 @@ namespace BankSync.Enrichers.Allegro
             List<Myorder> allegroOrders = model.myorders.myorders
                 .Where(x => x.payment.startDate.Date <= entry.Date)
                 .Where(x =>
-                    this.converter.ToDecimal(x.payment.amount.amount) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-'))
-                ).ToList();
+                    x.GetAmount(converter) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-')
+                )).ToList();
 
             
             if (allegroOrders.Count == 0)
