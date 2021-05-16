@@ -33,7 +33,7 @@ namespace BankSync.Windows
 
         public void Error(string message, Exception ex)
         {
-            progress.Report(new ProgressMessage(message, Brushes.Red));
+            progress.Report(new ProgressMessage(message + " " + ex.ToString(), Brushes.Red));
         }
 
         public void LogProgress(string progressMessage)

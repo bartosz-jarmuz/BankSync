@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using BankSync.Config;
 using BankSync.DataMapping;
@@ -135,6 +136,7 @@ namespace BankSync.Windows
                     }
                     catch (LogInException)
                     {
+                        MessageBox.Show($"Failed to log in {configServiceUser.UserName} to IPKO");
                         logger.Warning(
                             $"IPKO - {configServiceUser.UserName}. Could not log in.");
                     }
@@ -196,11 +198,13 @@ namespace BankSync.Windows
 
         private static string GetInput(string question)
         {
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(question);
-            Console.BackgroundColor = ConsoleColor.Black;
-            return Console.ReadLine();
+            var dialog = new InputBox(question);
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.ResponseText;
+            }
+
+            throw new InvalidOperationException("Expected value provision");
         }
 
 

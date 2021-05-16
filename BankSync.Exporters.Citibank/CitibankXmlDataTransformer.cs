@@ -117,6 +117,13 @@ namespace BankSync.Exporters.Citibank
                 }
                 catch (Exception)
                 {
+                    try
+                    {
+                        return DateTime.ParseExact(element.Value, "dd/MM/yyyy", null);
+                    }
+                    catch (Exception)
+                    {
+                    }
                     //todo handle maybe sometime?
                 }
             }
