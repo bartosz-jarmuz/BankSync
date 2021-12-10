@@ -117,7 +117,7 @@ namespace BankSync.Windows
                 var data = GetDataFromResponse(await this.GetCurrentHtml());
                 dataList.Add(new AllegroDataContainer(data, userConfig.UserName));
                 var oldestDateInCurrentBatch = AllegroDataContainer.GetOldestDate(data);
-                if (oldestDateInCurrentBatch == AllegroDataContainer.GetOldestDate(data))
+                if (oldestDateInCurrentBatch <= oldestEntry)
                 {
                     this.loadedAllData = true;
                     AllegroDataContainer consolidated = AllegroDataContainer.Consolidate(this.dataList);
@@ -137,7 +137,7 @@ namespace BankSync.Windows
         private string GetOffsetedListUrl()
         {
             return $"https://" +
-                   $"allegro.pl/moje-allegro/zakupy/nowe-kupione?filter=all&limit=25&offset={this.currentOffset}&sort=orderdate&order=DESC&decorate=paymentInfo";
+                   $"allegro.pl/moje-allegro/zakupy/kupione?filter=all&limit=25&offset={this.currentOffset}&sort=orderdate&order=DESC&decorate=paymentInfo";
         }
 
         private AllegroData GetDataFromResponse(string stringified)

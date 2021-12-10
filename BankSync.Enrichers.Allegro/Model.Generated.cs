@@ -20,8 +20,14 @@ namespace BankSync.Enrichers.Allegro.Model
 
     public class Myorders
     {
-        public Myorder[] myorders { get; set; }
+        public OrderGroup[] orderGroups { get; set; }
         public int total { get; set; }
+    }
+
+    public class OrderGroup
+    {
+        public string groupId { get; set; }
+        public Myorder[] myorders { get; set; }
     }
 
     public class Myorder

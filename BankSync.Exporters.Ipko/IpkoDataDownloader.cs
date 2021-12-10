@@ -137,7 +137,7 @@ namespace BankSync.Exporters.Ipko
             {
                 DateTime oldestAvailable = oldData.GetOldestEntryFor(this.mapper.Map(accountNumber));
 
-                if (oldestAvailable != default && oldestAvailable <= oldestEntryToBeFetched)
+                if (oldestAvailable != default && oldestAvailable < oldestEntryToBeFetched)
                 {
                     oldestEntryToBeFetched = oldData.GetNewestEntryFor(this.mapper.Map(accountNumber));
                 }

@@ -26,16 +26,16 @@ namespace BankSync.Enrichers.Allegro
             this.logger = logger;
         }
 
-        public async Task LoadAllData(DateTime oldestEntry, Action<List<AllegroDataContainer>> completionCallback)
+        public async Task LoadAllData(DateTime oldestEntry,bool getFreshEnrichmentData, Action<List<AllegroDataContainer>> completionCallback)
         {
             this.oldestEntryToDownload = oldestEntry;
             this.allUsersCompletionCallback = completionCallback;
             this.allUsersData = new List<AllegroDataContainer>();
 
-            await GetDataForUser();
+            await GetDataForUser(getFreshEnrichmentData);
         }
 
-        private async Task GetDataForUser()
+        private async Task GetDataForUser(bool getFreshEnrichmentData)
         {
             ServiceUser serviceUser = this.config.Users[currentUserIndex];
             OldDataManager oldDataManager = new OldDataManager(serviceUser, this.logger);
@@ -43,19 +43,27 @@ namespace BankSync.Enrichers.Allegro
 
             DateTime oldestEntryAdjusted = AdjustOldestEntryToDownloadBasedOnOldData(this.oldestEntryToDownload, oldData);
 
-            await this.dataLoader.GetData(serviceUser, oldestEntryAdjusted, async newData  
-                => await HandleDownloadedData(serviceUser, oldDataManager, newData, oldData, allUsersData)
-            );
+            if (getFreshEnrichmentData)
+            {
+                await this.dataLoader.GetData(serviceUser, oldestEntryAdjusted, async newData
+                    => await HandleDownloadedData(serviceUser, getFreshEnrichmentData, oldDataManager, newData, oldData, allUsersData)
+                );
+            }
+            else
+            {
+                await HandleDownloadedData(serviceUser, getFreshEnrichmentData, oldDataManager, null, oldData, allUsersData);
+            }
+            
         }
 
-        private async Task HandleDownloadedData(ServiceUser serviceUser, OldDataManager oldDataManager,
+        private async Task HandleDownloadedData(ServiceUser serviceUser, bool getFreshEnrichmentData, OldDataManager oldDataManager,
             AllegroDataContainer newData,
             AllegroDataContainer oldData, List<AllegroDataContainer> allUsersData)
         {
             oldDataManager.StoreData(newData);
 
-            AllegroDataContainer consolidatedData =
-                AllegroDataContainer.Consolidate(new List<AllegroDataContainer>() {newData, oldData});
+            AllegroDataContainer consolidatedData = AllegroDataContainer.Consolidate(GetConsolidationInput(newData, oldData));
+            
 
             allUsersData.Add(consolidatedData);
 
@@ -70,10 +78,25 @@ namespace BankSync.Enrichers.Allegro
                 else
                 {
                     this.currentUserIndex++;
-                    await this.GetDataForUser();
+                    await this.GetDataForUser(getFreshEnrichmentData);
                 }
             }
 
+        }
+
+        private List<AllegroDataContainer> GetConsolidationInput(AllegroDataContainer newData, AllegroDataContainer oldData)
+        {
+            var list = new List<AllegroDataContainer>();
+
+            if (oldData != null)
+            {
+                list.Add(oldData);
+            }
+            if (newData != null)
+            {
+                list.Add(newData);
+             }
+            return list;
         }
 
         /// <summary>

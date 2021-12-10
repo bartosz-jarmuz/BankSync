@@ -157,8 +157,15 @@ namespace BankSync.Exporters.Ipko.DataTransformation
             {
                 string part = description.Substring(description.IndexOf("Miasto: ", StringComparison.Ordinal));
                 string city = part.Substring("Miasto: ".Length);
+                if (city.IndexOf("Adres: ") != -1)
+                {
+                    city = city.Remove(city.IndexOf("Adres:", StringComparison.Ordinal)).Trim();
+                }
+                else
+                {
+                    city = city.Remove(city.IndexOf("\n", StringComparison.Ordinal)).Trim();
+                }
 
-                city = city.Remove(city.IndexOf("Adres:", StringComparison.Ordinal)).Trim();
                 return city;
             }
         }

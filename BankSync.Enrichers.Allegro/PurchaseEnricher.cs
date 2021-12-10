@@ -200,9 +200,9 @@ namespace BankSync.Enrichers.Allegro
         private List<Myorder> GetAllegroOrders(BankEntry entry, AllegroData model)
         {
             //first try finding the orders which fully correspond to the price and more or less the date
-            List<Myorder> dateFiltered = model.myorders.myorders
+            List<Myorder> dateFiltered = model.myorders.orderGroups.SelectMany(g=>g.myorders
                 .Where(x => x.orderDate.Date <= entry.Date.Date)
-                .Where(x => (entry.Date.Date - x.orderDate.Date).TotalDays < 30).ToList();
+                .Where(x => (entry.Date.Date - x.orderDate.Date).TotalDays < 30)).ToList();
 
             List<Myorder> allegroOrders = dateFiltered
                 .Where(x =>

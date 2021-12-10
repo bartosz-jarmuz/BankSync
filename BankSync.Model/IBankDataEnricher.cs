@@ -11,7 +11,7 @@ namespace BankSync.Model
 {
     public interface IBankDataEnricher
     {
-        public Task Enrich(BankDataSheet data, DateTime startTime, DateTime endTime,
+        public Task Enrich(BankDataSheet data, bool getFreshEnrichmentData, DateTime startTime, DateTime endTime,
             Action<BankDataSheet> completionCallback);
     }
 }

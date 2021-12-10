@@ -150,22 +150,22 @@ namespace BankSync.Enrichers.Allegro
         private List<Myorder> FindOrdersWhichMatchEntryPriceFullyOrPartially(BankEntry entry, AllegroData model)
         {
             //first try finding the orders which fully correspond to the price
-            List<Myorder> allegroOrders = model.myorders.myorders
+            List<Myorder> allegroOrders = model.myorders.orderGroups.SelectMany(g=>g.myorders
                 .Where(x => x.payment.startDate.Date <= entry.Date)
                 .Where(x =>
                     x.GetAmount(converter) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-')
-                )).ToList();
+                ))).ToList();
 
             
             if (allegroOrders.Count == 0)
             {
                 //and if that doesnt succeed, find orders where at least one offer matches the price
-                allegroOrders = model.myorders.myorders
+                allegroOrders = model.myorders.orderGroups.SelectMany(g=>g.myorders
                     //  .Where(x=>x.payment.startDate < entry.Date)
                     .Where(x =>
                         x.offers.Any(x =>
                             this.converter.ToDecimal(x.offerPrice.amount) == this.converter.ToDecimal(entry.Amount.ToString().Trim('-')))
-                    ).ToList();
+                    )).ToList();
             }
 
             return allegroOrders;

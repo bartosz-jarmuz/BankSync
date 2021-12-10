@@ -84,7 +84,7 @@ namespace BankSync.Analyzers.AI
             List<string> allDirectTokens = new List<string>();
             foreach (XElement mappingElement in categoryElement.Elements("MapFrom"))
             {
-                string[] tokenized = mappingElement.Value.Split(";", StringSplitOptions.RemoveEmptyEntries);
+                var tokenized = mappingElement.Value.Split(";", StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrWhiteSpace(x));
                 allDirectTokens.AddRange(tokenized);
             }
 

@@ -41,13 +41,13 @@ namespace BankSyncRunner
             }
         }
 
-        public void EnrichData(BankDataSheet data, DateTime startTime, DateTime endTime, Action<BankDataSheet> completionCallback)
+        public void EnrichData(BankDataSheet data, bool getFreshEnrichmentData, DateTime startTime, DateTime endTime, Action<BankDataSheet> completionCallback)
         {
             foreach (IBankDataEnricher bankDataEnricher in this.enrichers)
             {
                 try
                 {
-                    bankDataEnricher.Enrich(data, startTime, endTime, completionCallback);
+                    bankDataEnricher.Enrich(data, getFreshEnrichmentData, startTime, endTime, completionCallback);
                 }
                 catch (Exception ex)
                 {

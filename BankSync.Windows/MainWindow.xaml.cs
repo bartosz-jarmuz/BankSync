@@ -81,8 +81,13 @@ namespace BankSync.Windows
             try
             {
                var data = await Task.Run(() => runner.DownloadData());
-               this.WebViewVisibility = Visibility.Visible;
-                runner.EnrichData(data, () => this.WebViewVisibility = Visibility.Collapsed);
+                MessageBoxResult getFreshAllegroData = MessageBox.Show("Get fresh data from Allegro?", "Confirmation needed", MessageBoxButton.YesNo);
+                if (getFreshAllegroData == MessageBoxResult.Yes)
+                {
+                    this.WebViewVisibility = Visibility.Visible;
+                }
+
+                runner.EnrichData(data, getFreshAllegroData == MessageBoxResult.Yes, () => this.WebViewVisibility = Visibility.Collapsed);
             }
             catch (Exception ex)
             {

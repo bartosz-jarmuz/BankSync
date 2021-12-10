@@ -79,14 +79,16 @@ namespace BankSync.Windows
 
         }
 
-        public void EnrichData(BankDataSheet  bankDataSheet, Action allegroDownloadFinishedCallback)
+        public void EnrichData(BankDataSheet  bankDataSheet, bool getFreshEnrichmentData, Action allegroDownloadFinishedCallback)
         {
             try
             {
                 logger.Info("Starting data enriching...");
 
+
+
                 enricher.LoadEnrichers(config);
-                enricher.EnrichData(bankDataSheet, startTime, endTime, enrichedData => Task.Run(()=>
+                enricher.EnrichData(bankDataSheet, getFreshEnrichmentData, startTime, endTime, enrichedData => Task.Run(()=>
                 {
                     allegroDownloadFinishedCallback();
                     return this.AnalyzeAndSend(enrichedData);

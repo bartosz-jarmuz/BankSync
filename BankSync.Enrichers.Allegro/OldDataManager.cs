@@ -61,7 +61,7 @@ namespace BankSync.Enrichers.Allegro
 
         public void StoreData(AllegroDataContainer container)
         {
-            if (this.dataRetentionDirectory != null)
+            if (this.dataRetentionDirectory != null && container != null)
             {
                 List<AllegroDataContainer> allegroDataContainers = AllegroDataContainer.SplitPerMonth(container);
                 foreach (AllegroDataContainer allegroDataContainer in allegroDataContainers)
